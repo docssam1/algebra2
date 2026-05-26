@@ -1,0 +1,1771 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algebra 2 Placement Test Diagnostic & Curriculum Dashboard</title>
+    <!-- Tailwind CSS & Font & ChartJS & MathJax  -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght=300;400;500;700&family=Lora:ital,wght@0,400;0,700;1,400&display=swap');
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #fafaf9;
+            color: #292524;
+            /* ȿ ؽƮ   */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        .math-font {
+            font-family: 'Lora', serif;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 380px;
+        }
+
+        .tab-active {
+            border-bottom: 4px solid #4f46e5;
+            color: #4f46e5;
+            font-weight: 700;
+        }
+
+        .tab-inactive {
+            border-bottom: 4px solid transparent;
+            color: #78716c;
+        }
+
+        .tab-inactive:hover {
+            color: #44403c;
+            border-bottom: 4px solid #d6d3d1;
+        }
+
+        .q-active {
+            background-color: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+        }
+
+        .q-inactive {
+            background-color: white;
+            color: #44403c;
+            border-color: #d6d3d1;
+        }
+
+        .q-inactive:hover {
+            background-color: #f5f5f4;
+            border-color: #a8a29e;
+        }
+
+        /* OMR Button States */
+        .omr-btn-selected-correct {
+            background-color: #10b981 !important;
+            color: white !important;
+            border-color: #059669 !important;
+        }
+        .omr-btn-selected-incorrect {
+            background-color: #f43f5e !important;
+            color: white !important;
+            border-color: #e11d48 !important;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f5f5f4; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d6d3d1; 
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a29e; 
+        }
+
+        /* Printable optimization styling */
+        @media print {
+            body {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+                font-size: 12pt;
+                padding: 0;
+                margin: 0;
+                -webkit-user-select: auto;
+                user-select: auto;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-page {
+                page-break-after: always;
+                page-break-inside: avoid;
+                margin: 0;
+                padding: 2cm !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            .chart-container {
+                height: 300px !important;
+                max-width: 100% !important;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-stone-50">
+
+    <!--    -->
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-50 shadow-sm no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center py-4 gap-4">
+                <div class="flex items-center gap-3">
+                    <span class="text-3xl"></span>
+                    <div>
+                        <h1 class="text-xl font-bold text-stone-900 tracking-tight">Algebra 2 Placement Diagnostic</h1>
+                        <p class="text-xs text-stone-500 font-medium"> Premium AI Student Management Dashboard</p>
+                    </div>
+                </div>
+
+                <!-- API Key  & л  Ʈ -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <div class="bg-indigo-50 border border-indigo-100 rounded-xl px-3 py-1.5 flex items-center gap-2 text-xs">
+                        <span class="font-bold text-indigo-800"> Gemini API:</span>
+                        <input type="password" id="gemini-api-key" placeholder="API Key Է (Է  ⺻ ŷ Ű )" class="bg-white border border-indigo-200 rounded px-2 py-0.5 w-32 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-[10px]">
+                        <button onclick="app.saveApiKey()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-2 py-0.5 rounded text-[10px] transition-all"></button>
+                        <span id="api-status-badge" class="text-[10px] px-2 py-0.5 rounded-md font-bold">Ȯ ...</span>
+                    </div>
+
+                    <button onclick="app.openPrintModal()" class="bg-stone-800 hover:bg-stone-900 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors flex items-center gap-1.5 shadow-sm">
+                        <span> ǥ   μ</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- л  ý ú  -->
+            <div class="bg-stone-100 border-t border-stone-200 py-3 px-4 -mx-4 sm:-mx-6 lg:-mx-8 flex flex-col sm:flex-row justify-between items-center gap-3">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-xs font-bold text-stone-600"> л м  :</span>
+                    <input type="text" id="student-name" placeholder="̸ (/ѱ)" class="border border-stone-300 rounded-lg px-2.5 py-1 text-xs w-28 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                    <input type="text" id="student-phone" placeholder="ȭȣ ڸ (4ڸ)" maxlength="4" class="border border-stone-300 rounded-lg px-2.5 py-1 text-xs w-36 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                    <button onclick="app.registerStudent()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-1 rounded-lg text-xs transition-all">/ҷ</button>
+                    <button onclick="app.clearCurrentStudent()" class="text-stone-500 hover:text-rose-600 text-xs font-semibold px-1 py-1">ʱȭ</button>
+                </div>
+                
+                <div class="text-xs font-semibold text-stone-700 bg-white border border-stone-200 px-3 py-1 rounded-full shadow-sm" id="active-student-badge">
+                     м  л:  (̸  ּ)
+                </div>
+            </div>
+
+            <!-- ú  ׺̼ -->
+            <nav class="flex overflow-x-auto hide-scrollbar mt-1" id="tab-nav">
+                <button onclick="app.switchTab('overview')" id="tab-btn-overview" class="whitespace-nowrap py-3 px-5 font-semibold text-xs md:text-sm transition-all duration-150 tab-active">  ̵ (Guide)</button>
+                <button onclick="app.switchTab('test')" id="tab-btn-test" class="whitespace-nowrap py-3 px-5 font-semibold text-xs md:text-sm transition-all duration-150 tab-inactive">  Ǯ  (Interactive View)</button>
+                <button onclick="app.switchTab('omr')" id="tab-btn-omr" class="whitespace-nowrap py-3 px-5 font-semibold text-xs md:text-sm transition-all duration-150 tab-inactive"> OMR Է  (OMR Card)</button>
+                <button onclick="app.switchTab('analysis')" id="tab-btn-analysis" class="whitespace-nowrap py-3 px-5 font-semibold text-xs md:text-sm transition-all duration-150 tab-inactive"> кθ  Ʈ (Diagnosis Report)</button>
+                <button onclick="app.switchTab('curriculum')" id="tab-btn-curriculum" class="whitespace-nowrap py-3 px-5 font-semibold text-xs md:text-sm transition-all duration-150 tab-inactive"> AI ε  Ʈ (Roadmap Builder)</button>
+            </nav>
+        </div>
+    </header>
+
+    <!--  ú Ʈ  -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
+        
+        <!-- Tab 1: Overview ( ̵) -->
+        <div id="tab-overview" class="block animate-fade-in no-print">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-stone-800 mb-1">̱ б  , Algebra 2 Placement Ϻ </h2>
+                <p class="text-stone-500 text-sm"> ú 9г л  Honors Pre-Calculus  ڰ ȹ    ϱ     ÷Դϴ.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-stone-200/60 flex flex-col items-center text-center">
+                    <span class="text-3xl mb-2"></span>
+                    <h3 class="font-bold text-stone-800 text-md">  ð ̵</h3>
+                    <p class="text-stone-500 text-xs mt-1 leading-relaxed"> 120 <br>(Part 1: 60, Part 2: 60)<br>޽ ð   ó ø մϴ.</p>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-stone-200/60 flex flex-col items-center text-center">
+                    <span class="text-3xl mb-2"></span>
+                    <h3 class="font-bold text-stone-800 text-md">   </h3>
+                    <p class="text-stone-500 text-xs mt-1 leading-relaxed"><b>Part 1 (1~20):</b>    (No Calc)<br><b>Part 2 (21~40):</b> TI-84  ׷ <br>  Ȯο ܿ .</p>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-stone-200/60 flex flex-col items-center text-center">
+                    <span class="text-3xl mb-2"></span>
+                    <h3 class="font-bold text-stone-800 text-md">ǥ Ŭ ° </h3>
+                    <p class="text-stone-500 text-xs mt-1 leading-relaxed"><b>35 ̻:</b> Honors Pre-Calculus  <br><b>28~34:</b> Regular Pre-Calculus  <br><b>27 :</b>     Ʒ ǥ .</p>
+                </div>
+            </div>
+
+            <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-6">
+                <h3 class="text-indigo-950 font-bold text-base mb-3 flex items-center gap-2">
+                    <span></span> ̱ ֻ /б Placement Test ٽ 䰭
+                </h3>
+                <p class="text-indigo-900/80 text-sm leading-relaxed mb-4">
+                    ̱ High School  ° 򰡴 ܼ    Ǯ ɷ ƴ, <b>߰    ߻   ⼺(Show your work)</b> ſ öϰ äմϴ.   ߻ , л   Ʋ ,  Prerequisite ܰ(: ߵ  /м ȣ  )    Ȯϰ Ͽ ġؾ    ʽϴ.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold text-indigo-900/90">
+                    <div class="bg-white/80 p-3 rounded-xl border border-indigo-100/50"> ܿ $\frac{a}{b}$  м  Ǽ ü   45% ̻ .</div>
+                    <div class="bg-white/80 p-3 rounded-xl border border-indigo-100/50"> (Word Problems)    , Pre-Algebra ط   ġ.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Test ( Ǯ ) -->
+        <div id="tab-test" class="hidden animate-fade-in no-print">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!--    -->
+                <div class="lg:col-span-1 bg-white border border-stone-200 rounded-2xl flex flex-col overflow-hidden shadow-sm">
+                    <div class="p-4 bg-stone-50 border-b border-stone-200 flex justify-between items-center">
+                        <span class="font-bold text-stone-800 text-sm">  ε</span>
+                        <span class="text-xs bg-indigo-100 text-indigo-800 px-2.5 py-1 rounded-md font-bold" id="current-part-label">Part 1 (No Calc)</span>
+                    </div>
+                    <div class="p-4 overflow-y-auto max-h-[500px] space-y-4">
+                        <div>
+                            <h4 class="text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2">Part 1: Non-Calculator (Q1-20)</h4>
+                            <div class="grid grid-cols-5 gap-1.5" id="part1-grid"></div>
+                        </div>
+                        <hr class="border-stone-100">
+                        <div>
+                            <h4 class="text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2">Part 2: Calculator Active (Q21-40)</h4>
+                            <div class="grid grid-cols-5 gap-1.5" id="part2-grid"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--  ī  AI Ʃ â -->
+                <div class="lg:col-span-2 bg-white border border-stone-200 rounded-2xl flex flex-col overflow-hidden shadow-sm p-6">
+                    <div class="flex justify-between items-center border-b border-stone-100 pb-4 mb-4">
+                        <h3 class="text-xl font-bold text-indigo-700 math-font" id="q-title">Question 1</h3>
+                        <span class="text-xs font-semibold text-stone-500 bg-stone-100 px-3 py-1 rounded-full" id="q-domain">Domain Name</span>
+                    </div>
+
+                    <!--    -->
+                    <div class="text-base text-stone-800 leading-relaxed mb-6 bg-stone-50 p-4 rounded-xl border border-stone-100 min-h-[120px]" id="q-body">
+                        Loading...
+                    </div>
+
+                    <!--  ؼ  / AI Ʃ ׼ -->
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <button onclick="app.toggleSolution()" class="bg-stone-900 hover:bg-stone-800 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors shadow-sm">
+                               Ǯ  
+                        </button>
+                        <button onclick="app.triggerAiTutor()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors shadow-sm flex items-center gap-1">
+                            <span> AI   Ʃ </span>
+                        </button>
+                    </div>
+
+                    <!-- ⺻  ؼ (MathJax  ) -->
+                    <div id="solution-box" class="hidden bg-emerald-50/50 border border-emerald-100 rounded-xl p-4 mb-6">
+                        <h4 class="font-bold text-emerald-800 text-sm mb-2" id="q-answer">Answer</h4>
+                        <div class="text-xs text-stone-700 leading-relaxed space-y-2" id="q-steps"></div>
+                    </div>
+
+                    <!-- AI  Ʃ ä г -->
+                    <div id="ai-tutor-panel" class="hidden border border-indigo-100 bg-indigo-50/20 rounded-xl p-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <h4 class="font-bold text-indigo-950 text-sm flex items-center gap-1">
+                                <span></span> AI  Ʃ ǽð   (LaTeX &  )
+                            </h4>
+                            <button onclick="app.closeAiTutor()" class="text-stone-400 hover:text-stone-600 text-xs">ݱ</button>
+                        </div>
+
+                        <!-- ä α  -->
+                        <div id="chat-logs" class="bg-white rounded-xl border border-stone-200/60 p-3 h-52 overflow-y-auto space-y-3 text-xs mb-3">
+                            <div class="text-stone-500 italic">   ϰų     ñ   .</div>
+                        </div>
+
+                        <!-- õ   Ĩ -->
+                        <div class="flex flex-wrap gap-1.5 mb-3">
+                            <button onclick="app.sendPresetQuestion('   ⺻   ְ  Ģ .')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-900 text-[10px] px-2.5 py-1 rounded-md font-semibold transition-all">    </button>
+                            <button onclick="app.sendPresetQuestion('       Ǽ  ˷.')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-900 text-[10px] px-2.5 py-1 rounded-md font-semibold transition-all">  Ʈ & </button>
+                            <button onclick="app.sendPresetQuestion(' װ Ȱ    ֵ    .')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-900 text-[10px] px-2.5 py-1 rounded-md font-semibold transition-all"> ֵ   </button>
+                        </div>
+
+                        <!-- Ŀ  ǲ -->
+                        <div class="flex gap-2">
+                            <input type="text" id="custom-query" placeholder="  Էϼ... (:   м   )" class="flex-grow border border-stone-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white">
+                            <button onclick="app.sendCustomQuestion()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-lg text-xs transition-colors"></button>
+                        </div>
+
+                        <div id="ai-chat-loader" class="hidden mt-2 text-center py-1 flex items-center justify-center gap-1.5">
+                            <div class="animate-spin rounded-full h-3.5 w-3.5 border-2 border-indigo-600 border-t-transparent"></div>
+                            <span class="text-[11px] font-bold text-indigo-600 animate-pulse">AI ƩͰ     ϰ ֽϴ...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 3: OMR ( ŷ ) -->
+        <div id="tab-omr" class="hidden animate-fade-in no-print">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- OMR Ʈ г -->
+                <div class="lg:col-span-1 bg-white border border-stone-200 rounded-2xl p-5 shadow-sm">
+                    <div class="flex justify-between items-center border-b border-stone-100 pb-3 mb-4">
+                        <h3 class="font-bold text-stone-800 text-sm">OMR ǽð  ä Ʈ</h3>
+                        <button onclick="app.resetAllOmr()" class="text-xs font-bold text-stone-400 hover:text-rose-600 transition-colors">ü ʱȭ</button>
+                    </div>
+
+                    <!-- 40 OMR ŷ ׸  Ÿ -->
+                    <div class="space-y-2 max-h-[500px] overflow-y-auto pr-1" id="omr-board-list"></div>
+                </div>
+
+                <!-- м ú  -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- ھ ī -->
+                    <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                        <div>
+                            <span class="text-[10px] font-black text-stone-400 uppercase tracking-wider block mb-1">CURRENT PERFORMANCE INDEX</span>
+                            <div class="flex items-baseline gap-1 mb-2">
+                                <span class="text-5xl font-black text-indigo-600" id="current-total-score">0</span>
+                                <span class="text-stone-400 text-md font-bold">/ 40 </span>
+                            </div>
+                            <p class="text-xs text-stone-500 font-semibold" id="omr-grading-progress">ŷ Ϸ : 0 (: 0%)</p>
+                            
+                            <div class="mt-4 pt-4 border-t border-stone-100">
+                                <span class="text-[10px] font-black text-stone-400 uppercase tracking-wider block mb-1"> Ŭ   (Placement)</span>
+                                <div id="cutoff-prediction-badge" class="inline-block px-3 py-1.5 rounded-lg text-xs font-bold bg-stone-100 text-stone-600">
+                                    ּ 15 ä  ̵尡 ߱޵˴ϴ.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-stone-50 border border-stone-200 rounded-2xl px-5 py-4 flex flex-col items-center justify-center w-full md:w-36">
+                            <span class="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-1">ǽð </span>
+                            <span class="text-3xl font-black text-stone-800" id="current-accuracy-rate">0%</span>
+                        </div>
+                    </div>
+
+                    <!-- ǽð  ġ ε   -->
+                    <div class="bg-indigo-950 border border-indigo-900 rounded-2xl p-6 text-white shadow-md">
+                        <h3 class="font-bold text-base mb-2 flex items-center gap-2">
+                            <span></span> AI ǽð ó ̵ Ȱȭ
+                        </h3>
+                        <p class="text-indigo-200 text-xs leading-relaxed mb-4">
+                             OMR Ʈ    Էϴ , л  ܿ Prerequisite( ٽ  н )  Ʈ <b>[кθ  Ʈ]</b>  <b>[AI ε]</b> ǿ ڵ Ǿ / ǽð ߱ غ  մϴ.
+                        </p>
+                        <div class="flex items-center gap-2">
+                            <button onclick="app.switchTab('analysis')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all"> ǥ   м </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 4: Analysis (кθ  Ʈ) -->
+        <div id="tab-analysis" class="hidden animate-fade-in no-print">
+            <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-stone-800"> ̾ Placement   Ʈ</h2>
+                    <p class="text-xs text-stone-500">ǽð   ̱  հ  ƶΰ 񱳵 ü о м Դϴ.</p>
+                </div>
+                <!-- Ʈ ٱ ó -->
+                <div class="flex items-center gap-1 bg-stone-100 p-1 rounded-xl border border-stone-200">
+                    <button onclick="app.toggleLangMode('ko')" id="lang-ko-btn" class="px-4 py-1.5 text-xs font-bold rounded-lg bg-white text-indigo-600 shadow-sm transition-all">ѱ Ʈ</button>
+                    <button onclick="app.toggleLangMode('en')" id="lang-en-btn" class="px-4 py-1.5 text-xs font-bold rounded-lg text-stone-600 transition-all">English Report</button>
+                </div>
+            </div>
+
+            <!--   Ʈ  -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <!--  ׷  -->
+                <div class="lg:col-span-2 bg-white border border-stone-200 rounded-2xl p-5 shadow-sm">
+                    <h3 class="font-bold text-stone-800 text-sm mb-4 text-center"> ܿ 뵵 м ǥ (̱ Honors ƿ ̵ )</h3>
+                    <div class="chart-container">
+                        <canvas id="analysis-chart-canvas"></canvas>
+                    </div>
+                </div>
+
+                <!-- ƿ  м  -->
+                <div class="lg:col-span-1 bg-white border border-stone-200 rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <h4 class="font-bold text-stone-800 text-xs uppercase tracking-wider mb-3 border-b border-stone-100 pb-2"> Placement Cut-off Guide</h4>
+                        <div class="space-y-3 text-xs leading-relaxed">
+                            <div class="p-2.5 rounded-lg border-l-4 border-emerald-500 bg-emerald-50/50">
+                                <strong class="text-emerald-900 block font-bold mb-0.5">Honors Pre-Calc ݼ (35 ̻)</strong>
+                                ̱ TOP 25   ֿ б   .   ӵ    ֻ  ֽϴ.
+                            </div>
+                            <div class="p-2.5 rounded-lg border-l-4 border-amber-500 bg-amber-50/50">
+                                <strong class="text-amber-900 block font-bold mb-0.5">Standard Pre-Calc н (28~34)</strong>
+                                 ̻  ɷ ,   α׹̳ ﰢԼ ܿ ̼   մϴ.
+                            </div>
+                            <div class="p-2.5 rounded-lg border-l-4 border-rose-500 bg-rose-50/50">
+                                <strong class="text-rose-900 block font-bold mb-0.5"> ʿ   (27 )</strong>
+                                 ׽   ܿ   ɰϸ, Pre-Calculus   ö  ˴ϴ.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-stone-50 rounded-xl p-3 border border-stone-100 text-[11px] text-stone-500 leading-normal mt-4">
+                         ׷ <b> (Honors Pass - 35 )</b>  <b> (Regular Pass - 28 )</b>  츮 л  ̸   м ݿմϴ.
+                    </div>
+                </div>
+            </div>
+
+            <!--  Prerequisite   Ʈ  -->
+            <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm mb-8" id="diagnosis-text-report-board">
+                <!-- ڹٽũƮ   -->
+            </div>
+
+            <!-- US ѹ    ̵ -->
+            <div class="bg-white border border-stone-200 rounded-2xl shadow-sm overflow-hidden">
+                <div class="px-6 py-4 bg-stone-50 border-b border-stone-200">
+                    <h3 class="font-bold text-stone-800 text-sm"> US High School Algebra 2 vs ѱ б   </h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-stone-600">
+                        <thead class="bg-stone-100 text-[10px] font-black uppercase text-stone-500">
+                            <tr>
+                                <th class="px-6 py-3">US Algebra 2 Domain</th>
+                                <th class="px-6 py-3">ֿ н   </th>
+                                <th class="px-6 py-3">ѱ   輺 </th>
+                                <th class="px-6 py-3">ش г/б </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-stone-100" id="curriculum-mapping-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 5: Curriculum (AI ε  Ʈ) -->
+        <div id="tab-curriculum" class="hidden animate-fade-in no-print">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-stone-800">  10ȸ  Ŀŧ  Ʈ </h2>
+                <p class="text-xs text-stone-500">л OMR ä  мϿ AI ġ    ܿ Ǽ 10ȸ εԴϴ.</p>
+            </div>
+
+            <!-- AI Ŀŧ  Ʈѷ -->
+            <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 mb-8">
+                <h3 class="font-bold text-indigo-950 text-sm mb-2"> AI ǽð   ܿ Ʃ </h3>
+                <p class="text-indigo-900/80 text-xs mb-4"> ŷ  м Ư  ñ ܿ ڵ üũ߽ϴ. Ͻô ܿ  ߰/Ͽ [AI Ŀ ε ϱ] ư  AI  Ʈ ø ˴ϴ.</p>
+                
+                <div class="flex flex-wrap gap-2 mb-4" id="curriculum-domain-selectors"></div>
+
+                <div class="flex items-center gap-3">
+                    <button onclick="app.buildCustomCurriculum()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-colors shadow-sm flex items-center gap-1.5">
+                        <span> AI Ŀ ε ϱ</span>
+                    </button>
+                    <button onclick="app.resetToStandardCurriculum()" class="text-indigo-800 hover:text-indigo-950 font-bold text-xs">⺻  缳</button>
+                </div>
+
+                <div id="curriculum-generator-loader" class="hidden mt-3 text-center py-1 flex items-center justify-center gap-1.5">
+                    <div class="animate-spin rounded-full h-3.5 w-3.5 border-2 border-indigo-600 border-t-transparent"></div>
+                    <span class="text-[11px] font-bold text-indigo-600 animate-pulse">AI  Ʈ  Ŀŧ  ϰ ֽϴ...</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- 10ȸ Ŀŧ  -->
+                <div class="lg:col-span-2 space-y-3" id="curriculum-sessions-list"></div>
+
+                <!--     Ʈ  -->
+                <div class="lg:col-span-1 bg-white border border-stone-200 rounded-2xl p-5 shadow-sm">
+                    <div class="flex justify-between items-center border-b border-stone-100 pb-3 mb-3">
+                        <h3 class="font-bold text-stone-800 text-sm">    Ʈ (Ŭ)</h3>
+                        <span class="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-md" id="saved-variants-count">0 </span>
+                    </div>
+                    <p class="text-[11px] text-stone-500 leading-normal mb-3">
+                         Ǯ  AI  ƩͿ <b>'ֵ   '</b> û   л  غ  Կ   ֽϴ. μ  Ʈ ڿ ڵ ε˴ϴ.
+                    </p>
+                    <div class="space-y-3 max-h-[400px] overflow-y-auto pr-1" id="saved-variants-container">
+                        <div class="text-center py-8 text-xs text-stone-400">   ϴ. ƩͿ ȭ    !</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- μ   ũ -->
+    <div id="print-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-stone-100">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-stone-100">
+                <h3 class="font-bold text-stone-800 text-base flex items-center gap-1.5">
+                    <span></span> PDF  ܼ &  ȭ μ 
+                </h3>
+                <button onclick="app.closePrintModal()" class="text-stone-400 hover:text-stone-600 font-bold"></button>
+            </div>
+            <p class="text-xs text-stone-500 leading-relaxed mb-4">
+                  Ʈ Ī  ̾ƿ    ȭ кθ 긮ο ǥ    μ Դϴ.
+            </p>
+
+            <div class="space-y-3">
+                <button onclick="app.runPrintProcess('report')" class="w-full flex items-center justify-between p-3.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-950 font-semibold rounded-2xl transition-all border border-indigo-100 group">
+                    <div class="flex items-center gap-3">
+                        <span class="text-xl"></span>
+                        <div class="text-left">
+                            <span class="block text-xs font-bold">̾ /   м ܼ </span>
+                            <span class="text-[10px] text-indigo-700 font-medium"> 25% ̵ Ʈ +  н   Ұ߼</span>
+                        </div>
+                    </div>
+                    <span class="text-indigo-600 group-hover:translate-x-1 transition-transform"></span>
+                </button>
+                <button onclick="app.runPrintProcess('testpaper')" class="w-full flex items-center justify-between p-3.5 bg-stone-50 hover:bg-stone-100 text-stone-900 font-semibold rounded-2xl transition-all border border-stone-200 group">
+                    <div class="flex items-center gap-3">
+                        <span class="text-xl"></span>
+                        <div class="text-left">
+                            <span class="block text-xs font-bold">л    </span>
+                            <span class="text-[10px] text-stone-600 font-medium">LaTeX м Ϻ ݿ Part 1 & 2  40 </span>
+                        </div>
+                    </div>
+                    <span class="text-stone-600 group-hover:translate-x-1 transition-transform"></span>
+                </button>
+                <button onclick="app.runPrintProcess('omrsheet')" class="w-full flex items-center justify-between p-3.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-950 font-semibold rounded-2xl transition-all border border-emerald-100 group">
+                    <div class="flex items-center gap-3">
+                        <span class="text-xl"></span>
+                        <div class="text-left">
+                            <span class="block text-xs font-bold">  OMR ŷ Ʈ </span>
+                            <span class="text-[10px] text-emerald-700 font-medium"> ŷ  кθ     ԰ </span>
+                        </div>
+                    </div>
+                    <span class="text-emerald-600 group-hover:translate-x-1 transition-transform"></span>
+                </button>
+            </div>
+
+            <div class="mt-5 pt-3 border-t border-stone-100 flex justify-end">
+                <button onclick="app.closePrintModal()" class="bg-stone-100 hover:bg-stone-200 text-stone-600 font-bold px-4 py-2 rounded-xl text-xs transition-colors">ݱ</button>
+            </div>
+        </div>
+    </div>
+
+    <!--   μ  (Print   Ÿ) -->
+    <div id="hidden-print-zone" class="hidden"></div>
+
+    <script>
+        // -------------------------------------------------------------
+        //     ⺻ API Key  (ȭ/ŷ  )
+        // -------------------------------------------------------------
+        //  ҽڵ尡 ܺο Ǵ  ڵ API Key Ż ̳ ũѷ İ ϵ 
+        // Ű ڿ Base64 · ȭ ó(Masking)߽ϴ. 
+        //
+        //  API Key "AIzaSy..."  Ʒ OB_KEY  ϱ  base64 · ־ΰų, 
+        // ؽƮ ڿ Էϰ []ϸ ֿ켱 ǹǷ Ƚϰ ϼŵ ϴ.
+        const OB_KEY = "QUl6YVN5RHVvUGpSSTB4MndBdjJCc3hKMG40dWpSTjFSMG9Kekpv"; // <- ⺻ ŷ Ű ž 
+
+        //   ĳ  (   ػ LaTeX)
+        const appData = {
+            questions: [
+                // PART 1 (No Calc)
+                { id: 1, part: 1, domain: "Linear Equations", q: "Solve the following linear equation for $x$:<br><br>$$3(2x - 5) - 4(x + 2) = 11$$", a: "$x = 17$", s: "1. Distribute: $6x - 15 - 4x - 8 = 11$<br>2. Combine terms: $2x - 23 = 11$<br>3. Add 23: $2x = 34$<br>4. Divide: $x = 17$" },
+                { id: 2, part: 1, domain: "Inequalities & Absolute Value", q: "Solve the absolute value inequality and express in interval notation:<br><br>$$|2x - 3| \\le 9$$", a: "$[-3, 6]$", s: "1. Rewrite boundary conditions: $-9 \\le 2x - 3 \\le 9$<br>2. Add 3 to all parts: $-6 \\le 2x \\le 12$<br>3. Divide by 2: $-3 \\le x \\le 6$<br>4. Write in interval notation: $[-3, 6]$" },
+                { id: 3, part: 1, domain: "Coordinate Geometry", q: "Find the equation of the line in slope-intercept form ($y = mx + b$) that passes through $(-2, 5)$ and is perpendicular to:<br><br>$$y = -\\frac{2}{3}x + 4$$", a: "$y = \\frac{3}{2}x + 8$", s: "1. Identify baseline slope $m_1 = -\\frac{2}{3}$.<br>2. Perpendicular line slope $m_2 = \\frac{3}{2}$.<br>3. Point-slope form: $y - 5 = \\frac{3}{2}(x + 2)$<br>4. Simplify: $y = \\frac{3}{2}x + 3 + 5 \\implies y = \\frac{3}{2}x + 8$" },
+                { id: 4, part: 1, domain: "Linear Systems", q: "Solve the system of linear equations:<br><br>$$\\begin{cases} 3x + 2y = 7 \\\\ 5x - y = 3 \\end{cases}$$", a: "$(1, 2)$", s: "1. Isolate $y$ from Eq 2: $y = 5x - 3$<br>2. Substitute into Eq 1: $3x + 2(5x - 3) = 7$<br>3. Simplify: $13x - 6 = 7 \\implies 13x = 13 \\implies x = 1$<br>4. Find $y$: $y = 5(1) - 3 = 2$. Coordinate is $(1, 2)$" },
+                { id: 5, part: 1, domain: "Exponents", q: "Simplify completely, leaving positive exponents only:<br><br>$$\\left( \\frac{4x^3 y^{-2}}{x^{-1} y^4} \\right)^{-2}$$", a: "$\\frac{y^{12}}{16x^8}$", s: "1. Simplify internal terms: $4x^{3 - (-1)} y^{-2 - 4} = 4x^4 y^{-6}$<br>2. Apply exponent $-2$: $4^{-2} x^{-8} y^{12}$<br>3. Format positive exponents: $\\frac{y^{12}}{16x^8}$" },
+                { id: 6, part: 1, domain: "Complex Numbers", q: "Simplify into standard complex number form $a + bi$:<br><br>$$(3 - 2i)(5 + 4i)$$", a: "$23 + 2i$", s: "1. Expand terms: $15 + 12i - 10i - 8i^2$<br>2. Apply definition $i^2 = -1$: $15 + 2i - 8(-1)$<br>3. Combine constants: $23 + 2i$" },
+                { id: 7, part: 1, domain: "Complex Numbers", q: "Rationalize the denominator of the complex fraction:<br><br>$$\\frac{2 + i}{3 - 2i}$$", a: "$\\frac{4}{13} + \\frac{7}{13}i$", s: "1. Multiply conjugate: $\\frac{(2+i)(3+2i)}{(3-2i)(3+2i)}$<br>2. Expand numerator: $6 + 4i + 3i + 2i^2 = 4 + 7i$<br>3. Expand denominator: $9 - 4i^2 = 13$<br>4. Separate fractions: $\\frac{4}{13} + \\frac{7}{13}i$" },
+                { id: 8, part: 1, domain: "Quadratics", q: "Factor completely:<br><br>$$6x^2 - 11x - 10$$", a: "$(2x - 5)(3x + 2)$", s: "1. AC method: Multiply to $-60$, sum to $-11 \\implies -15, 4$.<br>2. Grouping: $6x^2 - 15x + 4x - 10 = 3x(2x-5) + 2(2x-5)$<br>3. Pull common binomial: $(2x - 5)(3x + 2)$" },
+                { id: 9, part: 1, domain: "Quadratics", q: "Solve using the quadratic formula:<br><br>$$2x^2 - 4x + 5 = 0$$", a: "$x = 1 \\pm \\frac{\\sqrt{6}}{2}i$", s: "1. Use formula $x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$ with $a=2, b=-4, c=5$.<br>2. $x = \\frac{4 \\pm \\sqrt{16 - 40}}{4} = \\frac{4 \\pm \\sqrt{-24}}{4}$<br>3. Simplify discriminant: $\\sqrt{-24} = 2i\\sqrt{6}$<br>4. Result: $x = \\frac{4 \\pm 2i\\sqrt{6}}{4} = 1 \\pm \\frac{\\sqrt{6}}{2}i$" },
+                { id: 10, part: 1, domain: "Quadratics", q: "Convert to vertex form and identify the vertex:<br><br>$$y = 2x^2 - 8x + 5$$", a: "$y = 2(x - 2)^2 - 3$, Vertex: $(2, -3)$", s: "1. Group quadratic/linear terms: $2(x^2 - 4x) + 5$<br>2. Complete square: $2(x^2 - 4x + 4) + 5 - 8$<br>3. Simplify form: $y = 2(x - 2)^2 - 3$<br>4. Pull vertex $(h, k) \\implies (2, -3)$" },
+                { id: 11, part: 1, domain: "Polynomials", q: "Multiply and simplify:<br><br>$$(2x - 3)(x^2 - 4x + 5)$$", a: "$2x^3 - 11x^2 + 22x - 15$", s: "1. Distribute $2x$: $2x^3 - 8x^2 + 10x$<br>2. Distribute $-3$: $-3x^2 + 12x - 15$<br>3. Combine like terms: $2x^3 - 11x^2 + 22x - 15$" },
+                { id: 12, part: 1, domain: "Polynomials", q: "Factor completely using difference of cubes:<br><br>$$8x^3 - 27$$", a: "$(2x - 3)(4x^2 + 6x + 9)$", s: "1. Recognize form: $(2x)^3 - (3)^3$<br>2. Apply pattern $a^3 - b^3 = (a-b)(a^2 + ab + b^2)$<br>3. Substitute: $(2x - 3)(4x^2 + 6x + 9)$" },
+                { id: 13, part: 1, domain: "Polynomials", q: "Divide using synthetic division:<br><br>$$\\frac{2x^3 - 5x^2 - 3x + 7}{x - 3}$$", a: "$Q(x) = 2x^2 + x, R = 7$", s: "1. Set root $= 3$. Coeffs: $2, -5, -3, 7$<br>2. Drop 2, mult to get 6 $\\implies$ sum is 1, mult to get 3 $\\implies$ sum is 0, mult to get 0 $\\implies$ remainder is 7.<br>3. $Q(x) = 2x^2 + x, R = 7$" },
+                { id: 14, part: 1, domain: "Rational Expressions", q: "Simplify completely:<br><br>$$\\frac{x^2 - 9}{x^2 + 5x + 6} \\cdot \\frac{x + 2}{2x - 6}$$", a: "$\\frac{1}{2}$", s: "1. Factor all polynomials: $\\frac{(x-3)(x+3)}{(x+2)(x+3)} \\cdot \\frac{x+2}{2(x-3)}$<br>2. Cancel terms: $(x+3), (x+2), (x-3)$<br>3. Final evaluation: $\\frac{1}{2}$" },
+                { id: 15, part: 1, domain: "Rational Equations", q: "Solve for $x$, checking for extraneous roots:<br><br>$$\\frac{3}{x - 2} + \\frac{2}{x + 3} = \\frac{10}{x^2 + x - 6}$$", a: "$x = 1$", s: "1. Find LCD: $(x-2)(x+3)$<br>2. Clear denominators: $3(x+3) + 2(x-2) = 10$<br>3. Distribute: $3x + 9 + 2x - 4 = 10 \\implies 5x + 5 = 10$<br>4. Solve: $5x = 5 \\implies x = 1$. It doesn't violate domain restrict." },
+                { id: 16, part: 1, domain: "Radicals", q: "Simplify the rational exponent expression completely:<br><br>$$(64x^6 y^{-3})^{2/3}$$", a: "$\\frac{16x^4}{y^2}$", s: "1. Distribute exponent: $(64)^{2/3} (x^6)^{2/3} (y^{-3})^{2/3}$<br>2. Calculate: $16 \\cdot x^4 \\cdot y^{-2}$<br>3. Format positive exponent: $\\frac{16x^4}{y^2}$" },
+                { id: 17, part: 1, domain: "Radical Equations", q: "Solve for $x$, checking for extraneous roots:<br><br>$$\\sqrt{2x + 7} - x = 2$$", a: "$x = 1$", s: "1. Isolate radical: $\\sqrt{2x+7} = x + 2$<br>2. Square both sides: $2x + 7 = x^2 + 4x + 4$<br>3. Set to zero: $x^2 + 2x - 3 = 0 \\implies (x+3)(x-1) = 0$<br>4. Test roots: $x=1$ checks out, but $x=-3$ yields $\\sqrt{1} - (-3) = 4 \\ne 2$ (extraneous). Result: $x=1$" },
+                { id: 18, part: 1, domain: "Functions", q: "Given $f(x) = 2x^2 - 3$ and $g(x) = x - 4$. Evaluate the composition $(f \\circ g)(x)$:", a: "$2x^2 - 16x + 29$", s: "1. Insert definition: $f(g(x)) = 2(x-4)^2 - 3$<br>2. Expand binomial: $2(x^2 - 8x + 16) - 3$<br>3. Distribute & simplify: $2x^2 - 16x + 32 - 3 = 2x^2 - 16x + 29$" },
+                { id: 19, part: 1, domain: "Functions", q: "Find the algebraic inverse function $f^{-1}(x)$ of:<br><br>$$f(x) = \\frac{3x - 1}{2}$$", a: "$f^{-1}(x) = \\frac{2x + 1}{3}$", s: "1. Replace with $y$: $y = \\frac{3x-1}{2}$<br>2. Swap $x$ and $y$: $x = \\frac{3y-1}{2}$<br>3. Multiply by 2: $2x = 3y - 1$<br>4. Add 1, divide by 3: $3y = 2x + 1 \\implies f^{-1}(x) = \\frac{2x+1}{3}$" },
+                { id: 20, part: 1, domain: "Logarithms", q: "Expand the logarithmic expression completely:<br><br>$$\\log_b \\left( \\frac{x^3 \\sqrt{y}}{z^2} \\right)$$", a: "$3\\log_b(x) + \\frac{1}{2}\\log_b(y) - 2\\log_b(z)$", s: "1. Apply quotient rule: $\\log_b(x^3\\sqrt{y}) - \\log_b(z^2)$<br>2. Apply product rule: $\\log_b(x^3) + \\log_b(y^{1/2}) - \\log_b(z^2)$<br>3. Apply power rule: $3\\log_b(x) + \\frac{1}{2}\\log_b(y) - 2\\log_b(z)$" },
+
+                // PART 2 (Calc Allowed)
+                { id: 21, part: 2, domain: "Systems of Equations", q: "Solve the three-variable system of linear equations:<br><br>$$\\begin{cases} x + y + z = 6 \\\\ 2x - y + z = 3 \\\\ 3x + 2y - z = 4 \\end{cases}$$", a: "$(1, 2, 3)$", s: "1. Sum Eq1 & Eq2 to eliminate $y$: $3x + 2z = 9$<br>2. Multiply Eq2 by 2 and add to Eq3: $7x + z = 10 \\implies z = 10 - 7x$<br>3. Substitute into Eq4: $3x + 2(10-7x) = 9 \\implies -11x = -11 \\implies x = 1$<br>4. Calculate back: $z = 3, y = 2$. Intersection is $(1, 2, 3)$" },
+                { id: 22, part: 2, domain: "Systems of Equations", q: "A jar contains dimes and quarters. There are 15 coins in total valued at $3.15. Formulate and solve a system to find the amount of each coin.", a: "4 dimes, 11 quarters", s: "1. Define variables: $d + q = 15$<br>2. Set monetary value: $0.10d + 0.25q = 3.15$<br>3. Use substitution: $d = 15 - q \\implies 0.10(15-q) + 0.25q = 3.15$<br>4. Simplify: $1.5 + 0.15q = 3.15 \\implies 0.15q = 1.65 \\implies q = 11$, so $d = 4$" },
+                { id: 23, part: 2, domain: "Systems of Equations", q: "Find the maximum profit $P = 5x + 7y$ under the given constraints:<br><br>$$x \\ge 0, y \\ge 0, x+y \\le 6, 2x+y \\le 8$$", a: "$P = 42$ at $(0, 6)$", s: "1. Plot lines to get vertices of feasible region: $(0,0), (4,0), (2,4), (0,6)$.<br>2. Test vertex $(0,6)$: $P = 5(0) + 7(6) = 42$<br>3. Test vertex $(2,4)$: $P = 5(2) + 7(4) = 38$<br>4. Maximum is $42$ at $(0,6)$" },
+                { id: 24, part: 2, domain: "Quadratics", q: "The height $h(t)$ of a model rocket is modeled by $h(t) = -16t^2 + 64t + 80$. Find its maximum altitude and the total flight duration before impact.", a: "Max height: $144\\text{ ft}$ at $t = 2\\text{ s}$, total flight: $5\\text{ s}$", s: "1. Vertex time: $t = -\\frac{b}{2a} = -\\frac{64}{-32} = 2\\text{ seconds}$.<br>2. Calculate max altitude: $h(2) = -16(4) + 64(2) + 80 = 144\\text{ ft}$.<br>3. Impact: $-16(t^2 - 4t - 5) = 0 \\implies (t-5)(t+1) = 0 \\implies t = 5\\text{ seconds}$" },
+                { id: 25, part: 2, domain: "Exponents", q: "Calculate the continuous compounded interest value of a $5,000 principal at 4.5% interest rate for 8 years ($A = Pe^{rt}$):", a: "$7,166.65$", s: "1. Set variables: $P=5000, r=0.045, t=8$.<br>2. Multiply exponent: $rt = 0.36$.<br>3. Evaluate continuous formula: $A = 5000e^{0.36} \\approx 5000(1.433329)$<br>4. Result: $7,166.65$" },
+                { id: 26, part: 2, domain: "Exponents", q: "Solve for $t$ to the nearest hundredth:<br><br>$$300(1.08)^t = 1200$$", a: "$t \\approx 18.01$", s: "1. Isolate base: $1.08^t = 4$<br>2. Use natural logs: $t \\ln(1.08) = \\ln(4)$<br>3. Solve for $t$: $t = \\frac{\\ln(4)}{\\ln(1.08)}$<br>4. Result: $t \\approx 18.01$" },
+                { id: 27, part: 2, domain: "Logarithms", q: "Solve the log equation, verifying domain restrictions:<br><br>$$\\log_2(x) + \\log_2(x - 6) = 4$$", a: "$x = 8$", s: "1. Condense log expression: $\\log_2(x(x-6)) = 4$<br>2. Convert to exponent form: $x^2 - 6x = 2^4 = 16$<br>3. Solve quadratic: $x^2 - 6x - 16 = 0 \\implies (x-8)(x+2) = 0$<br>4. Verify domains: $x=8$ works. $x=-2$ causes negative logs, hence extraneous. Result is $x=8$" },
+                { id: 28, part: 2, domain: "Rational Expressions", q: "A working rate problem: Bob can paint a fence in 4 hours, and Alice can do it in 6 hours. Find their together time.", a: "2.4 hours", s: "1. Write rate equations: $\\frac{1}{4} + \\frac{1}{6} = \\frac{1}{T}$<br>2. Common denominator: $\\frac{3}{12} + \\frac{2}{12} = \\frac{5}{12}$<br>3. Solve for $T$: $T = \\frac{12}{5} = 2.4\\text{ hours}$" },
+                { id: 29, part: 2, domain: "Rational Expressions", q: "Given $y$ varies directly as $x^2$ and inversely as $z$. If $y=12$ when $x=3, z=6$. Find $y$ when $x=4, z=8$.", a: "$y = 16$", s: "1. Write variation equation: $y = k \\frac{x^2}{z}$<br>2. Plug values to find $k$: $12 = k \\frac{9}{6} \\implies 12 = 1.5k \\implies k=8$<br>3. Compute with new variables: $y = 8 \\frac{16}{8} = 16$" },
+                { id: 30, part: 2, domain: "Coordinate Geometry", q: "State all transformations needed to map the parent absolute value function $f(x) = |x|$ onto:<br><br>$$g(x) = -2|x - 3| + 5$$", a: "Horizontal shift right by 3, vertical stretch by 2, reflection across the x-axis, vertical shift up by 5", s: "1. Term $(x-3)$: shift right 3.<br>2. Value $2$: vertical stretch factor 2.<br>3. Negative sign: reflect over x-axis.<br>4. Constant $+5$: shift up 5." },
+                { id: 31, part: 2, domain: "Discrete Math & Stats", q: "Find the equation of a circle with center $(-3, 4)$ that passes through $(1, 7)$:", a: "$(x + 3)^2 + (y - 4)^2 = 25$", s: "1. Standard form: $(x-h)^2 + (y-k)^2 = r^2$<br>2. Find distance $r$: $r^2 = (1 - (-3))^2 + (7-4)^2 = 4^2 + 3^2 = 25$<br>3. Substitute: $(x+3)^2 + (y-4)^2 = 25$" },
+                { id: 32, part: 2, domain: "Discrete Math & Stats", q: "An arithmetic sequence starts with 7, 13, 19, 25... Find the explicit formula $a_n$ and the 50th term.", a: "$a_n = 6n + 1$, $a_{50} = 301$", s: "1. Pull sequence constants: $a_1 = 7$, diff $d = 6$.<br>2. Formula: $a_n = a_1 + (n-1)d = 7 + (n-1)6 = 6n + 1$.<br>3. Calculate 50th: $a_{50} = 6(50) + 1 = 301$" },
+                { id: 33, part: 2, domain: "Discrete Math & Stats", q: "Evaluate the sum of the infinite geometric series:<br><br>$$18 + 12 + 8 + \\frac{16}{3} + \\dots$$", a: "$S = 54$", s: "1. Confirm terms: $a_1 = 18, r = \\frac{12}{18} = \\frac{2}{3}$.<br>2. Verify convergence: $|r| < 1$, so it converges.<br>3. Infinite sum formula: $S = \\frac{a}{1 - r} = \\frac{18}{1 - 2/3} = \\frac{18}{1/3} = 54$" },
+                { id: 34, part: 2, domain: "Polynomials", q: "Determine the coefficient of the fourth term of the expanded binomial expression $(x - 2y)^6$:", a: "$-160$", s: "1. Binomial formula term: $\\binom{n}{k} a^{n-k} b^k$. Fourth term is $k=3$.<br>2. Term is $\\binom{6}{3} x^3 (-2y)^3$.<br>3. Simplify components: $20 \\cdot x^3 \\cdot (-8y^3) = -160x^3y^3$<br>4. Coefficient is $-160$" },
+                { id: 35, part: 2, domain: "Trigonometry", q: "In a right triangle, angle $C=90^\\circ$. If $a=8$ and $b=15$, find the exact values of $\\sin(A)$, $\\cos(A)$, and $\\tan(A)$.", a: "$\\sin(A) = \\frac{8}{17}$, $\\cos(A) = \\frac{15}{17}$, $\\tan(A) = \\frac{8}{15}$", s: "1. Find hypotenuse $c$: $c = \\sqrt{8^2 + 15^2} = 17$.<br>2. Compute trig ratios: $\\sin = \\frac{\\text{opp}}{\\text{hyp}} = \\frac{8}{17}$, $\\cos = \\frac{\\text{adj}}{\\text{hyp}} = \\frac{15}{17}$, $\\tan = \\frac{\\text{opp}}{\\text{adj}} = \\frac{8}{15}$" },
+                { id: 36, part: 2, domain: "Trigonometry", q: "State the exact mathematical unit circle coordinate values for $\\sin\\left(\\frac{7\\pi}{6}\\right)$ and $\\cos\\left(\\frac{7\\pi}{6}\\right)$:", a: "$\\sin = -\\frac{1}{2}$, $\\cos = -\\frac{\\sqrt{3}}{2}$", s: "1. Identify target quadrant: Quadrant III (both are negative).<br>2. Find reference angle: $\\theta_{ref} = \\frac{7\\pi}{6} - \\pi = \\frac{\\pi}{6}$ ($30^\\circ$).<br>3. Evaluate standard ratios with quadrant signs: $\\sin = -\\frac{1}{2}$, $\\cos = -\\frac{\\sqrt{3}}{2}$" },
+                { id: 37, part: 2, domain: "Trigonometry", q: "For $y = 3\\sin(2x - \\pi) + 1$, identify Amplitude, Period, Phase Shift, and Vertical Shift.", a: "Amplitude = 3, Period = $\\pi$, Phase Shift = $\\frac{\\pi}{2}$ (right), Vertical Shift = 1 (up)", s: "1. Standardize form: $y = 3\\sin(2(x - \\frac{\\pi}{2})) + 1$.<br>2. Amplitude $= |A| = 3$.<br>3. Period $= \\frac{2\\pi}{B} = \\frac{2\\pi}{2} = \\pi$.<br>4. Phase shift $= \\frac{\\pi}{2}$ to the right. Vertical shift $= 1$ unit up." },
+                { id: 38, part: 2, domain: "Discrete Math & Stats", q: "A normal distribution curve has $\\mu=75$ and $\\sigma=8$. Calculate the exact percentage of data falling between 67 and 91:", a: "$81.5\\%$", s: "1. Convert values to standard z-scores: $z_{67} = \\frac{67-75}{8} = -1$, $z_{91} = \\frac{91-75}{8} = +2$.<br>2. Empirical rule ranges: Area from $-1\\sigma$ to Mean is $34\\%$.<br>3. Area from Mean to $+2\\sigma$ is $47.5\\%$.<br>4. Sum total: $34\\% + 47.5\\% = 81.5\\%$" },
+                { id: 39, part: 2, domain: "Discrete Math & Stats", q: "A probability experiment: a box holds 5 red balls and 7 blue. If 2 are drawn without replacement, find the probability that both are red.", a: "$\\frac{5}{33}$", s: "1. Probability first draw is red: $P(R_1) = \\frac{5}{12}$.<br>2. Probability second draw is red: $P(R_2 | R_1) = \\frac{4}{11}$.<br>3. Multiply combined probabilities: $\\frac{5}{12} \\times \\frac{4}{11} = \\frac{20}{132}$<br>4. Simplify: $\\frac{5}{33}$" },
+                { id: 40, part: 2, domain: "Systems of Equations", q: "Evaluate $2A - B$ given matrix parameters:<br><br>$$A = \\begin{bmatrix} 2 & -3 \\\\ 1 & 4 \\end{bmatrix}, B = \\begin{bmatrix} 5 & 0 \\\\ -2 & 3 \\end{bmatrix}$$", a: "$\\begin{bmatrix} -1 & -6 \\\\ 4 & 5 \\end{bmatrix}$", s: "1. Calculate scalar $2A = \\begin{bmatrix} 4 & -6 \\\\ 2 & 8 \\end{bmatrix}$.<br>2. Subtract matrix $B$: $\\begin{bmatrix} 4-5 & -6-0 \\\\ 2-(-2) & 8-3 \\end{bmatrix}$.<br>3. Result: $\\begin{bmatrix} -1 & -6 \\\\ 4 & 5 \\end{bmatrix}$" }
+            ],
+            // 8 ٽ 
+            domains: [
+                "Linear Equations",
+                "Inequalities & Absolute Value",
+                "Coordinate Geometry",
+                "Linear Systems",
+                "Exponents",
+                "Complex Numbers",
+                "Quadratics",
+                "Polynomials",
+                "Rational Expressions",
+                "Radicals",
+                "Functions",
+                "Logarithms",
+                "Systems of Equations",
+                "Discrete Math & Stats",
+                "Trigonometry"
+            ],
+            // Chart  ׷  Ī
+            domainGroups: {
+                "Linear & Coord (/)": [1, 3, 4, 30],
+                "Quadratics & Complex ()": [6, 7, 8, 9, 10, 24],
+                "Polynomials ( ׽)": [11, 12, 13, 34],
+                "Rational & Radical (/)": [14, 15, 16, 17, 28, 29],
+                "Exponents & Logs (/α)": [5, 18, 19, 20, 25, 26, 27],
+                "Trigonometry (ﰢ)": [35, 36, 37],
+                "Discrete Math & Stats (/)": [2, 31, 32, 33, 38, 39],
+                "Systems & Matrices ()": [21, 22, 23, 40]
+            },
+            mapping: [
+                { us: "Linear Systems / Matrices", topic: "3 , , ȹ", kr: " (, )", grade: "1" },
+                { us: "Quadratics & Complex", topic: "Ҽ ü, Լ Vertex Form, Ǻ", kr: " 1", grade: "1" },
+                { us: "Polynomials / Binomial", topic: ", ,  μ, װ", kr: " 1 / Ȯ ", grade: "1 / 2" },
+                { us: "Rational & Radical Equations", topic: "м ȭ, (Extraneous) , Ϸ", kr: " 2", grade: "1" },
+                { us: "Exponents & Logarithms", topic: "/α , α,  ($Pe^{rt}$)", kr: " I", grade: "2" },
+                { us: "Conic Sections & Discrete", topic: "  , /, ѵ޼", kr: " 2 /  I", grade: "1 / 2" },
+                { us: "Trigonometric Graphs", topic: "ȣ, Unit Circle Ư, ﰢ  Amplitude/Period", kr: " I", grade: "2" },
+                { us: "Probability & Normal Dist.", topic: "Ǻ 񺹿 , Ժ Empirical 68-95-99.7 ", kr: "Ȯ ", grade: "2" }
+            ],
+            curriculum: [
+                { id: 1, title: "1ȸ: Foundations of Linear & Absolute Bounds", desc: " ȣ Ե ٴܰ ε    $\\theta$ ǥ ̵   غ" },
+                { id: 2, title: "2ȸ: Multi-variable Systems & Matrix Algebra", desc: "3   Ǯ ð Ҹ ּȭ  2x2  Ģ  " },
+                { id: 3, title: "3ȸ: Completing Complex Roots & Quadratics", desc: "Լ  Vertex Form ȯ ȭ  $i^2 = -1$ ȣ  " },
+                { id: 4, title: "4ȸ: Polynomial Dividends & Binomial Theorem", desc: "   0    Binomial expansion    " },
+                { id: 5, title: "5ȸ: [߰ ] Half-Length Placement Mock-Test", desc: "1~4ȸ н      ߰ Ʃ׿ 20  Ʈ " },
+                { id: 6, title: "6ȸ: Extraneous Elimination of Rational & Radicals", desc: "/ Ǯ  и 0 Ǵ   (Extraneous)  Ǻ  ȭ" },
+                { id: 7, title: "7ȸ: Exponents, Continuous Compounding & Log Rules", desc: "/α غȯ  ȯ ӵ شȭ  ǻȰ   $A = Pe^{rt}$   " },
+                { id: 8, title: "8ȸ: Trigonometric Waves & Periodic Graphs", desc: "Radian/Degree ﰢ Ī, Unit Circle и ﰢ ȣ   /ֱ ȯ  Ʒ" },
+                { id: 9, title: "9ȸ: Conic Equations & Infinite Geometric Sums", desc: "       ѵ޼   $|r| < 1$ ĺ Ʒ" },
+                { id: 10, title: "10ȸ: [ ] Full Simulated Placement Test", desc: "  Part 1, 2  40 ŸӾ ùķ̼   Honors հ м  ߱" }
+            ]
+        };
+
+        const app = {
+            currentTab: 'overview',
+            currentQuestion: 1,
+            langMode: 'ko',
+            omrMarks: Array(40).fill(null), // null (unmarked), true (correct), false (incorrect)
+            studentDb: {},
+            activeStudent: null,
+            chartInstance: null,
+            savedVariants: [],
+
+            init() {
+                this.loadMathJaxEngine();
+                this.buildQuestionGrids();
+                this.renderMappingTable();
+                this.renderStandardCurriculum();
+                this.buildOmrRows();
+                this.loadSavedApiKey();
+                this.loadStudentDb();
+                this.setupSecurityShields();
+                this.switchTab('overview');
+                this.updateApiKeyStatusBadge();
+            },
+
+            loadMathJaxEngine() {
+                if (!window.MathJax) {
+                    window.MathJax = {
+                        tex: {
+                            inlineMath: [['$', '$'], ['\\(', '\\)']],
+                            displayMath: [['$$', '$$'], ['\\[', '\\]']]
+                        },
+                        options: {
+                            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+                        }
+                    };
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js';
+                    script.async = true;
+                    document.head.appendChild(script);
+                }
+            },
+
+            //     (Ŭ    )
+            setupSecurityShields() {
+                // Ŭ  
+                document.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                });
+
+                //   Ű   Ű 
+                document.addEventListener('keydown', (e) => {
+                    // F12 
+                    if (e.key === 'F12') {
+                        e.preventDefault();
+                        return false;
+                    }
+                    // Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C (ũ  ) 
+                    if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) {
+                        e.preventDefault();
+                        return false;
+                    }
+                    // Ctrl+U (ҽ ) 
+                    if (e.ctrlKey && e.key === 'u') {
+                        e.preventDefault();
+                        return false;
+                    }
+                    // Ctrl+S () 
+                    if (e.ctrlKey && e.key === 's') {
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+            },
+
+            // Base64 ŷ ȣȭ  Լ
+            decryptKey(maskedStr) {
+                try {
+                    return atob(maskedStr);
+                } catch (e) {
+                    return "";
+                }
+            },
+
+            buildQuestionGrids() {
+                const g1 = document.getElementById('part1-grid');
+                const g2 = document.getElementById('part2-grid');
+                g1.innerHTML = ""; g2.innerHTML = "";
+
+                appData.questions.forEach(q => {
+                    const btn = document.createElement('button');
+                    btn.textContent = q.id;
+                    btn.id = `q-grid-btn-${q.id}`;
+                    btn.className = "aspect-square flex items-center justify-center rounded-lg font-bold text-xs transition-all border q-inactive shadow-sm";
+                    btn.onclick = () => this.loadQuestion(q.id);
+
+                    if (q.part === 1) g1.appendChild(btn);
+                    else g2.appendChild(btn);
+                });
+            },
+
+            loadQuestion(id) {
+                //  ư Ÿ ǵ
+                const prevBtn = document.getElementById(`q-grid-btn-${this.currentQuestion}`);
+                if (prevBtn) prevBtn.classList.replace('q-active', 'q-inactive');
+
+                this.currentQuestion = id;
+                const activeBtn = document.getElementById(`q-grid-btn-${id}`);
+                if (activeBtn) activeBtn.classList.replace('q-inactive', 'q-active');
+
+                const q = appData.questions.find(x => x.id === id);
+                document.getElementById('q-title').textContent = `Question ${q.id}`;
+                document.getElementById('q-domain').textContent = q.domain;
+                document.getElementById('q-body').innerHTML = q.q;
+
+                const label = document.getElementById('current-part-label');
+                if (q.part === 1) {
+                    label.textContent = "Part 1 (No Calc)";
+                    label.className = "text-xs bg-rose-100 text-rose-800 px-2.5 py-1 rounded-md font-bold";
+                } else {
+                    label.textContent = "Part 2 (Calc OK)";
+                    label.className = "text-xs bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md font-bold";
+                }
+
+                // ַ ڽ   
+                document.getElementById('solution-box').classList.add('hidden');
+                document.getElementById('q-answer').innerHTML = `: ${q.a}`;
+                document.getElementById('q-steps').innerHTML = q.s;
+
+                // MathJax 񵿱  ó ( ȸǿ)
+                this.typesetMathJaxElements([document.getElementById('q-body'), document.getElementById('q-answer'), document.getElementById('q-steps')]);
+            },
+
+            typesetMathJaxElements(elements) {
+                if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+                    window.MathJax.typesetPromise(elements).catch(err => console.log("MathJax typesetting error: ", err));
+                }
+            },
+
+            toggleSolution() {
+                const box = document.getElementById('solution-box');
+                box.classList.toggle('hidden');
+                if (!box.classList.contains('hidden')) {
+                    this.typesetMathJaxElements([box]);
+                }
+            },
+
+            renderMappingTable() {
+                const tbody = document.getElementById('curriculum-mapping-tbody');
+                tbody.innerHTML = "";
+                appData.mapping.forEach(m => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-stone-50 border-b border-stone-100 transition-colors";
+                    tr.innerHTML = `
+                        <td class="px-6 py-3 font-bold text-indigo-700">${m.us}</td>
+                        <td class="px-6 py-3">${m.topic}</td>
+                        <td class="px-6 py-3 font-semibold text-stone-700">${m.kr}</td>
+                        <td class="px-6 py-3"><span class="bg-stone-200 text-stone-700 px-2 py-0.5 rounded text-[10px] font-extrabold">${m.grade}</span></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            },
+
+            renderStandardCurriculum() {
+                const list = document.getElementById('curriculum-sessions-list');
+                list.innerHTML = "";
+                appData.curriculum.forEach(c => {
+                    this.appendCurriculumCard(list, c.id, c.title, c.desc);
+                });
+            },
+
+            appendCurriculumCard(container, id, title, desc) {
+                const card = document.createElement('div');
+                card.className = "bg-white border border-stone-200 p-4 rounded-xl flex gap-3 items-start shadow-sm";
+                card.innerHTML = `
+                    <div class="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 font-extrabold text-xs flex items-center justify-center mt-0.5">
+                        ${id}
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-stone-800 text-sm">${title}</h4>
+                        <p class="text-xs text-stone-500 mt-1 leading-relaxed">${desc}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            },
+
+            buildOmrRows() {
+                const container = document.getElementById('omr-board-list');
+                container.innerHTML = "";
+
+                for (let i = 1; i <= 40; i++) {
+                    const row = document.createElement('div');
+                    row.className = "flex items-center justify-between p-2 rounded-xl border border-stone-100 hover:bg-stone-50 transition-all";
+                    row.innerHTML = `
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-full bg-stone-100 flex items-center justify-center text-[10px] font-black text-stone-600">Q${i}</span>
+                            <span class="text-[10px] text-stone-400 font-bold">${appData.questions[i-1].domain}</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="app.setOmrValue(${i}, true)" id="omr-btn-correct-${i}" class="w-8 h-8 rounded-lg border border-stone-200 text-xs font-black flex items-center justify-center hover:bg-emerald-50 hover:text-emerald-600 transition-all">O</button>
+                            <button onclick="app.setOmrValue(${i}, false)" id="omr-btn-incorrect-${i}" class="w-8 h-8 rounded-lg border border-stone-200 text-xs font-black flex items-center justify-center hover:bg-rose-50 hover:text-rose-600 transition-all">X</button>
+                        </div>
+                    `;
+                    container.appendChild(row);
+                }
+            },
+
+            setOmrValue(id, status) {
+                const idx = id - 1;
+                const correctBtn = document.getElementById(`omr-btn-correct-${id}`);
+                const incorrectBtn = document.getElementById(`omr-btn-incorrect-${id}`);
+
+                if (this.omrMarks[idx] === status) {
+                    //   Ŭ   
+                    this.omrMarks[idx] = null;
+                    correctBtn.className = "w-8 h-8 rounded-lg border border-stone-200 text-xs font-black flex items-center justify-center hover:bg-emerald-50 hover:text-emerald-600 transition-all bg-white text-stone-600";
+                    incorrectBtn.className = "w-8 h-8 rounded-lg border border-stone-200 text-xs font-black flex items-center justify-center hover:bg-rose-50 hover:text-rose-600 transition-all bg-white text-stone-600";
+                } else {
+                    this.omrMarks[idx] = status;
+                    if (status === true) {
+                        correctBtn.className = "w-8 h-8 rounded-lg text-xs font-black flex items-center justify-center transition-all omr-btn-selected-correct shadow-sm";
+                        incorrectBtn.className = "w-8 h-8 rounded-lg border border-stone-200 text-xs font-black flex items-center justify-center hover:bg-rose-50 hover:text-rose-600 transition-all bg-white text-stone-600";
+                    } else {
+                        correctBtn.className = "w-8 h-8 rounded-lg border border-stone-200 text-xs font-black flex items-center justify-center hover:bg-emerald-50 hover:text-emerald-600 transition-all bg-white text-stone-600";
+                        incorrectBtn.className = "w-8 h-8 rounded-lg text-xs font-black flex items-center justify-center transition-all omr-btn-selected-incorrect shadow-sm";
+                    }
+                }
+
+                this.autoSaveCurrentStudent();
+                this.updateLiveAnalytics();
+            },
+
+            resetAllOmr() {
+                this.omrMarks = Array(40).fill(null);
+                this.buildOmrRows();
+                this.autoSaveCurrentStudent();
+                this.updateLiveAnalytics();
+            },
+
+            updateLiveAnalytics() {
+                const totalGraded = this.omrMarks.filter(x => x !== null).length;
+                const totalCorrect = this.omrMarks.filter(x => x === true).length;
+                const accuracy = totalGraded === 0 ? 0 : Math.round((totalCorrect / totalGraded) * 100);
+
+                document.getElementById('current-total-score').textContent = totalCorrect;
+                document.getElementById('omr-grading-progress').textContent = `ŷ Ϸ : ${totalGraded} (: ${Math.round((totalGraded/40)*100)}%)`;
+                document.getElementById('current-accuracy-rate').textContent = `${accuracy}%`;
+
+                const badge = document.getElementById('cutoff-prediction-badge');
+                if (totalGraded >= 15) {
+                    if (totalCorrect >= 35) {
+                        badge.className = "inline-block px-3 py-1.5 rounded-lg text-xs font-extrabold bg-indigo-100 text-indigo-700";
+                        badge.textContent = " Honors Pre-Calculus н  ";
+                    } else if (totalCorrect >= 28) {
+                        badge.className = "inline-block px-3 py-1.5 rounded-lg text-xs font-extrabold bg-emerald-100 text-emerald-800";
+                        badge.textContent = " Regular Pre-Calculus ̷Ʈ н ";
+                    } else {
+                        badge.className = "inline-block px-3 py-1.5 rounded-lg text-xs font-extrabold bg-rose-100 text-rose-700";
+                        badge.textContent = "  ʼ (Algebra 2   ġ  )";
+                    }
+                } else {
+                    badge.className = "inline-block px-3 py-1.5 rounded-lg text-xs font-bold bg-stone-100 text-stone-600";
+                    badge.textContent = "ּ 15 ä  ̵尡 ߱޵˴ϴ.";
+                }
+
+                // Ʈ ǽð  ó
+                if (this.currentTab === 'analysis') {
+                    this.renderChartGraphic();
+                }
+
+                // ؽƮ Ұ Ʈ  
+                this.renderDynamicTextReport();
+            },
+
+            renderDynamicTextReport() {
+                const board = document.getElementById('diagnosis-text-report-board');
+                const totalCorrect = this.omrMarks.filter(x => x === true).length;
+                const totalGraded = this.omrMarks.filter(x => x !== null).length;
+                
+                const studentName = this.activeStudent ? this.activeStudent.name : "л";
+                const isKo = this.langMode === 'ko';
+
+                if (totalGraded === 0) {
+                    board.innerHTML = `
+                        <div class="text-center py-8 text-xs text-stone-400">
+                             OMR Ʈ  ŷؾ    ˴ϴ.
+                        </div>
+                    `;
+                    return;
+                }
+
+                // /  и 
+                const groupStats = {};
+                Object.keys(appData.domainGroups).forEach(group => {
+                    groupStats[group] = { total: 0, correct: 0 };
+                });
+
+                this.omrMarks.forEach((status, idx) => {
+                    if (status === null) return;
+                    const qId = idx + 1;
+                    Object.keys(appData.domainGroups).forEach(group => {
+                        if (appData.domainGroups[group].includes(qId)) {
+                            groupStats[group].total++;
+                            if (status === true) groupStats[group].correct++;
+                        }
+                    });
+                });
+
+                const weakGroups = [];
+                const strongGroups = [];
+
+                Object.keys(groupStats).forEach(group => {
+                    const stats = groupStats[group];
+                    if (stats.total > 0) {
+                        const rate = stats.correct / stats.total;
+                        if (rate <= 0.6) {
+                            weakGroups.push({ name: group, rate, ...stats });
+                        } else if (rate >= 0.8) {
+                            strongGroups.push({ name: group, rate, ...stats });
+                        }
+                    }
+                });
+
+                // Prerequisite    м
+                let prerequisiteHTML = "";
+                if (weakGroups.length > 0) {
+                    prerequisiteHTML = `<h4 class="font-bold text-rose-800 text-xs mb-2 border-b border-rose-50 pb-1 mt-4"> Prerequisite   Ұ߼ (   )</h4><ul class="space-y-2 text-xs leading-relaxed text-stone-700">`;
+                    weakGroups.forEach(wg => {
+                        let traceMsg = "";
+                        if (wg.name.includes("Exponents & Logs")) {
+                            traceMsg = "<b>[Pre-Algebra / Algebra 1 ]</b> α    ϴ  εȣ  ȯ  ǥ 谪    Ǿϴ.  1 ε  ٺ  óմϴ.";
+                        } else if (wg.name.includes("Quadratics & Complex")) {
+                            traceMsg = "<b>[Algebra 1 / Geometry ]</b> и ӷ Ҽ ȭ   ߵ ܰ  ȭ   ׽    $\\left((a-b)(a+b)=a^2-b^2\\right)$   ӵ  ſ ߻ Դϴ.";
+                        } else if (wg.name.includes("Trigonometry")) {
+                            traceMsg = "<b>[  / 7-8г Math ]</b> Ư  ǥ  Ǽ ﰢ   Ư ﰢ $1:2:\\sqrt{3}$  ü ðȭ Ʒ Ӹӿ ȭ   մϴ.";
+                        } else if (wg.name.includes("Systems & Matrices")) {
+                            traceMsg = "<b>[Pre-Algebra   ]</b> 3  Ǯ    ġ   ⺻ /Թ   ޵ ̼Ͽ   ϰ ֱ Դϴ.";
+                        } else {
+                            traceMsg = "<b>[Pre-requisite Trace]</b>     ġȯ Ģ 纯    ó   ʱ ǰ ߰ߵǸ, Ĳ  (Work write-down) Ʒ ñմϴ.";
+                        }
+                        prerequisiteHTML += `<li class="bg-rose-50/50 p-2.5 rounded-lg border-l-4 border-rose-400">${traceMsg}</li>`;
+                    });
+                    prerequisiteHTML += `</ul>`;
+                }
+
+                // ѿ  ȯ
+                if (isKo) {
+                    board.innerHTML = `
+                        <div class="space-y-4">
+                            <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 text-indigo-950 text-xs">
+                                 <strong>кθ     м:</strong><br><br>
+                                <span class="font-bold text-indigo-600 text-sm">${studentName}</span> л   40  <span class="font-bold text-indigo-600 text-sm">${totalCorrect}</span> Ͽ  <strong>${accuracy}%</strong> ̰ ֽϴ. <br>
+                                  δ ̱       
+                                <span class="text-rose-600 font-bold">${totalCorrect >= 35 ? 'Honors Pre-Calculus ﰢ  ' : totalCorrect >= 28 ? 'Regular Pre-Calculus    ' : '   ؾ   '}</span> Ǵܵ˴ϴ.
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                <div class="bg-stone-50 border border-stone-200 rounded-xl p-4">
+                                    <h4 class="font-bold text-emerald-800 text-xs mb-2 border-b border-emerald-100 pb-1">  м  (Mastered)</h4>
+                                    ${strongGroups.length > 0 ? `<ul class="list-disc pl-4 text-xs space-y-1 text-stone-700">${strongGroups.map(g => `<li><strong>${g.name}</strong> (: ${Math.round(g.rate*100)}%)</li>`).join('')}</ul>` : '<p class="text-xs text-stone-400"> ǥ 80% ̻  ܿ  ߰ߵ ʾҽϴ.</p>'}
+                                </div>
+                                <div class="bg-stone-50 border border-stone-200 rounded-xl p-4">
+                                    <h4 class="font-bold text-rose-800 text-xs mb-2 border-b border-rose-100 pb-1">  ġ  (Weakness)</h4>
+                                    ${weakGroups.length > 0 ? `<ul class="list-disc pl-4 text-xs space-y-1 text-stone-700">${weakGroups.map(g => `<li><strong>${g.name}</strong> (: ${Math.round(g.rate*100)}%)</li>`).join('')}</ul>` : '<p class="text-xs text-stone-400">뵵 60%   ܿ ߰ߵ ʾҽϴ. Ǹմϴ!</p>'}
+                                </div>
+                            </div>
+
+                            ${prerequisiteHTML}
+                        </div>
+                    `;
+                } else {
+                    board.innerHTML = `
+                        <div class="space-y-4">
+                            <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 text-indigo-950 text-xs">
+                                 <strong>Official Diagnostic Report Card:</strong><br><br>
+                                Student <span class="font-bold text-indigo-600 text-sm">${studentName}</span> has scored <span class="font-bold text-indigo-600 text-sm">${totalCorrect}</span> out of 40 questions, achieving an accuracy of <strong>${accuracy}%</strong>.<br>
+                                Based on competitive US High School Cut-off benchmarks, <span class="text-rose-600 font-bold">${totalCorrect >= 35 ? 'immediate admission to Honors Pre-Calculus is highly likely.' : totalCorrect >= 28 ? 'placement into Regular Pre-Calculus is predicted.' : 'intensive summer intervention is strongly recommended.'}</span>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                <div class="bg-stone-50 border border-stone-200 rounded-xl p-4">
+                                    <h4 class="font-bold text-emerald-800 text-xs mb-2 border-b border-emerald-100 pb-1"> Strong Areas (Mastered)</h4>
+                                    ${strongGroups.length > 0 ? `<ul class="list-disc pl-4 text-xs space-y-1 text-stone-700">${strongGroups.map(g => `<li><strong>${g.name}</strong> (${Math.round(g.rate*100)}%)</li>`).join('')}</ul>` : '<p class="text-xs text-stone-400">No mastered area detected (Need &gt;80% accuracy).</p>'}
+                                </div>
+                                <div class="bg-stone-50 border border-stone-200 rounded-xl p-4">
+                                    <h4 class="font-bold text-rose-800 text-xs mb-2 border-b border-rose-100 pb-1"> High Priority Weaknesses</h4>
+                                    ${weakGroups.length > 0 ? `<ul class="list-disc pl-4 text-xs space-y-1 text-stone-700">${weakGroups.map(g => `<li><strong>${g.name}</strong> (${Math.round(g.rate*100)}%)</li>`).join('')}</ul>` : '<p class="text-xs text-stone-400">Excellent! No weak areas detected (&lt;60% accuracy).</p>'}
+                                </div>
+                            </div>
+
+                            ${prerequisiteHTML ? prerequisiteHTML.replace(/ Prerequisite   Ұ߼/g, " Prerequisite Gap Track Report").replace(/   /g, "Diagnostics of Pre-academic gaps") : ""}
+                        </div>
+                    `;
+                }
+
+                this.renderCurriculumDomainSelectors(weakGroups.map(w => w.name));
+            },
+
+            renderCurriculumDomainSelectors(autoDetectedWeaknesses) {
+                const wrapper = document.getElementById('curriculum-domain-selectors');
+                wrapper.innerHTML = "";
+
+                Object.keys(appData.domainGroups).forEach(group => {
+                    const isChecked = autoDetectedWeaknesses.includes(group);
+                    const label = document.createElement('label');
+                    label.className = "flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-xl border border-stone-200 text-xs cursor-pointer hover:bg-stone-50 transition-all font-semibold";
+                    label.innerHTML = `
+                        <input type="checkbox" value="${group}" ${isChecked ? 'checked' : ''} class="domain-checkbox rounded text-indigo-600 focus:ring-indigo-500">
+                        <span>${group}</span>
+                    `;
+                    wrapper.appendChild(label);
+                });
+            },
+
+            renderChartGraphic() {
+                const ctx = document.getElementById('analysis-chart-canvas').getContext('2d');
+                if (this.chartInstance) {
+                    this.chartInstance.destroy();
+                }
+
+                //  ׷  
+                const labels = Object.keys(appData.domainGroups);
+                const scoreData = labels.map(group => {
+                    const questionIds = appData.domainGroups[group];
+                    const graded = questionIds.filter(qId => this.omrMarks[qId - 1] !== null);
+                    if (graded.length === 0) return 0;
+                    const correct = questionIds.filter(qId => this.omrMarks[qId - 1] === true);
+                    return Math.round((correct.length / questionIds.length) * 100);
+                });
+
+                // ChartJS Annotation ÷ ȸ  ( ̵ ͼ óϿ 浹 )
+                this.chartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'ǽð   (%)',
+                                data: scoreData,
+                                backgroundColor: '#6366f1',
+                                borderRadius: 8,
+                                borderWidth: 0,
+                                order: 2
+                            },
+                            {
+                                label: 'Honors  (88%)',
+                                data: Array(labels.length).fill(88),
+                                type: 'line',
+                                borderColor: '#ef4444',
+                                borderDash: [5, 5],
+                                borderWidth: 2,
+                                pointRadius: 0,
+                                fill: false,
+                                order: 1
+                            },
+                            {
+                                label: 'Regular  (70%)',
+                                data: Array(labels.length).fill(70),
+                                type: 'line',
+                                borderColor: '#f59e0b',
+                                borderDash: [5, 5],
+                                borderWidth: 2,
+                                pointRadius: 0,
+                                fill: false,
+                                order: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'bottom',
+                                labels: { font: { size: 10, family: 'Noto Sans KR' } }
+                            },
+                            tooltip: {
+                                padding: 10,
+                                titleFont: { size: 12, family: 'Noto Sans KR' },
+                                bodyFont: { size: 12, family: 'Noto Sans KR' }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                min: 0,
+                                max: 100,
+                                ticks: { color: '#78716c', stepSize: 20 },
+                                grid: { color: '#f5f5f4' }
+                            },
+                            x: {
+                                ticks: {
+                                    color: '#78716c',
+                                    font: { size: 9 },
+                                    callback: function(val) {
+                                        let text = this.getLabelForValue(val);
+                                        return text.length > 10 ? text.substring(0, 10) + '..' : text;
+                                    }
+                                },
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            },
+
+            switchTab(tabId) {
+                document.getElementById(`tab-${this.currentTab}`).classList.add('hidden');
+                document.getElementById(`tab-btn-${this.currentTab}`).classList.replace('tab-active', 'tab-inactive');
+
+                this.currentTab = tabId;
+
+                document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+                document.getElementById(`tab-btn-${tabId}`).classList.replace('tab-inactive', 'tab-active');
+
+                if (tabId === 'test') {
+                    this.loadQuestion(this.currentQuestion);
+                } else if (tabId === 'analysis') {
+                    setTimeout(() => {
+                        this.renderChartGraphic();
+                    }, 50);
+                }
+
+                this.updateLiveAnalytics();
+            },
+
+            toggleLangMode(lang) {
+                this.langMode = lang;
+                const koBtn = document.getElementById('lang-ko-btn');
+                const enBtn = document.getElementById('lang-en-btn');
+
+                if (lang === 'ko') {
+                    koBtn.className = "px-4 py-1.5 text-xs font-bold rounded-lg bg-white text-indigo-600 shadow-sm transition-all";
+                    enBtn.className = "px-4 py-1.5 text-xs font-bold rounded-lg text-stone-600 transition-all";
+                } else {
+                    enBtn.className = "px-4 py-1.5 text-xs font-bold rounded-lg bg-white text-indigo-600 shadow-sm transition-all";
+                    koBtn.className = "px-4 py-1.5 text-xs font-bold rounded-lg text-stone-600 transition-all";
+                }
+
+                this.updateLiveAnalytics();
+            },
+
+            // л  &   
+            registerStudent() {
+                const name = document.getElementById('student-name').value.trim();
+                const phone = document.getElementById('student-phone').value.trim();
+
+                if (!name || !phone) {
+                    alert("л ̸ and ȭȣ  4ڸ  Էϼ.");
+                    return;
+                }
+
+                const sId = `${name}_${phone}`;
+                if (!this.studentDb[sId]) {
+                    this.studentDb[sId] = {
+                        name: name,
+                        phone: phone,
+                        marks: Array(40).fill(null),
+                        savedVariants: []
+                    };
+                }
+
+                this.activeStudent = this.studentDb[sId];
+                this.omrMarks = [...this.activeStudent.marks];
+                this.savedVariants = this.activeStudent.savedVariants || [];
+
+                // OMR Ʈ  ȭ ó
+                this.syncOmrMarkView();
+                this.saveStudentDb();
+                this.renderSavedVariantsList();
+
+                document.getElementById('active-student-badge').innerHTML = ` м  л: <span class="text-indigo-600 font-bold">${name} (${phone})</span>`;
+                this.updateLiveAnalytics();
+                alert(`л [${name}]  ε Ϸ.`);
+            },
+
+            syncOmrMarkView() {
+                for (let i = 1; i <= 40; i++) {
+                    const status = this.omrMarks[i - 1];
+                    const correctBtn = document.getElementById(`omr-btn-correct-${i}`);
+                    const incorrectBtn = document.getElementById(`omr-btn-incorrect-${i}`);
+
+                    if (status === null) {
+                        correctBtn.className = "w-8 h-8 rounded-lg border border-stone-200 text-xs font-black flex items-center justify-center hover:bg-emerald-50 hover:text-emerald-600 transition-all bg-white text-stone-600";
+                        incorrectBtn.className = "w-8 h-8 rounded-lg border border-stone-200 text-xs font-black flex items-center justify-center hover:bg-rose-50 hover:text-rose-600 transition-all bg-white text-stone-600";
+                    } else if (status === true) {
+                        correctBtn.className = "w-8 h-8 rounded-lg text-xs font-black flex items-center justify-center transition-all omr-btn-selected-correct shadow-sm";
+                        incorrectBtn.className = "w-8 h-8 rounded-lg border border-stone-200 text-xs font-black flex items-center justify-center hover:bg-rose-50 hover:text-rose-600 transition-all bg-white text-stone-600";
+                    } else {
+                        correctBtn.className = "w-8 h-8 rounded-lg border border-stone-200 text-xs font-black flex items-center justify-center hover:bg-emerald-50 hover:text-emerald-600 transition-all bg-white text-stone-600";
+                        incorrectBtn.className = "w-8 h-8 rounded-lg text-xs font-black flex items-center justify-center transition-all omr-btn-selected-incorrect shadow-sm";
+                    }
+                }
+            },
+
+            autoSaveCurrentStudent() {
+                if (this.activeStudent) {
+                    this.activeStudent.marks = [...this.omrMarks];
+                    this.activeStudent.savedVariants = [...this.savedVariants];
+                    this.studentDb[`${this.activeStudent.name}_${this.activeStudent.phone}`] = this.activeStudent;
+                    this.saveStudentDb();
+                }
+            },
+
+            clearCurrentStudent() {
+                this.activeStudent = null;
+                this.omrMarks = Array(40).fill(null);
+                this.savedVariants = [];
+                this.syncOmrMarkView();
+                this.renderSavedVariantsList();
+                document.getElementById('student-name').value = "";
+                document.getElementById('student-phone').value = "";
+                document.getElementById('active-student-badge').textContent = " м  л:  (̸  ּ)";
+                this.updateLiveAnalytics();
+            },
+
+            loadStudentDb() {
+                const raw = localStorage.getItem('algebra2_placement_db');
+                if (raw) {
+                    try {
+                        this.studentDb = JSON.parse(raw);
+                    } catch (e) {
+                        this.studentDb = {};
+                    }
+                }
+            },
+
+            saveStudentDb() {
+                localStorage.setItem('algebra2_placement_db', JSON.stringify(this.studentDb));
+            },
+
+            saveApiKey() {
+                const key = document.getElementById('gemini-api-key').value.trim();
+                localStorage.setItem('gemini_api_key_temp', key);
+                this.updateApiKeyStatusBadge();
+                alert("API Key  ӽ Ǿϴ.");
+            },
+
+            loadSavedApiKey() {
+                const saved = localStorage.getItem('gemini_api_key_temp');
+                if (saved) {
+                    document.getElementById('gemini-api-key').value = saved;
+                }
+            },
+
+            getApiKey() {
+                const temp = localStorage.getItem('gemini_api_key_temp');
+                if (temp) return temp;
+                return this.decryptKey(OB_KEY); // ȭ ȣȭ  ȯ
+            },
+
+            updateApiKeyStatusBadge() {
+                const activeKey = this.getApiKey();
+                const badge = document.getElementById('api-status-badge');
+                if (badge) {
+                    if (activeKey) {
+                        badge.textContent = " AI  Ȱȭ";
+                        badge.className = "text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md font-bold animate-pulse";
+                    } else {
+                        badge.textContent = " API Key ʿ";
+                        badge.className = "text-[10px] bg-rose-100 text-rose-800 px-2 py-0.5 rounded-md font-bold";
+                    }
+                }
+            },
+
+            // Gemini API ȣ  (  ž)
+            async executeGeminiCall(prompt, sysInstruction, schema = null) {
+                const apiKey = this.getApiKey();
+                if (!apiKey) {
+                    throw new Error("API Key  ʽϴ.   Ű  â ȿ Gemini API Ű ־ּ.");
+                }
+
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    systemInstruction: { parts: [{ text: sysInstruction }] }
+                };
+
+                if (schema) {
+                    payload.generationConfig = {
+                        responseMimeType: "application/json",
+                        responseSchema: schema
+                    };
+                }
+
+                let retryDelay = 1000;
+                for (let attempt = 0; attempt < 5; attempt++) {
+                    try {
+                        const response = await fetch(url, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (response.ok) {
+                            const result = await response.json();
+                            const outputText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                            if (outputText) return outputText;
+                        } else {
+                            const errorResult = await response.json();
+                            if (errorResult.error?.message?.includes("API key not valid")) {
+                                throw new Error("ԷϽ Google Gemini API Ű ȿ ʽϴ.");
+                            }
+                        }
+                    } catch (err) {
+                        if (err.message.includes("API Ű")) throw err;
+                    }
+                    await new Promise(res => setTimeout(res, retryDelay));
+                    retryDelay *= 2;
+                }
+                throw new Error("ͳ ȥ̳ Quota   Ͻ ߻߽ϴ.   õ ٶϴ.");
+            },
+
+            // AI  Ʃ  ε
+            triggerAiTutor() {
+                document.getElementById('ai-tutor-panel').classList.remove('hidden');
+                const chatLogs = document.getElementById('chat-logs');
+                const q = appData.questions.find(x => x.id === this.currentQuestion);
+                chatLogs.innerHTML = `
+                    <div class="p-2.5 bg-indigo-50 border border-indigo-100 rounded-lg mb-2">
+                        ȳϼ!   Ȯ  帮  AI  ƩԴϴ. <br>
+                         Ͻ <b>Question ${q.id}</b> ܿ <b>[${q.domain}]</b> Դϴ. Ʒ   ߸ ų,     !
+                    </div>
+                `;
+            },
+
+            closeAiTutor() {
+                document.getElementById('ai-tutor-panel').classList.add('hidden');
+            },
+
+            sendPresetQuestion(text) {
+                this.processTutorPipeline(text);
+            },
+
+            sendCustomQuestion() {
+                const input = document.getElementById('custom-query');
+                const val = input.value.trim();
+                if (!val) return;
+                input.value = "";
+                this.processTutorPipeline(val);
+            },
+
+            async processTutorPipeline(query) {
+                const chatLogs = document.getElementById('chat-logs');
+                const loader = document.getElementById('ai-chat-loader');
+
+                //   
+                const userBubble = document.createElement('div');
+                userBubble.className = "bg-stone-100 text-stone-800 p-2.5 rounded-xl max-w-[85%] ml-auto mb-2 text-right font-medium text-xs";
+                userBubble.innerHTML = `<b>Student Query:</b> ${query}`;
+                chatLogs.appendChild(userBubble);
+                chatLogs.scrollTop = chatLogs.scrollHeight;
+
+                loader.classList.remove('hidden');
+
+                const currentQ = appData.questions.find(x => x.id === this.currentQuestion);
+                const sysPrompt = `You are a world-class pedagogically precise AI Math Tutor. Your objective is to assist high school freshmen preparing for their US Algebra 2 Placement Test.
+Provide extremely clear mathematical proofs with Zero mistakes.
+Ensure all mathematical variables, formulas, and divisions are formatted perfectly in MathJax LaTeX.
+Use standard single dollar signs ($) for inline formulas like $\\frac{a}{b}$ and double dollar signs ($$) for block formulas.
+Output must be in Korean but retain official US mathematical naming conventions (e.g., Vertex form, Extraneous roots, Completing the square).
+Current Problem Context:
+- Question ${currentQ.id} [${currentQ.domain}]: ${currentQ.q}
+- Solution: ${currentQ.s}
+- Answer: ${currentQ.a}
+If the student asks for 'ֵ  ', write a completely new problem of identical difficulty and mathematical structure, then provide its answer and steps clearly labeled.`;
+
+                try {
+                    const reply = await this.executeGeminiCall(query, sysPrompt);
+                    
+                    const aiBubble = document.createElement('div');
+                    aiBubble.className = "bg-indigo-50 border border-indigo-100 p-3 rounded-xl max-w-[85%] mr-auto mb-2 text-xs";
+                    aiBubble.innerHTML = `<b> AI Tutor:</b><br><br>${reply}`;
+
+                    // ֵ   ,  Ŭ忡  ư  
+                    if (query.includes("ֵ") || query.includes("")) {
+                        const saveBtn = document.createElement('button');
+                        saveBtn.className = "mt-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-2 py-1 rounded text-[10px] block transition-all shadow-sm";
+                        saveBtn.textContent = "  繮 Ʈ ߰ ϱ";
+                        saveBtn.onclick = () => this.saveVariantToLocal(currentQ.id, reply);
+                        aiBubble.appendChild(saveBtn);
+                    }
+
+                    chatLogs.appendChild(aiBubble);
+                    this.typesetMathJaxElements([aiBubble]);
+
+                } catch (e) {
+                    const errBubble = document.createElement('div');
+                    errBubble.className = "bg-rose-50 border border-rose-100 text-rose-800 p-2.5 rounded-xl max-w-[85%] mr-auto mb-2 text-xs";
+                    errBubble.innerHTML = ` <b> ߻:</b> ${e.message}`;
+                    chatLogs.appendChild(errBubble);
+                } finally {
+                    loader.classList.add('hidden');
+                    chatLogs.scrollTop = chatLogs.scrollHeight;
+                }
+            },
+
+            saveVariantToLocal(parentQId, variantContent) {
+                if (!this.activeStudent) {
+                    alert("л Ͱ ε ʾҽϴ.  ܿ  ּ.");
+                    return;
+                }
+
+                // ߺ ˻
+                const exists = this.savedVariants.some(v => v.content === variantContent);
+                if (exists) {
+                    alert("̹   Կ մϴ.");
+                    return;
+                }
+
+                this.savedVariants.push({
+                    parentQId: parentQId,
+                    content: variantContent,
+                    timestamp: new Date().toLocaleDateString()
+                });
+
+                this.autoSaveCurrentStudent();
+                this.renderSavedVariantsList();
+                alert("  л  Ŭ忡  Ǿϴ.");
+            },
+
+            renderSavedVariantsList() {
+                const container = document.getElementById('saved-variants-container');
+                const badge = document.getElementById('saved-variants-count');
+
+                badge.textContent = `${this.savedVariants.length} `;
+
+                if (this.savedVariants.length === 0) {
+                    container.innerHTML = `<div class="text-center py-8 text-xs text-stone-400">   ϴ. ƩͿ ȭ    !</div>`;
+                    return;
+                }
+
+                container.innerHTML = "";
+                this.savedVariants.forEach((v, index) => {
+                    const card = document.createElement('div');
+                    card.className = "bg-stone-50 border border-stone-200 p-3 rounded-xl relative hover:bg-stone-100/60 transition-all text-[11px] leading-relaxed";
+                    card.innerHTML = `
+                        <button onclick="app.removeVariant(${index})" class="absolute top-2 right-2 text-rose-500 hover:text-rose-700 font-bold"></button>
+                        <div class="font-bold text-indigo-700 mb-1">Variant from Q${v.parentQId}</div>
+                        <div class="text-stone-700 line-clamp-3 overflow-hidden text-ellipsis">${v.content.substring(0, 100)}...</div>
+                    `;
+                    container.appendChild(card);
+                });
+            },
+
+            removeVariant(idx) {
+                this.savedVariants.splice(idx, 1);
+                this.autoSaveCurrentStudent();
+                this.renderSavedVariantsList();
+            },
+
+            // 10ȸ Ŀ ε  
+            async buildCustomCurriculum() {
+                const checkboxes = document.querySelectorAll('.domain-checkbox:checked');
+                const checkedDomains = Array.from(checkboxes).map(x => x.value);
+
+                if (checkedDomains.length === 0) {
+                    alert("ּ ϳ  ġ ܿ  ֽñ ٶϴ.");
+                    return;
+                }
+
+                const loader = document.getElementById('curriculum-generator-loader');
+                const container = document.getElementById('curriculum-sessions-list');
+
+                loader.classList.remove('hidden');
+
+                const sysPrompt = `You are a high school mathematics curriculum design director. Based on the selected weakness areas: ${checkedDomains.join(', ')}, rewrite a highly detailed 10-session prep curriculum.
+Requirements:
+1. Prioritize these checked domains deeply. Make sure they have concrete mathematical topics like Vertex Form conversions, Complex conjugates, Unit circles, Extraneous root detection with standard fraction formulas in LaTeX format.
+2. Ensure there is a midterm simulated evaluation at Session 5, and a final placement examination at Session 10.
+3. Output MUST be a clean JSON list matching this schema exactly:
+{
+  "curriculum": [
+    { "id": 1, "title": "Session 1 Topic in Korean", "desc": "Detailed bullet-point objectives in Korean" },
+    ...
+    { "id": 10, "title": "Session 10 Topic in Korean", "desc": "Detailed objectives" }
+  ]
+}`;
+
+                const schema = {
+                    type: "OBJECT",
+                    properties: {
+                        curriculum: {
+                            type: "ARRAY",
+                            items: {
+                                type: "OBJECT",
+                                properties: {
+                                    id: { type: "INTEGER" },
+                                    title: { type: "STRING" },
+                                    desc: { type: "STRING" }
+                                },
+                                required: ["id", "title", "desc"]
+                            }
+                        }
+                    },
+                    required: ["curriculum"]
+                };
+
+                try {
+                    const rawJson = await this.executeGeminiCall("Generate customized 10-session program", sysPrompt, schema);
+                    const parsed = JSON.parse(rawJson);
+                    if (parsed && Array.isArray(parsed.curriculum)) {
+                        container.innerHTML = "";
+                        parsed.curriculum.forEach(c => {
+                            this.appendCurriculumCard(container, c.id, c.title, c.desc);
+                        });
+                        alert("AI  Ʃ ε 尡  ϷǾϴ.");
+                    } else {
+                        throw new Error("   ԰ ȯ ʾҽϴ.");
+                    }
+                } catch (e) {
+                    alert(`AI Ŀŧ  ۵  Ͻ  ߻: ${e.message}\n⺻  Ŀŧ 븮 մϴ.`);
+                    this.renderStandardCurriculum();
+                } finally {
+                    loader.classList.add('hidden');
+                }
+            },
+
+            resetToStandardCurriculum() {
+                this.renderStandardCurriculum();
+            },
+
+            // Ʈ  Ʈ
+            openPrintModal() {
+                document.getElementById('print-modal').classList.remove('hidden');
+            },
+
+            closePrintModal() {
+                document.getElementById('print-modal').classList.add('hidden');
+            },
+
+            //  μ ȭ :  â    ٺ ذ
+            runPrintProcess(type) {
+                const printWin = window.open('', '_blank');
+                let bodyContent = "";
+
+                const sharedCSS = `
+                    <style>
+                        body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 35px; color: #1c1917; background-color: #ffffff; }
+                        h1 { text-align: center; font-size: 24px; font-weight: bold; margin-bottom: 5px; color: #111827; }
+                        .sub { text-align: center; font-size: 13px; color: #4b5563; margin-bottom: 25px; }
+                        .info-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 13px; }
+                        .info-table td { border: 1px solid #d1d5db; padding: 10px; font-weight: bold; }
+                        .sec-title { font-size: 16px; font-weight: bold; border-bottom: 2px solid #111827; padding-bottom: 5px; margin-top: 25px; margin-bottom: 15px; text-transform: uppercase; }
+                        .card-wrap { border: 1px solid #e5e7eb; border-radius: 12px; padding: 15px; margin-bottom: 20px; page-break-inside: avoid; }
+                        .card-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; color: #4f46e5; border-bottom: 1px dashed #e5e7eb; padding-bottom: 5px; margin-bottom: 10px; }
+                        .workspace-box { height: 160px; border: 1px solid #c4b5fd; border-radius: 8px; margin-top: 15px; position: relative; }
+                        .workspace-box::after { content: "Workspace (Show all your algebraic steps clearly here)"; font-size: 10px; color: #a78bfa; position: absolute; bottom: 8px; right: 12px; }
+                        .omr-print-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+                        .omr-print-item { border: 1px solid #d1d5db; padding: 16px; border-radius: 10px; display: flex; align-items: center; }
+                        .omr-print-num { font-weight: bold; width: 45px; font-size: 15px; color: #4f46e5; }
+                        .omr-print-input { flex-grow: 1; border-bottom: 1.5px solid #4b5563; height: 30px; margin-left: 10px; }
+                        .diag-box { background-color: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 12px; padding: 15px; font-size: 13px; line-height: 1.6; color: #1e1b4b; margin-bottom: 20px; }
+                    </style>
+                `;
+
+                if (type === 'testpaper') {
+                    bodyContent = `
+                        <html>
+                        <head>
+                            <title>Algebra 2 Placement Test Paper</title>
+                            ${sharedCSS}
+                            <script>
+                                window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\\\(', '\\\\)']], displayMath: [['$$', '$$']] } };
+                            </` + `script>
+                            <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></` + `script>
+                        </head>
+                        <body>
+                            <h1>ALGEBRA 2 PLACEMENT TEST</h1>
+                            <div class="sub">Standard Placement Assessment (40 Questions) - Time Allowed: 120 Minutes</div>
+
+                            <div class="diag-box">
+                                <strong> STUDENT INSTRUCTIONS:</strong><br>
+                                1. Section 1 (Q1 - Q20): Calculator is STRICTLY PROHIBITED. Hand-written work is graded.<br>
+                                2. Section 2 (Q21 - Q40): TI-84 graphing or scientific calculators are permitted.<br>
+                                3. Write all intermediary quadratic formulas, matrix arrays, and log steps within the workspaces.
+                            </div>
+
+                            <div class="sec-title">Section 1: Non-Calculator (Questions 1 - 20)</div>
+                    `;
+
+                    appData.questions.forEach(q => {
+                        if (q.id === 21) {
+                            bodyContent += `
+                                <div style="page-break-before: always;"></div>
+                                <div class="sec-title" style="margin-top:0;">Section 2: Calculator Active (Questions 21 - 40)</div>
+                            `;
+                        }
+                        bodyContent += `
+                            <div class="card-wrap">
+                                <div class="card-header">
+                                    <span>Question ${q.id}</span>
+                                    <span style="font-size:11px; font-weight:normal; color:#4b5563;">[${q.domain}]</span>
+                                </div>
+                                <div style="font-size: 13px; line-height: 1.6;">${q.q}</div>
+                                <div class="workspace-box"></div>
+                            </div>
+                        `;
+                    });
+
+                    bodyContent += `</body></html>`;
+
+                } else if (type === 'omrsheet') {
+                    bodyContent = `
+                        <html>
+                        <head>
+                            <title>Print OMR Sheet</title>
+                            ${sharedCSS}
+                        </head>
+                        <body>
+                            <h1>ALGEBRA 2 DIAGNOSTIC ANSWER SHEET</h1>
+                            <div class="sub">Student Official Record Card (Placement Exam)</div>
+
+                            <table class="info-table">
+                                <tr>
+                                    <td>STUDENT NAME: ____________________</td>
+                                    <td>DATE: __________________</td>
+                                </tr>
+                                <tr>
+                                    <td>TARGET GRADE: 9th Grade</td>
+                                    <td>EVALUATOR: __________________</td>
+                                </tr>
+                            </table>
+
+                            <div class="omr-print-grid">
+                    `;
+
+                    for (let i = 1; i <= 40; i++) {
+                        bodyContent += `
+                            <div class="omr-print-item">
+                                <span class="omr-print-num">Q${i}</span>
+                                <span style="font-size:11px; color:#6b7280;">[${appData.questions[i-1].domain}]</span>
+                                <span class="omr-print-input"></span>
+                            </div>
+                        `;
+                    }
+
+                    bodyContent += `</div></body></html>`;
+
+                } else if (type === 'report') {
+                    // ǥ  μ (ѱ/   )
+                    const totalCorrect = this.omrMarks.filter(x => x === true).length;
+                    const accuracy = Math.round((totalCorrect / 40) * 100);
+                    const sName = this.activeStudent ? this.activeStudent.name : "Ϲ л";
+                    const sPhone = this.activeStudent ? this.activeStudent.phone : "None";
+
+                    const textReportDiv = document.getElementById('diagnosis-text-report-board').innerHTML;
+
+                    bodyContent = `
+                        <html>
+                        <head>
+                            <title>Diagnostic Report Card</title>
+                            ${sharedCSS}
+                            <script>
+                                window.MathJax = { tex: { inlineMath: [['$', '$']], displayMath: [['$$', '$$']] } };
+                            </` + `script>
+                            <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></` + `script>
+                        </head>
+                        <body>
+                            <h1>ALGEBRA 2 PLACEMENT DIAGNOSTIC REPORT</h1>
+                            <div class="sub">AI-Powered Student Academic Status Portfolio</div>
+
+                            <table class="info-table">
+                                <tr>
+                                    <td>STUDENT NAME: ${sName}</td>
+                                    <td>SESSION ID: ${sName}_${sPhone}</td>
+                                </tr>
+                                <tr>
+                                    <td>SCORE TOTAL: ${totalCorrect} / 40</td>
+                                    <td>TOTAL ACCURACY: ${accuracy}%</td>
+                                </tr>
+                            </table>
+
+                            <div class="sec-title">1. AI    м Ұ</div>
+                            <div class="diag-box" style="background-color:#ffffff; border:1px solid #ddd6fe;">
+                                ${textReportDiv}
+                            </div>
+
+                            <div style="page-break-before: always;"></div>
+                            <div class="sec-title">2. AI ó 10ȸ  Ŀŧ</div>
+                            <div style="font-size:12px; line-height:1.7;">
+                    `;
+
+                    // Ŀŧ  Ʈ 
+                    const curHTML = document.getElementById('curriculum-sessions-list').innerHTML;
+                    bodyContent += curHTML;
+
+                    //        ε ó
+                    if (this.savedVariants.length > 0) {
+                        bodyContent += `
+                            <div style="page-break-before: always;"></div>
+                            <div class="sec-title">3. л  ֵ    (   Ʈ)</div>
+                        `;
+                        this.savedVariants.forEach((v, index) => {
+                            bodyContent += `
+                                <div class="card-wrap" style="background-color: #fafaf9; border-color: #cbd5e1;">
+                                    <div class="card-header" style="color: #475569; border-bottom-color: #cbd5e1;">
+                                        <span>[  ${index+1}] (Q${v.parentQId}  )</span>
+                                    </div>
+                                    <div style="font-size: 13px; line-height: 1.8;">${v.content}</div>
+                                </div>
+                            `;
+                        });
+                    }
+
+                    bodyContent += `</div></body></html>`;
+                }
+
+                printWin.document.write(bodyContent);
+                printWin.document.close();
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+    </script>
+</body>
+</html>
