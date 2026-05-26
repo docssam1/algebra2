@@ -1,4 +1,4 @@
-const MODEL = "gemini-2.5-flash-preview-09-2025";
+const MODEL = "gemini-2.5-flash";
 
 function json(statusCode, body) {
   return {
