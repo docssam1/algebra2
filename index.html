@@ -450,7 +450,13 @@
                 <h3 class="font-bold text-indigo-950 text-sm mb-2">✨ AI 실시간 오답 노출 단원 튜닝 기기</h3>
                 <p class="text-indigo-900/80 text-xs mb-4">현재 마킹 결과를 분석해 특별 보강이 시급한 단원을 자동으로 체크했습니다. 원하시는 단원을 직접 추가/제외하여 [AI 커스텀 로드맵 빌드하기] 버튼을 누르면 AI 교육 컨설턴트 템플릿으로 재생성됩니다.</p>
                 
-                <div class="flex flex-wrap gap-2 mb-4" id="curriculum-domain-selectors"></div>
+                <div class="flex flex-wrap gap-2 mb-3" id="curriculum-domain-selectors"></div>
+                <div class="flex flex-wrap items-center gap-2 mb-4">
+                    <label for="curriculum-session-count" class="text-[11px] font-bold text-indigo-900">회차 수</label>
+                    <input id="curriculum-session-count" type="number" min="4" max="30" value="10" class="w-20 border border-indigo-200 rounded-lg px-2 py-1 text-xs bg-white">
+                    <label for="curriculum-session-minutes" class="text-[11px] font-bold text-indigo-900">회당 시간(분)</label>
+                    <input id="curriculum-session-minutes" type="number" min="30" max="240" value="120" class="w-24 border border-indigo-200 rounded-lg px-2 py-1 text-xs bg-white">
+                </div>
 
                 <div class="flex items-center gap-3">
                     <button onclick="app.buildCustomCurriculum()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-colors shadow-sm flex items-center gap-1.5">
@@ -1643,6 +1649,8 @@ If the student asks for '쌍둥이 변형 문제', write a completely new proble
             async buildCustomCurriculum() {
                 const checkboxes = document.querySelectorAll('.domain-checkbox:checked');
                 const checkedDomains = Array.from(checkboxes).map(x => x.value);
+                const requestedSessions = Math.max(4, Math.min(30, Number(document.getElementById('curriculum-session-count')?.value || 10)));
+                const requestedMinutes = Math.max(30, Math.min(240, Number(document.getElementById('curriculum-session-minutes')?.value || 120)));
 
                 if (checkedDomains.length === 0) {
                     alert("최소 하나의 약점 치료 단원을 선택해 주시기 바랍니다.");
@@ -1654,16 +1662,17 @@ If the student asks for '쌍둥이 변형 문제', write a completely new proble
 
                 loader.classList.remove('hidden');
 
-                const sysPrompt = `You are a high school mathematics curriculum design director. Based on the selected weakness areas: ${checkedDomains.join(', ')}, rewrite a highly detailed 10-session prep curriculum.
+                const sysPrompt = `You are a high school mathematics curriculum design director. Based on the selected weakness areas: ${checkedDomains.join(', ')}, rewrite a highly detailed ${requestedSessions}-session prep curriculum.
 Requirements:
 1. Prioritize these checked domains deeply. Make sure they have concrete mathematical topics like Vertex Form conversions, Complex conjugates, Unit circles, Extraneous root detection with standard fraction formulas in LaTeX format.
-2. Ensure there is a midterm simulated evaluation at Session 5, and a final placement examination at Session 10.
-3. Output MUST be a clean JSON list matching this schema exactly:
+2. Each session is exactly ${requestedMinutes} minutes.
+3. Ensure there is a midterm simulated evaluation around the middle session, and a final placement examination at the last session.
+4. Output MUST be a clean JSON list matching this schema exactly:
 {
   "curriculum": [
     { "id": 1, "title": "Session 1 Topic in Korean", "desc": "Detailed bullet-point objectives in Korean" },
     ...
-    { "id": 10, "title": "Session 10 Topic in Korean", "desc": "Detailed objectives" }
+    { "id": ${requestedSessions}, "title": "Session ${requestedSessions} Topic in Korean", "desc": "Detailed objectives" }
   ]
 }`;
 
@@ -1687,11 +1696,11 @@ Requirements:
                 };
 
                 try {
-                    const rawJson = await this.executeGeminiCall("Generate customized 10-session program", sysPrompt, schema);
+                    const rawJson = await this.executeGeminiCall(`Generate customized ${requestedSessions}-session program`, sysPrompt, schema);
                     const parsed = JSON.parse(rawJson);
                     if (parsed && Array.isArray(parsed.curriculum)) {
                         container.innerHTML = "";
-                        parsed.curriculum.forEach(c => {
+                        parsed.curriculum.slice(0, requestedSessions).forEach(c => {
                             this.appendCurriculumCard(container, c.id, c.title, c.desc);
                         });
                         alert("AI 정밀 튜닝 로드맵 빌드가 정상 완료되었습니다.");
