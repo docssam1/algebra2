@@ -1406,7 +1406,7 @@
                 return false;
             },
 
-            async executeGeminiCall(prompt, sysInstruction, schema = null) {
+            async executeGeminiCall(prompt, sysInstruction, schema = null, maxOutputTokens = null) {
                 const cacheKey = JSON.stringify({ prompt, sysInstruction, schema: !!schema });
                 const cached = this.requestCache[cacheKey];
                 const now = Date.now();
@@ -1424,7 +1424,7 @@
                                 prompt,
                                 sysInstruction,
                                 schema,
-                                maxOutputTokens: schema ? 1200 : 700
+                                maxOutputTokens: maxOutputTokens || (schema ? 1400 : 1800)
                             })
                         });
 
@@ -1560,6 +1560,19 @@
                 loader.classList.remove('hidden');
 
                 const currentQ = appData.questions.find(x => x.id === this.currentQuestion);
+                const isVariantRequest = query.includes("쌍둥이") || query.includes("변형") || query.includes("유사") || query.toLowerCase().includes("variant");
+                const enhancedQuery = isVariantRequest
+                    ? `${query}
+
+반드시 아래 형식으로 끝까지 작성하세요.
+1. 새 변형 문제: 원문과 숫자/상황은 다르게, 같은 수학 구조와 같은 난이도로 작성
+2. 정답: 최종 답만 한 줄로 명시
+3. 풀이: 4~7단계로 계산 과정을 완성
+4. 검산/조건 확인: 정의역 조건, 분모=0 여부, 원식 대입 검산 등 필요한 확인 포함
+5. 학생 주의점: 왜 원문과 같은 약점을 점검하는지 2문장
+
+수식은 반드시 완성된 MathJax로 작성하고, 열린 $ 또는 $$를 남기지 마세요.`
+                    : query;
                 const sysPrompt = `You are a world-class pedagogically precise AI Math Tutor. Your objective is to assist high school freshmen preparing for their US Algebra 2 Placement Test.
 Provide extremely clear mathematical proofs with zero mistakes.
 Ensure all mathematical variables, formulas, and divisions are formatted perfectly in MathJax LaTeX.
@@ -1572,17 +1585,17 @@ Current Problem Context:
 - Question ${currentQ.id} [${currentQ.domain}]: ${currentQ.q}
 - Solution: ${currentQ.s}
 - Answer: ${currentQ.a}
-If the student asks for a twin or variant problem, write a completely new problem of identical difficulty and mathematical structure, then provide its answer and steps clearly labeled.`;
+If the student asks for a twin or variant problem, write a completely new problem of identical difficulty and mathematical structure, then provide its answer, full solution, and condition checks. The response must not stop after an introduction.`;
 
                 try {
-                    const reply = await this.executeGeminiCall(query, sysPrompt);
+                    const reply = await this.executeGeminiCall(enhancedQuery, sysPrompt, null, isVariantRequest ? 2600 : 1800);
                     
                     const aiBubble = document.createElement('div');
                     aiBubble.className = "bg-indigo-50 border border-indigo-100 p-3 rounded-xl max-w-[85%] mr-auto mb-2 text-xs";
                     aiBubble.innerHTML = `<b>AI Tutor:</b><br><br>${this.formatAiHtml(reply)}`;
 
                     // 쌍둥이 변형 문제인 경우, 오답 클립보드에 담기 버튼 동적 렌더링
-                    if (query.includes("쌍둥이") || query.includes("변형") || query.includes("유사") || query.toLowerCase().includes("variant")) {
+                    if (isVariantRequest) {
                         const saveBtn = document.createElement('button');
                         saveBtn.className = "mt-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-2 py-1 rounded text-[10px] block transition-all shadow-sm";
                         saveBtn.textContent = "이 변형 문제를 오답노트에 저장";

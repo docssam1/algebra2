@@ -44,7 +44,7 @@ async function handler(event) {
     generationConfig: {
       maxOutputTokens: Math.max(
         128,
-        Math.min(1400, Number(payload.maxOutputTokens || (isVerify ? 32 : 700)))
+        Math.min(3200, Number(payload.maxOutputTokens || (isVerify ? 32 : 1800)))
       ),
     },
   };
@@ -75,7 +75,10 @@ async function handler(event) {
       });
     }
 
-    const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const text = result?.candidates?.[0]?.content?.parts
+      ?.map((part) => part.text || "")
+      .join("")
+      .trim();
     if (!text) {
       return json(502, { error: "Gemini response was empty." });
     }
