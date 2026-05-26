@@ -41,10 +41,17 @@ async function handler(event) {
   const geminiPayload = {
     contents: [{ parts: [{ text: String(prompt) }] }],
     systemInstruction: { parts: [{ text: String(sysInstruction) }] },
+    generationConfig: {
+      maxOutputTokens: Math.max(
+        128,
+        Math.min(1400, Number(payload.maxOutputTokens || (isVerify ? 32 : 700)))
+      ),
+    },
   };
 
   if (payload.schema) {
     geminiPayload.generationConfig = {
+      ...geminiPayload.generationConfig,
       responseMimeType: "application/json",
       responseSchema: payload.schema,
     };
