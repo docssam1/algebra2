@@ -148,6 +148,9 @@
                     <button onclick="app.openPrintModal()" class="bg-stone-800 hover:bg-stone-900 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors flex items-center gap-1.5 shadow-sm">
                         <span>🖨️ 성적표 및 시험지 인쇄</span>
                     </button>
+                    <button onclick="app.downloadCurrentReportHtml()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors flex items-center gap-1.5 shadow-sm">
+                        <span>💾 HTML 다운로드</span>
+                    </button>
                 </div>
             </div>
 
@@ -172,7 +175,7 @@
                 <button onclick="app.switchTab('test')" id="tab-btn-test" class="whitespace-nowrap py-3 px-5 font-semibold text-xs md:text-sm transition-all duration-150 tab-inactive">📝 문제 풀이 뷰어 (Interactive View)</button>
                 <button onclick="app.switchTab('omr')" id="tab-btn-omr" class="whitespace-nowrap py-3 px-5 font-semibold text-xs md:text-sm transition-all duration-150 tab-inactive">✅ OMR 입력 보드 (OMR Card)</button>
                 <button onclick="app.switchTab('analysis')" id="tab-btn-analysis" class="whitespace-nowrap py-3 px-5 font-semibold text-xs md:text-sm transition-all duration-150 tab-inactive">🎯 학부모 진단 리포트 (Diagnosis Report)</button>
-                <button onclick="app.switchTab('curriculum')" id="tab-btn-curriculum" class="whitespace-nowrap py-3 px-5 font-semibold text-xs md:text-sm transition-all duration-150 tab-inactive">🗓️ AI 로드맵 및 오답노트 (Roadmap Builder)</button>
+                <button onclick="app.switchTab('curriculum')" id="tab-btn-curriculum" class="whitespace-nowrap py-3 px-5 font-semibold text-xs md:text-sm transition-all duration-150 tab-inactive">🗓️ 로드맵 및 진단 생성 (Roadmap Builder)</button>
             </nav>
         </div>
     </header>
@@ -577,9 +580,9 @@
                 { id: 12, part: 1, domain: "Polynomials", q: "Factor completely using difference of cubes:<br><br>$$8x^3 - 27$$", a: "$(2x - 3)(4x^2 + 6x + 9)$", s: "1. Recognize form: $(2x)^3 - (3)^3$<br>2. Apply pattern $a^3 - b^3 = (a-b)(a^2 + ab + b^2)$<br>3. Substitute: $(2x - 3)(4x^2 + 6x + 9)$" },
                 { id: 13, part: 1, domain: "Polynomials", q: "Divide using synthetic division:<br><br>$$\\frac{2x^3 - 5x^2 - 3x + 7}{x - 3}$$", a: "$Q(x) = 2x^2 + x, R = 7$", s: "1. Set root $= 3$. Coeffs: $2, -5, -3, 7$<br>2. Drop 2, mult to get 6 $\\implies$ sum is 1, mult to get 3 $\\implies$ sum is 0, mult to get 0 $\\implies$ remainder is 7.<br>3. $Q(x) = 2x^2 + x, R = 7$" },
                 { id: 14, part: 1, domain: "Rational Expressions", q: "Simplify completely:<br><br>$$\\frac{x^2 - 9}{x^2 + 5x + 6} \\cdot \\frac{x + 2}{2x - 6}$$", a: "$\\frac{1}{2}$", s: "1. Factor all polynomials: $\\frac{(x-3)(x+3)}{(x+2)(x+3)} \\cdot \\frac{x+2}{2(x-3)}$<br>2. Cancel terms: $(x+3), (x+2), (x-3)$<br>3. Final evaluation: $\\frac{1}{2}$" },
-                { id: 15, part: 1, domain: "Rational Equations", q: "Solve for $x$, checking for extraneous roots:<br><br>$$\\frac{3}{x - 2} + \\frac{2}{x + 3} = \\frac{10}{x^2 + x - 6}$$", a: "$x = 1$", s: "1. Find LCD: $(x-2)(x+3)$<br>2. Clear denominators: $3(x+3) + 2(x-2) = 10$<br>3. Distribute: $3x + 9 + 2x - 4 = 10 \\implies 5x + 5 = 10$<br>4. Solve: $5x = 5 \\implies x = 1$. It doesn't violate domain restrict." },
+                { id: 15, part: 1, domain: "Rational Equations", q: "Solve for $x$, checking domain restrictions:<br><br>$$\\frac{3}{x - 2} + \\frac{2}{x + 3} = \\frac{10}{x^2 + x - 6}$$", a: "$x = 1$", s: "1. Find LCD: $(x-2)(x+3)$<br>2. Clear denominators: $3(x+3) + 2(x-2) = 10$<br>3. Distribute: $3x + 9 + 2x - 4 = 10 \\implies 5x + 5 = 10$<br>4. Solve: $5x = 5 \\implies x = 1$. It satisfies the domain restrictions." },
                 { id: 16, part: 1, domain: "Radicals", q: "Simplify the rational exponent expression completely:<br><br>$$(64x^6 y^{-3})^{2/3}$$", a: "$\\frac{16x^4}{y^2}$", s: "1. Distribute exponent: $(64)^{2/3} (x^6)^{2/3} (y^{-3})^{2/3}$<br>2. Calculate: $16 \\cdot x^4 \\cdot y^{-2}$<br>3. Format positive exponent: $\\frac{16x^4}{y^2}$" },
-                { id: 17, part: 1, domain: "Radical Equations", q: "Solve for $x$, checking for extraneous roots:<br><br>$$\\sqrt{2x + 7} - x = 2$$", a: "$x = 1$", s: "1. Isolate radical: $\\sqrt{2x+7} = x + 2$<br>2. Square both sides: $2x + 7 = x^2 + 4x + 4$<br>3. Set to zero: $x^2 + 2x - 3 = 0 \\implies (x+3)(x-1) = 0$<br>4. Test roots: $x=1$ checks out, but $x=-3$ yields $\\sqrt{1} - (-3) = 4 \\ne 2$ (extraneous). Result: $x=1$" },
+                { id: 17, part: 1, domain: "Radical Equations", q: "Solve for $x$, checking the original equation:<br><br>$$\\sqrt{2x + 7} - x = 2$$", a: "$x = 1$", s: "1. Isolate radical: $\\sqrt{2x+7} = x + 2$<br>2. Square both sides: $2x + 7 = x^2 + 4x + 4$<br>3. Set to zero: $x^2 + 2x - 3 = 0 \\implies (x+3)(x-1) = 0$<br>4. Test roots: $x=1$ checks out, but $x=-3$ does not satisfy the original equation. Result: $x=1$" },
                 { id: 18, part: 1, domain: "Functions", q: "Given $f(x) = 2x^2 - 3$ and $g(x) = x - 4$. Evaluate the composition $(f \\circ g)(x)$:", a: "$2x^2 - 16x + 29$", s: "1. Insert definition: $f(g(x)) = 2(x-4)^2 - 3$<br>2. Expand binomial: $2(x^2 - 8x + 16) - 3$<br>3. Distribute & simplify: $2x^2 - 16x + 32 - 3 = 2x^2 - 16x + 29$" },
                 { id: 19, part: 1, domain: "Functions", q: "Find the algebraic inverse function $f^{-1}(x)$ of:<br><br>$$f(x) = \\frac{3x - 1}{2}$$", a: "$f^{-1}(x) = \\frac{2x + 1}{3}$", s: "1. Replace with $y$: $y = \\frac{3x-1}{2}$<br>2. Swap $x$ and $y$: $x = \\frac{3y-1}{2}$<br>3. Multiply by 2: $2x = 3y - 1$<br>4. Add 1, divide by 3: $3y = 2x + 1 \\implies f^{-1}(x) = \\frac{2x+1}{3}$" },
                 { id: 20, part: 1, domain: "Logarithms", q: "Expand the logarithmic expression completely:<br><br>$$\\log_b \\left( \\frac{x^3 \\sqrt{y}}{z^2} \\right)$$", a: "$3\\log_b(x) + \\frac{1}{2}\\log_b(y) - 2\\log_b(z)$", s: "1. Apply quotient rule: $\\log_b(x^3\\sqrt{y}) - \\log_b(z^2)$<br>2. Apply product rule: $\\log_b(x^3) + \\log_b(y^{1/2}) - \\log_b(z^2)$<br>3. Apply power rule: $3\\log_b(x) + \\frac{1}{2}\\log_b(y) - 2\\log_b(z)$" },
@@ -591,7 +594,7 @@
                 { id: 24, part: 2, domain: "Quadratics", q: "The height $h(t)$ of a model rocket is modeled by $h(t) = -16t^2 + 64t + 80$. Find its maximum altitude and the total flight duration before impact.", a: "Max height: $144\\text{ ft}$ at $t = 2\\text{ s}$, total flight: $5\\text{ s}$", s: "1. Vertex time: $t = -\\frac{b}{2a} = -\\frac{64}{-32} = 2\\text{ seconds}$.<br>2. Calculate max altitude: $h(2) = -16(4) + 64(2) + 80 = 144\\text{ ft}$.<br>3. Impact: $-16(t^2 - 4t - 5) = 0 \\implies (t-5)(t+1) = 0 \\implies t = 5\\text{ seconds}$" },
                 { id: 25, part: 2, domain: "Exponents", q: "Calculate the continuous compounded interest value of a $5,000 principal at 4.5% interest rate for 8 years ($A = Pe^{rt}$):", a: "$7,166.65$", s: "1. Set variables: $P=5000, r=0.045, t=8$.<br>2. Multiply exponent: $rt = 0.36$.<br>3. Evaluate continuous formula: $A = 5000e^{0.36} \\approx 5000(1.433329)$<br>4. Result: $7,166.65$" },
                 { id: 26, part: 2, domain: "Exponents", q: "Solve for $t$ to the nearest hundredth:<br><br>$$300(1.08)^t = 1200$$", a: "$t \\approx 18.01$", s: "1. Isolate base: $1.08^t = 4$<br>2. Use natural logs: $t \\ln(1.08) = \\ln(4)$<br>3. Solve for $t$: $t = \\frac{\\ln(4)}{\\ln(1.08)}$<br>4. Result: $t \\approx 18.01$" },
-                { id: 27, part: 2, domain: "Logarithms", q: "Solve the log equation, verifying domain restrictions:<br><br>$$\\log_2(x) + \\log_2(x - 6) = 4$$", a: "$x = 8$", s: "1. Condense log expression: $\\log_2(x(x-6)) = 4$<br>2. Convert to exponent form: $x^2 - 6x = 2^4 = 16$<br>3. Solve quadratic: $x^2 - 6x - 16 = 0 \\implies (x-8)(x+2) = 0$<br>4. Verify domains: $x=8$ works. $x=-2$ causes negative logs, hence extraneous. Result is $x=8$" },
+                { id: 27, part: 2, domain: "Logarithms", q: "Solve the log equation, verifying domain restrictions:<br><br>$$\\log_2(x) + \\log_2(x - 6) = 4$$", a: "$x = 8$", s: "1. Condense log expression: $\\log_2(x(x-6)) = 4$<br>2. Convert to exponent form: $x^2 - 6x = 2^4 = 16$<br>3. Solve quadratic: $x^2 - 6x - 16 = 0 \\implies (x-8)(x+2) = 0$<br>4. Verify domains: $x=8$ works. $x=-2$ violates the log domain condition. Result is $x=8$" },
                 { id: 28, part: 2, domain: "Rational Expressions", q: "A working rate problem: Bob can paint a fence in 4 hours, and Alice can do it in 6 hours. Find their together time.", a: "2.4 hours", s: "1. Write rate equations: $\\frac{1}{4} + \\frac{1}{6} = \\frac{1}{T}$<br>2. Common denominator: $\\frac{3}{12} + \\frac{2}{12} = \\frac{5}{12}$<br>3. Solve for $T$: $T = \\frac{12}{5} = 2.4\\text{ hours}$" },
                 { id: 29, part: 2, domain: "Rational Expressions", q: "Given $y$ varies directly as $x^2$ and inversely as $z$. If $y=12$ when $x=3, z=6$. Find $y$ when $x=4, z=8$.", a: "$y = 16$", s: "1. Write variation equation: $y = k \\frac{x^2}{z}$<br>2. Plug values to find $k$: $12 = k \\frac{9}{6} \\implies 12 = 1.5k \\implies k=8$<br>3. Compute with new variables: $y = 8 \\frac{16}{8} = 16$" },
                 { id: 30, part: 2, domain: "Coordinate Geometry", q: "State all transformations needed to map the parent absolute value function $f(x) = |x|$ onto:<br><br>$$g(x) = -2|x - 3| + 5$$", a: "Horizontal shift right by 3, vertical stretch by 2, reflection across the x-axis, vertical shift up by 5", s: "1. Term $(x-3)$: shift right 3.<br>2. Value $2$: vertical stretch factor 2.<br>3. Negative sign: reflect over x-axis.<br>4. Constant $+5$: shift up 5." },
@@ -639,7 +642,7 @@
                 { us: "Linear Systems / Matrices", topic: "3원 연립방정식, 행렬, 선형계획법", kr: "공통수학 (연립방정식, 행렬)", grade: "고1" },
                 { us: "Quadratics & Complex", topic: "복소수 체계, 이차함수 Vertex Form, 판별식", kr: "공통수학 1", grade: "고1" },
                 { us: "Polynomials / Binomial", topic: "조립제법, 나머지정리, 세제곱 인수분해, 이항계수", kr: "공통수학 1 / 확률과 통계", grade: "고1 / 고2" },
-                { us: "Rational & Radical Equations", topic: "번분수식 간소화, 무연근(Extraneous) 감지, 일률", kr: "공통수학 2", grade: "고1" },
+                { us: "Rational & Radical Equations", topic: "분수방정식 간소화, 정의역 조건 확인, 해 검산", kr: "공통수학 2", grade: "고1" },
                 { us: "Exponents & Logarithms", topic: "지수/로그 공식, 상용로그, 연속 복리($Pe^{rt}$)", kr: "수학 I", grade: "고2" },
                 { us: "Conic Sections & Discrete", topic: "원의 방정식 유도, 등차/등비수열, 무한등비급수", kr: "공통수학 2 / 수학 I", grade: "고1 / 고2" },
                 { us: "Trigonometric Graphs", topic: "호도법, Unit Circle 특수각, 삼각 파형 Amplitude/Period", kr: "수학 I", grade: "고2" },
@@ -651,7 +654,7 @@
                 { id: 3, title: "3회차: Completing Complex Roots & Quadratics", desc: "이차함수 완전제곱식 Vertex Form 변환 기계화 및 $i^2 = -1$ 부호 오류 소탕" },
                 { id: 4, title: "4회차: Polynomial Dividends & Binomial Theorem", desc: "세세한 조립제법 계수 0 삽입 주의 및 Binomial expansion 복합 항 계수 유도법" },
                 { id: 5, title: "5회차: [중간 점검] Half-Length Placement Mock-Test", desc: "1~4회차 학습 범위 취약 보강 및 오차율 중간 튜닝용 20문항 성적 리포트 발행" },
-                { id: 6, title: "6회차: Extraneous Elimination of Rational & Radicals", desc: "유리/무리방정식 풀이 후 분모가 0이 되는 조건 및 무연근(Extraneous) 유무 판별 정밀 습관화" },
+                { id: 6, title: "6회차: Rational & Radical Equation Conditions", desc: "유리/무리방정식 풀이 후 정의역 조건, 분모가 0이 되는 값 제외, 해 검산 절차를 정밀 습관화" },
                 { id: 7, title: "7회차: Exponents, Continuous Compounding & Log Rules", desc: "지수/로그 밑변환 양방향 변환 속도 극대화 및 실생활 연속 복리 $A = Pe^{rt}$ 수식 구성력 증강" },
                 { id: 8, title: "8회차: Trigonometric Waves & Periodic Graphs", desc: "Radian/Degree 즉각 매칭, Unit Circle 사분면 삼각비 부호 결정 및 진폭/주기 변환 공식 훈련" },
                 { id: 9, title: "9회차: Conic Equations & Infinite Geometric Sums", desc: "원의 방정식 유도 기하학 뼈대 정립 및 무한등비급수 수렴 조건 $|r| < 1$ 식별 훈련" },
@@ -1347,10 +1350,10 @@
                 if (!badge) return;
 
                 if (activeKey) {
-                    badge.textContent = "?? ??";
+                    badge.textContent = "키 저장됨";
                     badge.className = "text-[10px] bg-stone-100 text-stone-700 px-2 py-0.5 rounded-md font-bold";
                 } else {
-                    badge.textContent = "API Key ??";
+                    badge.textContent = "API Key 필요";
                     badge.className = "text-[10px] bg-rose-100 text-rose-800 px-2 py-0.5 rounded-md font-bold";
                 }
             },
@@ -1360,13 +1363,13 @@
                 if (!badge) return;
 
                 const styles = {
-                    idle: ["?? ??", "text-[10px] bg-stone-100 text-stone-700 px-2 py-0.5 rounded-md font-bold"],
-                    checking: ["?? ?? ?...", "text-[10px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-md font-bold animate-pulse"],
-                    success: ["?? ?? ??", "text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md font-bold"],
-                    auth: ["?? ?? (401/403)", "text-[10px] bg-rose-100 text-rose-800 px-2 py-0.5 rounded-md font-bold"],
-                    quota: ["??/?? ?? (429)", "text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md font-bold"],
-                    request: ["?? ?? ?? (400)", "text-[10px] bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-md font-bold"],
-                    network: ["????/CORS ??", "text-[10px] bg-violet-100 text-violet-800 px-2 py-0.5 rounded-md font-bold"]
+                    idle: ["키 저장됨", "text-[10px] bg-stone-100 text-stone-700 px-2 py-0.5 rounded-md font-bold"],
+                    checking: ["연결 확인 중...", "text-[10px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-md font-bold animate-pulse"],
+                    success: ["AI 키 정상 연결", "text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md font-bold"],
+                    auth: ["인증 오류 (401/403)", "text-[10px] bg-rose-100 text-rose-800 px-2 py-0.5 rounded-md font-bold"],
+                    quota: ["쿼터 제한 (429)", "text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md font-bold"],
+                    request: ["요청 형식 오류 (400)", "text-[10px] bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-md font-bold"],
+                    network: ["네트워크/CORS 오류", "text-[10px] bg-violet-100 text-violet-800 px-2 py-0.5 rounded-md font-bold"]
                 };
 
                 const [text, className] = styles[state] || styles.idle;
@@ -1433,7 +1436,7 @@
                                 return result.text;
                             }
                             this.setApiStatusBadge('request');
-                            throw new Error('AI ?? ??? ???? ????.');
+                            throw new Error('AI 응답 본문이 비어 있습니다.');
                         }
 
                         if (response.status === 401 || response.status === 403) {
@@ -1446,7 +1449,7 @@
                             this.setApiStatusBadge('network');
                         }
 
-                        let message = 'AI ??? ??????.';
+                        let message = 'AI 요청에 실패했습니다.';
                         try {
                             const errorResult = await response.json();
                             message = errorResult?.error || message;
@@ -1459,7 +1462,7 @@
                     }
                 }
                 this.setApiStatusBadge('quota');
-                throw new Error('???? ?? ??? ??????. ?? ? ?? ??? ???.');
+                throw new Error('일시적으로 요청이 실패했습니다. 잠시 후 다시 시도해 주세요.');
             },
 
             // AI ?? ?? ?? ?????
@@ -1558,28 +1561,31 @@
 
                 const currentQ = appData.questions.find(x => x.id === this.currentQuestion);
                 const sysPrompt = `You are a world-class pedagogically precise AI Math Tutor. Your objective is to assist high school freshmen preparing for their US Algebra 2 Placement Test.
-Provide extremely clear mathematical proofs with Zero mistakes.
+Provide extremely clear mathematical proofs with zero mistakes.
 Ensure all mathematical variables, formulas, and divisions are formatted perfectly in MathJax LaTeX.
 Use standard single dollar signs ($) for inline formulas like $\\frac{a}{b}$ and double dollar signs ($$) for block formulas.
-Output must be in Korean but retain official US mathematical naming conventions (e.g., Vertex form, Extraneous roots, Completing the square).
+Output Korean and English together when useful, but keep Korean terminology aligned with the Korean math curriculum.
+For domain-invalid solutions, Korean output must use "해가 될 수 없는 값(분모=0)" or "정의역 조건 불만족 해".
+If English is required, write "solution that violates the domain condition".
+Do not output markdown bold markers such as **text**. Use short paragraphs, numbered steps, and MathJax only.
 Current Problem Context:
 - Question ${currentQ.id} [${currentQ.domain}]: ${currentQ.q}
 - Solution: ${currentQ.s}
 - Answer: ${currentQ.a}
-If the student asks for '쌍둥이 변형 문제', write a completely new problem of identical difficulty and mathematical structure, then provide its answer and steps clearly labeled.`;
+If the student asks for a twin or variant problem, write a completely new problem of identical difficulty and mathematical structure, then provide its answer and steps clearly labeled.`;
 
                 try {
                     const reply = await this.executeGeminiCall(query, sysPrompt);
                     
                     const aiBubble = document.createElement('div');
                     aiBubble.className = "bg-indigo-50 border border-indigo-100 p-3 rounded-xl max-w-[85%] mr-auto mb-2 text-xs";
-                    aiBubble.innerHTML = `<b>✨ AI Tutor:</b><br><br>${reply}`;
+                    aiBubble.innerHTML = `<b>AI Tutor:</b><br><br>${this.formatAiHtml(reply)}`;
 
                     // 쌍둥이 변형 문제인 경우, 오답 클립보드에 담기 버튼 동적 렌더링
-                    if (query.includes("쌍둥이") || query.includes("유사")) {
+                    if (query.includes("쌍둥이") || query.includes("변형") || query.includes("유사") || query.toLowerCase().includes("variant")) {
                         const saveBtn = document.createElement('button');
                         saveBtn.className = "mt-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-2 py-1 rounded text-[10px] block transition-all shadow-sm";
-                        saveBtn.textContent = "💾 이 유사문항 오답노트에 추가 저장하기";
+                        saveBtn.textContent = "이 변형 문제를 오답노트에 저장";
                         saveBtn.onclick = () => this.saveVariantToLocal(currentQ.id, reply);
                         aiBubble.appendChild(saveBtn);
                     }
@@ -1598,6 +1604,19 @@ If the student asks for '쌍둥이 변형 문제', write a completely new proble
                     loader.classList.add('hidden');
                     chatLogs.scrollTop = chatLogs.scrollHeight;
                 }
+            },
+
+            formatAiHtml(text) {
+                const escaped = String(text || "")
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;");
+
+                return escaped
+                    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                    .replace(/^#{1,6}\s*(.*)$/gm, "<strong>$1</strong>")
+                    .replace(/\n{2,}/g, "<br><br>")
+                    .replace(/\n/g, "<br>");
             },
 
             saveVariantToLocal(parentQId, variantContent) {
@@ -1673,10 +1692,13 @@ If the student asks for '쌍둥이 변형 문제', write a completely new proble
 
                 const sysPrompt = `You are a high school mathematics curriculum design director. Based on the selected weakness areas: ${checkedDomains.join(', ')}, rewrite a highly detailed ${requestedSessions}-session prep curriculum.
 Requirements:
-1. Prioritize these checked domains deeply. Make sure they have concrete mathematical topics like Vertex Form conversions, Complex conjugates, Unit circles, Extraneous root detection with standard fraction formulas in LaTeX format.
+1. Prioritize these checked domains deeply. Make sure they have concrete mathematical topics like Vertex Form conversions, Complex conjugates, Unit circles, domain-condition checks for rational equations, and standard fraction formulas in LaTeX format.
 2. Each session is exactly ${requestedMinutes} minutes.
 3. Ensure there is a midterm simulated evaluation around the middle session, and a final placement examination at the last session.
-4. Output MUST be a clean JSON list matching this schema exactly:
+4. Korean curriculum terminology rule: use "해가 될 수 없는 값(분모=0)" or "정의역 조건 불만족 해" for domain-invalid solutions.
+5. Include both Korean and English when useful, but keep the returned title and desc fields in polished Korean.
+6. Do not use markdown bold markers such as **text**.
+7. Output MUST be a clean JSON list matching this schema exactly:
 {
   "curriculum": [
     { "id": 1, "title": "Session 1 Topic in Korean", "desc": "Detailed bullet-point objectives in Korean" },
@@ -1726,6 +1748,25 @@ Requirements:
 
             resetToStandardCurriculum() {
                 this.renderStandardCurriculum();
+            },
+
+            downloadCurrentReportHtml() {
+                const reportNode = document.getElementById('tab-analysis');
+                const studentName = (this.activeStudent && this.activeStudent.name) ? this.activeStudent.name : "student";
+                if (!reportNode) {
+                    alert("리포트 영역을 찾을 수 없습니다.");
+                    return;
+                }
+
+                const html = `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${studentName}_diagnostic_report</title><style>body{font-family:'Noto Sans KR',Arial,sans-serif;padding:20px;color:#111827}table{border-collapse:collapse;width:100%}th,td{border:1px solid #e5e7eb;padding:8px;text-align:left}.no-print,button{display:none!important}</style></head><body>${reportNode.innerHTML}</body></html>`;
+                const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `${studentName}_diagnostic_report.html`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
             },
 
             // 프린트 모달 컨트롤
