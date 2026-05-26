@@ -1473,23 +1473,47 @@
             getKhanConceptUrl(question) {
                 const domain = String(question?.domain || "").toLowerCase();
                 const tier = this.getDifficultyTier(question);
-                const baseByTier = {
-                    basic: "https://www.khanacademy.org/math/algebra",
-                    standard: "https://www.khanacademy.org/math/algebra2",
-                    advanced: "https://www.khanacademy.org/math/precalculus"
+                const directVideos = {
+                    linear_basic: "https://www.khanacademy.org/math/algebra/one-variable-linear-equations/v/constructing-and-interpreting-linear-functions",
+                    linear_standard: "https://www.khanacademy.org/math/algebra2/x2ec2f6f830c9fb89:transformations/x2ec2f6f830c9fb89:trans-all-together/v/shifting-and-reflecting-functions",
+                    linear_advanced: "https://www.khanacademy.org/math/precalculus/x9e81a4f98389efdf:conic-sections/v/introduction-to-conic-sections",
+                    systems_basic: "https://www.khanacademy.org/math/algebra/two-var-linear-equations/v/substitution-method",
+                    systems_standard: "https://www.khanacademy.org/math/algebra2/x2ec2f6f830c9fb89:systems/v/graphing-systems-of-equations",
+                    systems_advanced: "https://www.khanacademy.org/math/precalculus/x9e81a4f98389efdf:systems/v/three-variable-linear-system",
+                    quadratics_basic: "https://www.khanacademy.org/math/algebra/quadratics/v/solving-quadratic-equations-by-factoring",
+                    quadratics_standard: "https://www.khanacademy.org/math/algebra2/quadratics/v/solving-quadratics-by-completing-the-square",
+                    quadratics_advanced: "https://www.khanacademy.org/math/precalculus/x9e81a4f98389efdf:complex-numbers/v/complex-number-introduction",
+                    poly_basic: "https://www.khanacademy.org/math/algebra/polynomial-factorization/v/factoring-quadratics-intro",
+                    poly_standard: "https://www.khanacademy.org/math/algebra2/polynomial-arithmetic/v/adding-and-subtracting-polynomials",
+                    poly_advanced: "https://www.khanacademy.org/math/precalculus/x9e81a4f98389efdf:polynomials/v/polynomial-division",
+                    rational_basic: "https://www.khanacademy.org/math/algebra/rational-expressions-equations-and-functions/v/simplifying-rational-expressions",
+                    rational_standard: "https://www.khanacademy.org/math/algebra2/rational-exponents-and-radicals/v/rational-exponents",
+                    rational_advanced: "https://www.khanacademy.org/math/precalculus/x9e81a4f98389efdf:rational-functions/v/asymptotes-of-rational-functions",
+                    exp_basic: "https://www.khanacademy.org/math/algebra/exponential-growth-decay/v/exponential-growth-and-decay-word-problems",
+                    exp_standard: "https://www.khanacademy.org/math/algebra2/exponential-and-logarithmic-functions/v/logarithms",
+                    exp_advanced: "https://www.khanacademy.org/math/precalculus/x9e81a4f98389efdf:exponential-and-logarithmic-functions/v/properties-of-logarithms",
+                    trig_basic: "https://www.khanacademy.org/math/geometry/hs-geo-trig/v/trigonometric-ratios-in-right-triangles",
+                    trig_standard: "https://www.khanacademy.org/math/algebra2/trigonometry/v/unit-circle-introduction",
+                    trig_advanced: "https://www.khanacademy.org/math/precalculus/x9e81a4f98389efdf:trig/v/graphs-of-sine-and-cosine",
+                    stats_basic: "https://www.khanacademy.org/math/statistics-probability/random-variables-stats-library/v/random-variables-introduction",
+                    stats_standard: "https://www.khanacademy.org/math/statistics-probability/v/mean-and-median",
+                    stats_advanced: "https://www.khanacademy.org/math/statistics-probability/probability-library/v/independent-and-dependent-events",
+                    function_basic: "https://www.khanacademy.org/math/algebra/functions/v/functions-and-function-notation",
+                    function_standard: "https://www.khanacademy.org/math/algebra2/functions/v/composite-functions",
+                    function_advanced: "https://www.khanacademy.org/math/precalculus/x9e81a4f98389efdf:functions/v/inverse-functions"
                 };
-                const base = baseByTier[tier] || baseByTier.standard;
 
-                if (domain.includes("linear") || domain.includes("coordinate")) return `${base}/x2f8bb11595b61c86:linear-equations-and-inequalities`;
-                if (domain.includes("system") || domain.includes("matri")) return `${base}/x2f8bb11595b61c86:systems-of-equations`;
-                if (domain.includes("quadratic") || domain.includes("complex")) return `${base}/x2f8bb11595b61c86:quadratics`;
-                if (domain.includes("polynomial") || domain.includes("binomial")) return `${base}/x2f8bb11595b61c86:polynomial-arithmetic`;
-                if (domain.includes("rational") || domain.includes("radical")) return `${base}/x2f8bb11595b61c86:rational-exponents-and-radicals`;
-                if (domain.includes("exponent") || domain.includes("log")) return `${base}/x2f8bb11595b61c86:exponential-and-logarithmic-functions`;
-                if (domain.includes("trigon")) return `${base}/trigonometry`;
-                if (domain.includes("discrete") || domain.includes("stats") || domain.includes("probability")) return "https://www.khanacademy.org/math/statistics-probability";
-                if (domain.includes("function")) return `${base}/x2f8bb11595b61c86:functions`;
-                return base;
+                const suffix = tier === "basic" ? "basic" : tier === "advanced" ? "advanced" : "standard";
+                if (domain.includes("linear") || domain.includes("coordinate")) return directVideos[`linear_${suffix}`];
+                if (domain.includes("system") || domain.includes("matri")) return directVideos[`systems_${suffix}`];
+                if (domain.includes("quadratic") || domain.includes("complex")) return directVideos[`quadratics_${suffix}`];
+                if (domain.includes("polynomial") || domain.includes("binomial")) return directVideos[`poly_${suffix}`];
+                if (domain.includes("rational") || domain.includes("radical")) return directVideos[`rational_${suffix}`];
+                if (domain.includes("exponent") || domain.includes("log")) return directVideos[`exp_${suffix}`];
+                if (domain.includes("trigon")) return directVideos[`trig_${suffix}`];
+                if (domain.includes("discrete") || domain.includes("stats") || domain.includes("probability")) return directVideos[`stats_${suffix}`];
+                if (domain.includes("function")) return directVideos[`function_${suffix}`];
+                return "https://www.khanacademy.org/math/algebra2";
             },
 
             openConceptVideo() {
