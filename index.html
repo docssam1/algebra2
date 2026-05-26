@@ -288,6 +288,7 @@
                             <button onclick="app.sendPresetQuestion('이 문제의 대수학 기본 원리와 공식을 증명해주고 유도 규칙을 보여줘.')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-900 text-[10px] px-2.5 py-1 rounded-md font-semibold transition-all">🔍 공식 유도 및 역추적</button>
                             <button onclick="app.sendPresetQuestion('이 수학 문제에서 오답이 나기 쉬운 부주의 실수 경고를 알려줘.')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-900 text-[10px] px-2.5 py-1 rounded-md font-semibold transition-all">⚠️ 함정 포인트 & 팁</button>
                             <button onclick="app.sendPresetQuestion('이 문항과 똑같은 논리 구조를 가진 쌍둥이 유사 변형 문제를 제작해줘.')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-900 text-[10px] px-2.5 py-1 rounded-md font-semibold transition-all">📝 쌍둥이 변형 문제 출제</button>
+                            <button onclick="app.openConceptVideo()" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-900 text-[10px] px-2.5 py-1 rounded-md font-semibold transition-all">🎬 개념 영상 보기</button>
                         </div>
 
                         <!-- 커스텀 질문 인풋 -->
@@ -973,6 +974,35 @@
                     }
                 });
 
+                const lowDifficultyWrong = this.omrMarks
+                    .map((status, idx) => ({ status, qId: idx + 1 }))
+                    .filter(item => item.status === false && item.qId <= 15)
+                    .slice(0, 8)
+                    .map(item => {
+                        const q = appData.questions[item.qId - 1];
+                        return { qId: item.qId, domain: q?.domain || "Unknown Domain" };
+                    });
+
+                const lowDiffHtmlKo = lowDifficultyWrong.length > 0
+                    ? `<div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mt-4">
+                        <h4 class="font-bold text-amber-900 text-xs mb-2">⚠️ 저난도 오답 경고 (기초 개념 누수 가능성)</h4>
+                        <ul class="list-disc pl-4 text-xs space-y-1 text-stone-700">
+                            ${lowDifficultyWrong.map(x => `<li>Q${x.qId} · ${x.domain}</li>`).join('')}
+                        </ul>
+                        <p class="text-[11px] text-amber-900/80 mt-2">저난도 문항 오답은 Algebra 2 자체보다 선수개념 결손 신호일 수 있습니다.</p>
+                    </div>`
+                    : '';
+
+                const lowDiffHtmlEn = lowDifficultyWrong.length > 0
+                    ? `<div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mt-4">
+                        <h4 class="font-bold text-amber-900 text-xs mb-2">⚠️ Low-Difficulty Miss Alert</h4>
+                        <ul class="list-disc pl-4 text-xs space-y-1 text-stone-700">
+                            ${lowDifficultyWrong.map(x => `<li>Q${x.qId} · ${x.domain}</li>`).join('')}
+                        </ul>
+                        <p class="text-[11px] text-amber-900/80 mt-2">Repeated misses on easier items often indicate prerequisite gaps before Algebra 2 content.</p>
+                    </div>`
+                    : '';
+
                 // Prerequisite 결손 도메인 연립식 분석
                 let prerequisiteHTML = "";
                 if (weakGroups.length > 0) {
@@ -1017,6 +1047,7 @@
                                 </div>
                             </div>
 
+                            ${lowDiffHtmlKo}
                             ${prerequisiteHTML}
                         </div>
                     `;
@@ -1040,6 +1071,7 @@
                                 </div>
                             </div>
 
+                            ${lowDiffHtmlEn}
                             ${prerequisiteHTML ? prerequisiteHTML.replace(/🚨 Prerequisite 결손 역추적 소견서/g, "🚨 Prerequisite Gap Track Report").replace(/선수 과정 결손 진단/g, "Diagnostics of Pre-academic gaps") : ""}
                         </div>
                     `;
@@ -1280,6 +1312,7 @@
             saveStudentDb() {
                 localStorage.setItem('algebra2_placement_db', JSON.stringify(this.studentDb));
             },
+
             async saveApiKey() {
                 const key = document.getElementById('gemini-api-key').value.trim();
                 localStorage.setItem('gemini_api_key_temp', key);
@@ -1297,8 +1330,9 @@
             getApiKey() {
                 const temp = localStorage.getItem('gemini_api_key_temp');
                 if (temp) return temp;
-                return this.decryptKey(OB_KEY); // 난독화 복호화 후 반환
+                return this.decryptKey(OB_KEY);
             },
+
             updateApiKeyStatusBadge() {
                 const activeKey = this.getApiKey();
                 const badge = document.getElementById('api-status-badge');
@@ -1331,6 +1365,7 @@
                 badge.textContent = text;
                 badge.className = className;
             },
+
             async verifyGeminiConnection() {
                 this.setApiStatusBadge('checking');
                 try {
@@ -1360,7 +1395,6 @@
                 return false;
             },
 
-            // Gemini API ??? ?? ??
             async executeGeminiCall(prompt, sysInstruction, schema = null) {
                 let retryDelay = 1000;
                 for (let attempt = 0; attempt < 3; attempt++) {
@@ -1426,6 +1460,42 @@
 
             sendPresetQuestion(text) {
                 this.processTutorPipeline(text);
+            },
+
+            getDifficultyTier(question) {
+                const part = Number(question?.part || 1);
+                const qId = Number(question?.id || 1);
+                if (part === 1 && qId <= 12) return 'basic';
+                if (part === 2 && qId >= 31) return 'advanced';
+                return 'standard';
+            },
+
+            getKhanConceptUrl(question) {
+                const domain = String(question?.domain || "").toLowerCase();
+                const tier = this.getDifficultyTier(question);
+                const baseByTier = {
+                    basic: "https://www.khanacademy.org/math/algebra",
+                    standard: "https://www.khanacademy.org/math/algebra2",
+                    advanced: "https://www.khanacademy.org/math/precalculus"
+                };
+                const base = baseByTier[tier] || baseByTier.standard;
+
+                if (domain.includes("linear") || domain.includes("coordinate")) return `${base}/x2f8bb11595b61c86:linear-equations-and-inequalities`;
+                if (domain.includes("system") || domain.includes("matri")) return `${base}/x2f8bb11595b61c86:systems-of-equations`;
+                if (domain.includes("quadratic") || domain.includes("complex")) return `${base}/x2f8bb11595b61c86:quadratics`;
+                if (domain.includes("polynomial") || domain.includes("binomial")) return `${base}/x2f8bb11595b61c86:polynomial-arithmetic`;
+                if (domain.includes("rational") || domain.includes("radical")) return `${base}/x2f8bb11595b61c86:rational-exponents-and-radicals`;
+                if (domain.includes("exponent") || domain.includes("log")) return `${base}/x2f8bb11595b61c86:exponential-and-logarithmic-functions`;
+                if (domain.includes("trigon")) return `${base}/trigonometry`;
+                if (domain.includes("discrete") || domain.includes("stats") || domain.includes("probability")) return "https://www.khanacademy.org/math/statistics-probability";
+                if (domain.includes("function")) return `${base}/x2f8bb11595b61c86:functions`;
+                return base;
+            },
+
+            openConceptVideo() {
+                const q = appData.questions.find(x => x.id === this.currentQuestion);
+                const targetUrl = this.getKhanConceptUrl(q);
+                window.open(targetUrl, '_blank', 'noopener,noreferrer');
             },
 
             sendCustomQuestion() {
