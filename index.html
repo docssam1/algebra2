@@ -1484,58 +1484,33 @@
                 this.processTutorPipeline(text);
             },
 
-            getDifficultyTier(question) {
-                const part = Number(question?.part || 1);
-                const qId = Number(question?.id || 1);
-                if (part === 1 && qId <= 12) return 'basic';
-                if (part === 2 && qId >= 31) return 'advanced';
-                return 'standard';
-            },
-
             getKhanConceptUrl(question) {
-                const domain = String(question?.domain || "").toLowerCase();
-                const tier = this.getDifficultyTier(question);
-                const directVideos = {
-                    linear_basic: "https://www.khanacademy.org/math/algebra/one-variable-linear-equations/v/constructing-and-interpreting-linear-functions",
-                    linear_standard: "https://www.khanacademy.org/math/algebra2/x2ec2f6f830c9fb89:transformations/x2ec2f6f830c9fb89:trans-all-together/v/shifting-and-reflecting-functions",
-                    linear_advanced: "https://www.khanacademy.org/math/precalculus/x9e81a4f98389efdf:conic-sections/v/introduction-to-conic-sections",
-                    systems_basic: "https://www.khanacademy.org/math/algebra/two-var-linear-equations/v/substitution-method",
-                    systems_standard: "https://www.khanacademy.org/math/algebra2/x2ec2f6f830c9fb89:systems/v/graphing-systems-of-equations",
-                    systems_advanced: "https://www.khanacademy.org/math/precalculus/x9e81a4f98389efdf:systems/v/three-variable-linear-system",
-                    quadratics_basic: "https://www.khanacademy.org/math/algebra/quadratics/v/solving-quadratic-equations-by-factoring",
-                    quadratics_standard: "https://www.khanacademy.org/math/algebra2/quadratics/v/solving-quadratics-by-completing-the-square",
-                    quadratics_advanced: "https://www.khanacademy.org/math/precalculus/x9e81a4f98389efdf:complex-numbers/v/complex-number-introduction",
-                    poly_basic: "https://www.khanacademy.org/math/algebra/polynomial-factorization/v/factoring-quadratics-intro",
-                    poly_standard: "https://www.khanacademy.org/math/algebra2/polynomial-arithmetic/v/adding-and-subtracting-polynomials",
-                    poly_advanced: "https://www.khanacademy.org/math/precalculus/x9e81a4f98389efdf:polynomials/v/polynomial-division",
-                    rational_basic: "https://www.khanacademy.org/math/algebra/rational-expressions-equations-and-functions/v/simplifying-rational-expressions",
-                    rational_standard: "https://www.khanacademy.org/math/algebra2/rational-exponents-and-radicals/v/rational-exponents",
-                    rational_advanced: "https://www.khanacademy.org/math/precalculus/x9e81a4f98389efdf:rational-functions/v/asymptotes-of-rational-functions",
-                    exp_basic: "https://www.khanacademy.org/math/algebra/exponential-growth-decay/v/exponential-growth-and-decay-word-problems",
-                    exp_standard: "https://www.khanacademy.org/math/algebra2/exponential-and-logarithmic-functions/v/logarithms",
-                    exp_advanced: "https://www.khanacademy.org/math/precalculus/x9e81a4f98389efdf:exponential-and-logarithmic-functions/v/properties-of-logarithms",
-                    trig_basic: "https://www.khanacademy.org/math/geometry/hs-geo-trig/v/trigonometric-ratios-in-right-triangles",
-                    trig_standard: "https://www.khanacademy.org/math/algebra2/trigonometry/v/unit-circle-introduction",
-                    trig_advanced: "https://www.khanacademy.org/math/precalculus/x9e81a4f98389efdf:trig/v/graphs-of-sine-and-cosine",
-                    stats_basic: "https://www.khanacademy.org/math/statistics-probability/random-variables-stats-library/v/random-variables-introduction",
-                    stats_standard: "https://www.khanacademy.org/math/statistics-probability/v/mean-and-median",
-                    stats_advanced: "https://www.khanacademy.org/math/statistics-probability/probability-library/v/independent-and-dependent-events",
-                    function_basic: "https://www.khanacademy.org/math/algebra/functions/v/functions-and-function-notation",
-                    function_standard: "https://www.khanacademy.org/math/algebra2/functions/v/composite-functions",
-                    function_advanced: "https://www.khanacademy.org/math/precalculus/x9e81a4f98389efdf:functions/v/inverse-functions"
-                };
+                const qId = Number(question?.id || 0);
+                const mapByRange = [
+                    { start: 1, end: 2, url: "https://www.khanacademy.org/math/algebra2/x2ec2e6f8:quadratics/x2ec2e6f8:solving-quadratics-using-factoring/v/factoring-quadratic-expressions" },
+                    { start: 3, end: 4, url: "https://www.khanacademy.org/math/algebra2/x2ec2e6f8:quadratics/x2ec2e6f8:solving-quadratics-using-factoring/v/factoring-quadratics-by-grouping" },
+                    { start: 5, end: 6, url: "https://www.khanacademy.org/math/algebra2/x2ec2e6f8:quadratics/x2ec2e6f8:quadratics-features/v/finding-the-vertex-of-a-parabola-in-standard-form" },
+                    { start: 7, end: 8, url: "https://www.khanacademy.org/math/algebra2/x2ec2e6f8:quadratics/x2ec2e6f8:quadratics-features/v/quadratic-word-problem-ball" },
+                    { start: 9, end: 10, url: "https://www.khanacademy.org/math/algebra2/x2ec2e6f8:complex-numbers/x2ec2e6f8:complex-numbers-intro/v/adding-and-subtracting-complex-numbers" },
+                    { start: 11, end: 12, url: "https://www.khanacademy.org/math/algebra2/x2ec2e6f8:complex-numbers/x2ec2e6f8:complex-numbers-intro/v/multiplying-complex-numbers" },
+                    { start: 13, end: 14, url: "https://www.khanacademy.org/math/algebra2/x2ec2e6f8:polynomials/x2ec2e6f8:polynomial-basics/v/adding-and-subtracting-polynomials" },
+                    { start: 15, end: 16, url: "https://www.khanacademy.org/math/algebra2/x2ec2e6f8:polynomials/x2ec2e6f8:polynomial-basics/v/multiplying-polynomials" },
+                    { start: 17, end: 18, url: "https://www.khanacademy.org/math/algebra2/x2ec2e6f8:polynomials/x2ec2e6f8:polynomial-div-remainder/v/polynomial-division" },
+                    { start: 19, end: 20, url: "https://www.khanacademy.org/math/algebra2/x2ec2e6f8:polynomials/x2ec2e6f8:polynomial-div-remainder/v/synthetic-division" },
+                    { start: 21, end: 22, url: "https://www.khanacademy.org/math/algebra2/x2ec2e6f8:rational-expressions-equations/x2ec2e6f8:rational-expressions-intro/v/simplifying-rational-expressions" },
+                    { start: 23, end: 24, url: "https://www.khanacademy.org/math/algebra2/x2ec2e6f8:rational-expressions-equations/x2ec2e6f8:rational-expressions-intro/v/multiplying-and-dividing-rational-expressions" },
+                    { start: 25, end: 26, url: "https://www.khanacademy.org/math/algebra2/x2ec2e6f8:rational-expressions-equations/x2ec2e6f8:solving-rational-equations/v/solving-rational-equations" },
+                    { start: 27, end: 28, url: "https://www.khanacademy.org/math/algebra2/x2ec2e6f8:rational-expressions-equations/x2ec2e6f8:solving-rational-equations/v/extraneous-solutions-to-rational-equations" },
+                    { start: 29, end: 30, url: "https://www.khanacademy.org/math/algebra2/x2ec2e6f8:exponential-log-functions/x2ec2e6f8:logarithms/v/logarithm-properties" },
+                    { start: 31, end: 32, url: "https://www.khanacademy.org/math/algebra2/x2ec2e6f8:exponential-log-functions/x2ec2e6f8:logarithms/v/solving-logarithmic-equations" },
+                    { start: 33, end: 34, url: "https://www.khanacademy.org/math/algebra2/x2ec2e6f8:trig-functions/x2ec2e6f8:unit-circle/v/radians-and-degrees" },
+                    { start: 35, end: 36, url: "https://www.khanacademy.org/math/algebra2/x2ec2e6f8:trig-functions/x2ec2e6f8:unit-circle/v/unit-circle-definition-of-trig-functions" },
+                    { start: 37, end: 38, url: "https://www.khanacademy.org/math/algebra2/x2ec2e6f8:functions-graphs/x2ec2e6f8:transforming-functions/v/shifting-functions" },
+                    { start: 39, end: 40, url: "https://www.khanacademy.org/math/algebra2/x2ec2e6f8:functions-graphs/x2ec2e6f8:transforming-functions/v/stretching-and-compressing-functions" }
+                ];
 
-                const suffix = tier === "basic" ? "basic" : tier === "advanced" ? "advanced" : "standard";
-                if (domain.includes("linear") || domain.includes("coordinate")) return directVideos[`linear_${suffix}`];
-                if (domain.includes("system") || domain.includes("matri")) return directVideos[`systems_${suffix}`];
-                if (domain.includes("quadratic") || domain.includes("complex")) return directVideos[`quadratics_${suffix}`];
-                if (domain.includes("polynomial") || domain.includes("binomial")) return directVideos[`poly_${suffix}`];
-                if (domain.includes("rational") || domain.includes("radical")) return directVideos[`rational_${suffix}`];
-                if (domain.includes("exponent") || domain.includes("log")) return directVideos[`exp_${suffix}`];
-                if (domain.includes("trigon")) return directVideos[`trig_${suffix}`];
-                if (domain.includes("discrete") || domain.includes("stats") || domain.includes("probability")) return directVideos[`stats_${suffix}`];
-                if (domain.includes("function")) return directVideos[`function_${suffix}`];
-                return "https://www.khanacademy.org/math/algebra2";
+                const found = mapByRange.find(item => qId >= item.start && qId <= item.end);
+                return found ? found.url : "https://www.khanacademy.org/math/algebra2";
             },
 
             openConceptVideo() {
