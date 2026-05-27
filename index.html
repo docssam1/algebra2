@@ -1362,25 +1362,37 @@
                 }
             },
 
-            setApiStatusBadge(state) {
+            setApiStatusBadge(state, detail = "") {
                 const badge = document.getElementById('api-status-badge');
                 if (!badge) return;
 
                 const styles = {
-                    idle: ["키 저장됨", "text-[10px] bg-stone-100 text-stone-700 px-2 py-0.5 rounded-md font-bold"],
-                    checking: ["연결 확인 중...", "text-[10px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-md font-bold animate-pulse"],
-                    success: ["AI 키 정상 연결", "text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md font-bold"],
-                    auth: ["인증 오류 (401/403)", "text-[10px] bg-rose-100 text-rose-800 px-2 py-0.5 rounded-md font-bold"],
-                    quota: ["쿼터 제한 (429)", "text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md font-bold"],
-                    request: ["요청 형식 오류 (400)", "text-[10px] bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-md font-bold"],
-                    network: ["네트워크/CORS 오류", "text-[10px] bg-violet-100 text-violet-800 px-2 py-0.5 rounded-md font-bold"]
+                    idle: ["Key saved", "text-[10px] bg-stone-100 text-stone-700 px-2 py-0.5 rounded-md font-bold"],
+                    checking: ["Checking...", "text-[10px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-md font-bold animate-pulse"],
+                    success: ["AI connected", "text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md font-bold"],
+                    auth: ["Auth error", "text-[10px] bg-rose-100 text-rose-800 px-2 py-0.5 rounded-md font-bold"],
+                    quota: ["429 error", "text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md font-bold"],
+                    request: ["Bad request", "text-[10px] bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-md font-bold"],
+                    network: ["Network/CORS", "text-[10px] bg-violet-100 text-violet-800 px-2 py-0.5 rounded-md font-bold"]
                 };
 
                 const [text, className] = styles[state] || styles.idle;
-                badge.textContent = text;
+                const shortDetail = detail ? `: ${String(detail).slice(0, 80)}` : "";
+                badge.textContent = `${text}${shortDetail}`;
                 badge.className = className;
+                badge.title = detail || text;
             },
 
+            getGeminiErrorMessage(result, fallback = "AI request failed.") {
+                const message = result?.error?.message || result?.error || fallback;
+                const details = Array.isArray(result?.error?.details)
+                    ? result.error.details
+                        .map((item) => item?.reason || item?.violations?.[0]?.quotaMetric || "")
+                        .filter(Boolean)
+                        .join(" / ")
+                    : "";
+                return details ? `${message} (${details})` : message;
+            },
             async verifyGeminiConnection() {
                 const apiKey = this.getApiKey();
                 if (!apiKey) {
@@ -1405,17 +1417,19 @@
                         return true;
                     }
 
+                    const result = await response.json().catch(() => ({}));
+                    const message = this.getGeminiErrorMessage(result, `HTTP ${response.status}`);
                     if (response.status === 401 || response.status === 403) {
-                        this.setApiStatusBadge('auth');
+                        this.setApiStatusBadge('auth', message);
                     } else if (response.status === 429) {
-                        this.setApiStatusBadge('quota');
+                        this.setApiStatusBadge('quota', message);
                     } else if (response.status === 400) {
-                        this.setApiStatusBadge('request');
+                        this.setApiStatusBadge('request', message);
                     } else {
-                        this.setApiStatusBadge('network');
+                        this.setApiStatusBadge('network', message);
                     }
-                } catch (_) {
-                    this.setApiStatusBadge('network');
+                } catch (error) {
+                    this.setApiStatusBadge('network', error?.message || 'Network request failed');
                 }
                 return false;
             },
@@ -1460,16 +1474,17 @@
 
                         const result = await response.json().catch(() => ({}));
                         if (!response.ok) {
+                            const message = this.getGeminiErrorMessage(result, `HTTP ${response.status}`);
                             if (response.status === 401 || response.status === 403) {
-                                this.setApiStatusBadge('auth');
+                                this.setApiStatusBadge('auth', message);
                             } else if (response.status === 429) {
-                                this.setApiStatusBadge('quota');
+                                this.setApiStatusBadge('quota', message);
                             } else if (response.status === 400) {
-                                this.setApiStatusBadge('request');
+                                this.setApiStatusBadge('request', message);
                             } else {
-                                this.setApiStatusBadge('network');
+                                this.setApiStatusBadge('network', message);
                             }
-                            throw new Error(result?.error?.message || result?.error || 'AI 요청이 실패했습니다.');
+                            throw new Error(message);
                         }
 
                         const text = (result?.candidates?.[0]?.content?.parts || [])
