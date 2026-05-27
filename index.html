@@ -141,7 +141,7 @@
                     <div class="bg-indigo-50 border border-indigo-100 rounded-xl px-3 py-1.5 flex items-center gap-2 text-xs">
                         <span class="font-bold text-indigo-800">🔑 Gemini API:</span>
                         <input type="password" id="gemini-api-key" placeholder="API Key 입력 (미입력 시 기본 마스킹 키 적용)" class="bg-white border border-indigo-200 rounded px-2 py-0.5 w-32 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-[10px]">
-                        <input type="url" id="gemini-proxy-url" placeholder="Apps Script URL (선택)" class="bg-white border border-indigo-200 rounded px-2 py-0.5 w-44 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-[10px]">
+                        <input type="url" id="gemini-proxy-url" placeholder="Netlify Function 사용 중" readonly class="bg-slate-100 border border-indigo-100 rounded px-2 py-0.5 w-44 text-slate-500 text-[10px] cursor-not-allowed">
                         <button onclick="app.saveApiKey()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-2 py-0.5 rounded text-[10px] transition-all">저장</button>
                         <span id="api-status-badge" class="text-[10px] px-2 py-0.5 rounded-md font-bold">확인 중...</span>
                     </div>
@@ -1327,9 +1327,8 @@
 
             async saveApiKey() {
                 const key = document.getElementById('gemini-api-key').value.trim();
-                const proxyUrl = document.getElementById('gemini-proxy-url')?.value.trim() || "";
                 localStorage.setItem('gemini_api_key_temp', key);
-                localStorage.setItem('gemini_proxy_url', proxyUrl);
+                localStorage.removeItem('gemini_proxy_url');
                 this.updateApiKeyStatusBadge();
                 await this.verifyGeminiConnection();
             },
@@ -1339,9 +1338,9 @@
                 if (saved) {
                     document.getElementById('gemini-api-key').value = saved;
                 }
-                const proxyUrl = localStorage.getItem('gemini_proxy_url');
-                if (proxyUrl && document.getElementById('gemini-proxy-url')) {
-                    document.getElementById('gemini-proxy-url').value = proxyUrl;
+                localStorage.removeItem('gemini_proxy_url');
+                if (document.getElementById('gemini-proxy-url')) {
+                    document.getElementById('gemini-proxy-url').value = "";
                 }
             },
 
@@ -1352,7 +1351,7 @@
             },
 
             getGeminiEndpoint() {
-                return localStorage.getItem('gemini_proxy_url') || '/.netlify/functions/gemini';
+                return '/.netlify/functions/gemini';
             },
 
             getGeminiFallbackEndpoint() {
