@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Algebra 2 Placement Test Diagnostic & Curriculum Dashboard</title>
-    <!-- Tailwind CSS & Font & ChartJS & MathJax ?ㅼ젙 -->
+    <!-- Tailwind CSS & Font & ChartJS & MathJax 설정 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -14,7 +14,7 @@
             font-family: 'Noto Sans KR', sans-serif;
             background-color: #fafaf9;
             color: #292524;
-            /* 蹂댁븞???띿뒪???좏깮 諛⑹? */
+            /* 보안용 텍스트 선택 방지 */
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
@@ -124,112 +124,112 @@
 </head>
 <body class="min-h-screen flex flex-col bg-stone-50">
 
-    <!-- ?곷떒 怨좎젙 ?ㅻ뜑 -->
+    <!-- 상단 고정 헤더 -->
     <header class="bg-white border-b border-stone-200 sticky top-0 z-50 shadow-sm no-print">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row justify-between items-center py-4 gap-4">
                 <div class="flex items-center gap-3">
-                    <span class="text-3xl">?뱪</span>
+                    <span class="text-3xl">📐</span>
                     <div>
                         <h1 class="text-xl font-bold text-stone-900 tracking-tight">Algebra 2 Placement Diagnostic</h1>
-                        <p class="text-xs text-stone-500 font-medium">??Premium AI Student Management Dashboard</p>
+                        <p class="text-xs text-stone-500 font-medium">✨ Premium AI Student Management Dashboard</p>
                     </div>
                 </div>
 
-                <!-- API Key 愿由?& ?숈깮 ?곗씠??而⑦듃濡?-->
+                <!-- API Key 관리 & 학생 데이터 컨트롤 -->
                 <div class="flex flex-wrap items-center gap-2">
                     <div class="bg-indigo-50 border border-indigo-100 rounded-xl px-3 py-1.5 flex items-center gap-2 text-xs">
-                        <span class="font-bold text-indigo-800">Gemini API:</span>
-                        <input type="password" id="gemini-api-key" placeholder="Enter Google AI Studio API Key" class="bg-white border border-indigo-200 rounded px-2 py-0.5 w-44 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-[10px]">
-                        <button onclick="app.saveApiKey()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-2 py-0.5 rounded text-[10px] transition-all">Save</button>
-                        <button onclick="app.verifyGeminiConnection()" class="bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold px-2 py-0.5 rounded text-[10px] transition-all">Verify</button>
-                        <span id="api-status-badge" class="text-[10px] px-2 py-0.5 rounded-md font-bold">Checking...</span>
+                        <span class="font-bold text-indigo-800">🔑 Gemini API:</span>
+                        <input type="password" id="gemini-api-key" placeholder="Google AI Studio API Key" class="bg-white border border-indigo-200 rounded px-2 py-0.5 w-44 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-[10px]">
+                        <button onclick="app.saveApiKey()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-2 py-0.5 rounded text-[10px] transition-all">저장</button>
+                        <button onclick="app.verifyGeminiConnection()" class="bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold px-2 py-0.5 rounded text-[10px] transition-all">연결 확인</button>
+                        <span id="api-status-badge" class="text-[10px] px-2 py-0.5 rounded-md font-bold">확인 중...</span>
                     </div>
 
                     <button onclick="app.openPrintModal()" class="bg-stone-800 hover:bg-stone-900 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors flex items-center gap-1.5 shadow-sm">
-                        <span>?뼥截??깆쟻??諛??쒗뿕吏 ?몄뇙</span>
+                        <span>🖨️ 성적표 및 시험지 인쇄</span>
                     </button>
                     <button onclick="app.downloadCurrentReportHtml()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors flex items-center gap-1.5 shadow-sm">
-                        <span>?뮶 HTML ?ㅼ슫濡쒕뱶</span>
+                        <span>💾 HTML 다운로드</span>
                     </button>
                 </div>
             </div>
 
-            <!-- ?숈깮 愿由??쒖뒪????쒕낫???곕룞 -->
+            <!-- 학생 관리 시스템 대시보드 연동 -->
             <div class="bg-stone-100 border-t border-stone-200 py-3 px-4 -mx-4 sm:-mx-6 lg:-mx-8 flex flex-col sm:flex-row justify-between items-center gap-3">
                 <div class="flex flex-wrap items-center gap-2">
-                    <span class="text-xs font-bold text-stone-600">?뫀 ?숈깮 遺꾩꽍 ?몄뀡 ?깅줉:</span>
-                    <input type="text" id="student-name" placeholder="?대쫫 (?곷Ц/?쒓?)" class="border border-stone-300 rounded-lg px-2.5 py-1 text-xs w-28 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                    <input type="text" id="student-phone" placeholder="?꾪솕踰덊샇 ?룹옄由?(4?먮━)" maxlength="4" class="border border-stone-300 rounded-lg px-2.5 py-1 text-xs w-36 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                    <button onclick="app.registerStudent()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-1 rounded-lg text-xs transition-all">?깅줉/遺덈윭?ㅺ린</button>
-                    <button onclick="app.clearCurrentStudent()" class="text-stone-500 hover:text-rose-600 text-xs font-semibold px-1 py-1">珥덇린??/button>
+                    <span class="text-xs font-bold text-stone-600">👤 학생 분석 세션 등록:</span>
+                    <input type="text" id="student-name" placeholder="이름 (영문/한글)" class="border border-stone-300 rounded-lg px-2.5 py-1 text-xs w-28 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                    <input type="text" id="student-phone" placeholder="전화번호 뒷자리 (4자리)" maxlength="4" class="border border-stone-300 rounded-lg px-2.5 py-1 text-xs w-36 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                    <button onclick="app.registerStudent()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-1 rounded-lg text-xs transition-all">등록/불러오기</button>
+                    <button onclick="app.clearCurrentStudent()" class="text-stone-500 hover:text-rose-600 text-xs font-semibold px-1 py-1">초기화</button>
                 </div>
                 
                 <div class="text-xs font-semibold text-stone-700 bg-white border border-stone-200 px-3 py-1 rounded-full shadow-sm" id="active-student-badge">
-                    ?꾩옱 遺꾩꽍 以묒씤 ?숈깮: ?놁쓬 (?대쫫???깅줉??二쇱꽭??
+                    현재 분석 중인 학생: 없음 (이름을 등록해 주세요)
                 </div>
             </div>
 
-            <!-- ??쒕낫?????ㅻ퉬寃뚯씠??-->
+            <!-- 대시보드 탭 네비게이션 -->
             <nav class="flex overflow-x-auto hide-scrollbar mt-1" id="tab-nav">
-                <button onclick="app.switchTab('overview')" id="tab-btn-overview" class="whitespace-nowrap py-3 px-5 font-semibold text-xs md:text-sm transition-all duration-150 tab-active">?뱤 ?됯? 媛?대뱶 (Guide)</button>
-                <button onclick="app.switchTab('test')" id="tab-btn-test" class="whitespace-nowrap py-3 px-5 font-semibold text-xs md:text-sm transition-all duration-150 tab-inactive">?뱷 臾몄젣 ???酉곗뼱 (Interactive View)</button>
-                <button onclick="app.switchTab('omr')" id="tab-btn-omr" class="whitespace-nowrap py-3 px-5 font-semibold text-xs md:text-sm transition-all duration-150 tab-inactive">??OMR ?낅젰 蹂대뱶 (OMR Card)</button>
-                <button onclick="app.switchTab('analysis')" id="tab-btn-analysis" class="whitespace-nowrap py-3 px-5 font-semibold text-xs md:text-sm transition-all duration-150 tab-inactive">?렞 ?숇?紐?吏꾨떒 由ы룷??(Diagnosis Report)</button>
-                <button onclick="app.switchTab('curriculum')" id="tab-btn-curriculum" class="whitespace-nowrap py-3 px-5 font-semibold text-xs md:text-sm transition-all duration-150 tab-inactive">?뿎截?濡쒕뱶留?諛?吏꾨떒 ?앹꽦 (Roadmap Builder)</button>
+                <button onclick="app.switchTab('overview')" id="tab-btn-overview" class="whitespace-nowrap py-3 px-5 font-semibold text-xs md:text-sm transition-all duration-150 tab-active">📊 평가 가이드 (Guide)</button>
+                <button onclick="app.switchTab('test')" id="tab-btn-test" class="whitespace-nowrap py-3 px-5 font-semibold text-xs md:text-sm transition-all duration-150 tab-inactive">📝 문제 풀이 뷰어 (Interactive View)</button>
+                <button onclick="app.switchTab('omr')" id="tab-btn-omr" class="whitespace-nowrap py-3 px-5 font-semibold text-xs md:text-sm transition-all duration-150 tab-inactive">✅ OMR 입력 보드 (OMR Card)</button>
+                <button onclick="app.switchTab('analysis')" id="tab-btn-analysis" class="whitespace-nowrap py-3 px-5 font-semibold text-xs md:text-sm transition-all duration-150 tab-inactive">🎯 학부모 진단 리포트 (Diagnosis Report)</button>
+                <button onclick="app.switchTab('curriculum')" id="tab-btn-curriculum" class="whitespace-nowrap py-3 px-5 font-semibold text-xs md:text-sm transition-all duration-150 tab-inactive">🗓️ 로드맵 및 진단 생성 (Roadmap Builder)</button>
             </nav>
         </div>
     </header>
 
-    <!-- 硫붿씤 ??쒕낫??酉고룷???곸뿭 -->
+    <!-- 메인 대시보드 뷰포트 영역 -->
     <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
         
-        <!-- Tab 1: Overview (?됯? 媛?대뱶) -->
+        <!-- Tab 1: Overview (평가 가이드) -->
         <div id="tab-overview" class="block animate-fade-in no-print">
             <div class="mb-6">
-                <h2 class="text-2xl font-bold text-stone-800 mb-1">誘멸뎅 怨좊벑?숆탳 ?섑븰 愿臾? Algebra 2 Placement ?꾨꼍 ?鍮?/h2>
-                <p class="text-stone-500 text-sm">蹂???쒕낫?쒕뒗 9?숇뀈 ?숈깮???깃났?곸씤 Honors Pre-Calculus ?붾컲 ?먭꺽 ?띾뱷 諛?痍⑥빟 蹂댁셿??蹂댁쬆?섍린 ?꾪븳 吏?ν삎 愿由??듯빀 ?뚮옯?쇱엯?덈떎.</p>
+                <h2 class="text-2xl font-bold text-stone-800 mb-1">미국 고등학교 수학 관문, Algebra 2 Placement 완벽 대비</h2>
+                <p class="text-stone-500 text-sm">본 대시보드는 9학년 학생의 성공적인 Honors Pre-Calculus 월반 자격 획득 및 취약 보완을 보증하기 위한 지능형 관리 통합 플랫폼입니다.</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-stone-200/60 flex flex-col items-center text-center">
-                    <span class="text-3xl mb-2">?깍툘</span>
-                    <h3 class="font-bold text-stone-800 text-md">?꾧꺽???쒗뿕 ?쒓컙 媛?대뱶</h3>
-                    <p class="text-stone-500 text-xs mt-1 leading-relaxed">珥?120遺??쒓났<br>(Part 1: 60遺? Part 2: 60遺?<br>?댁떇 ?쒓컙 ?놁씠 ?ㅼ젣 怨좎궗?μ쿂???묒떆瑜?沅뚯옣?⑸땲??</p>
+                    <span class="text-3xl mb-2">⏱️</span>
+                    <h3 class="font-bold text-stone-800 text-md">엄격한 시험 시간 가이드</h3>
+                    <p class="text-stone-500 text-xs mt-1 leading-relaxed">총 120분 제공<br>(Part 1: 60분, Part 2: 60분)<br>휴식 시간 없이 실제 고사장처럼 응시를 권장합니다.</p>
                 </div>
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-stone-200/60 flex flex-col items-center text-center">
-                    <span class="text-3xl mb-2">?㎜</span>
-                    <h3 class="font-bold text-stone-800 text-md">怨꾩궛湲??덉슜 洹쒖젙 ?꾩닔</h3>
-                    <p class="text-stone-500 text-xs mt-1 leading-relaxed"><b>Part 1 (1~20踰?:</b> 怨꾩궛湲??쇱젅 湲덉? (No Calc)<br><b>Part 2 (21~40踰?:</b> TI-84 ??洹몃옒??怨꾩궛湲?br>?ъ슜踰??뺣? ?뺤씤???⑥썝 援ъ꽦.</p>
+                    <span class="text-3xl mb-2">🧮</span>
+                    <h3 class="font-bold text-stone-800 text-md">계산기 허용 규정 엄수</h3>
+                    <p class="text-stone-500 text-xs mt-1 leading-relaxed"><b>Part 1 (1~20번):</b> 계산기 일절 금지 (No Calc)<br><b>Part 2 (21~40번):</b> TI-84 등 그래핑 계산기<br>사용법 정밀 확인용 단원 구성.</p>
                 </div>
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-stone-200/60 flex flex-col items-center text-center">
-                    <span class="text-3xl mb-2">?럳</span>
-                    <h3 class="font-bold text-stone-800 text-md">紐⑺몴 ?대옒???밴꺽 湲곗?</h3>
-                    <p class="text-stone-500 text-xs mt-1 leading-relaxed"><b>35???댁긽:</b> Honors Pre-Calculus ?붾컲 ?듦낵<br><b>28~34??</b> Regular Pre-Calculus 諛곗젙 ?덉젙沅?br><b>27???댄븯:</b> 媛쒕뀗 援щ찉 蹂댁셿 吏묒쨷 ?덈젴 吏???쒓났.</p>
+                    <span class="text-3xl mb-2">🎓</span>
+                    <h3 class="font-bold text-stone-800 text-md">목표 클래스 승격 기준</h3>
+                    <p class="text-stone-500 text-xs mt-1 leading-relaxed"><b>35점 이상:</b> Honors Pre-Calculus 월반 통과<br><b>28~34점:</b> Regular Pre-Calculus 배정 안정권<br><b>27점 이하:</b> 개념 구멍 보완 집중 훈련 지표 제공.</p>
                 </div>
             </div>
 
             <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-6">
                 <h3 class="text-indigo-950 font-bold text-base mb-3 flex items-center gap-2">
-                    <span>?뮕</span> 誘멸뎅 理쒖긽??蹂대뵫/援?젣?숆탳 Placement Test ?듭떖 ?붽컯
+                    <span>💡</span> 미국 최상위 보딩/국제학교 Placement Test 핵심 요강
                 </h3>
                 <p class="text-indigo-900/80 text-sm leading-relaxed mb-4">
-                    誘멸뎅 High School ?섑븰 ?밴꺽 ?됯????⑥닚???뺣떟??媛?ㅻ궡??媛앷???????λ젰???꾨땶, <b>以묎컙 ????곗궛 怨쇱젙?먯꽌 諛쒖깮???쇰━ ?꾧컻 ?좉린??Show your work)</b>??留ㅼ슦 泥좎??섍쾶 梨꾩젏?⑸땲?? ?곕씪???ㅻ떟 諛쒖깮 ?? ?숈깮??臾몄젣瑜?紐곕씪???由?寃껋씤吏, ?댁쟾 Prerequisite ?④퀎(?? 以묐벑 怨쇱젙???뚯닔/遺꾩닔 遺???곗궛 ?듦?)?먯꽌 ?꾩닔??援щ찉 ?뚮Ц?몄? 紐낇솗?섍쾶 援щ텇?섏뿬 移섎즺?댁빞 蹂대뵫 ?꾩??먯꽌 醫뚯젅?섏? ?딆뒿?덈떎.
+                    미국 High School 수학 승격 평가는 단순히 정답을 가려내는 객관식 풀이 능력이 아닌, <b>중간 대수 연산 과정에서 발생한 논리 전개 유기성(Show your work)</b>을 매우 철저하게 채점합니다. 따라서 오답 발생 시, 학생이 문제를 몰라서 틀린 것인지, 이전 Prerequisite 단계(예: 중등 과정의 음수/분수 부호 연산 습관)에서 누수된 구멍 때문인지 명확하게 구분하여 치료해야 보딩 현지에서 좌절하지 않습니다.
                 </p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold text-indigo-900/90">
-                    <div class="bg-white/80 p-3 rounded-xl border border-indigo-100/50">???⑥썝蹂?$\frac{a}{b}$ 瑗댁쓽 遺꾩닔 ?곗궛 ?ㅼ닔媛 ?꾩껜 ?ㅻ떟 ?먯씤??45% ?댁긽 李⑥?.</div>
-                    <div class="bg-white/80 p-3 rounded-xl border border-indigo-100/50">??臾몄옣??Word Problems) ???좊룄 ?ㅽ뙣 ?? Pre-Algebra 臾명빐???뺣? ?먭? ?꾩튂.</div>
+                    <div class="bg-white/80 p-3 rounded-xl border border-indigo-100/50">✔ 단원별 $\frac{a}{b}$ 꼴의 분수 연산 실수가 전체 오답 원인의 45% 이상 차지.</div>
+                    <div class="bg-white/80 p-3 rounded-xl border border-indigo-100/50">✔ 문장제(Word Problems) 식 유도 실패 시, Pre-Algebra 문해력 정밀 점검 필치.</div>
                 </div>
             </div>
         </div>
 
-        <!-- Tab 2: Test (臾몄젣 ???酉곗뼱) -->
+        <!-- Tab 2: Test (문제 풀이 뷰어) -->
         <div id="tab-test" class="hidden animate-fade-in no-print">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- 臾명빆 ?좏깮 留?-->
+                <!-- 문항 선택 맵 -->
                 <div class="lg:col-span-1 bg-white border border-stone-200 rounded-2xl flex flex-col overflow-hidden shadow-sm">
                     <div class="p-4 bg-stone-50 border-b border-stone-200 flex justify-between items-center">
-                        <span class="font-bold text-stone-800 text-sm">吏꾨떒 臾명빆 ?몃뜳??/span>
+                        <span class="font-bold text-stone-800 text-sm">진단 문항 인덱스</span>
                         <span class="text-xs bg-indigo-100 text-indigo-800 px-2.5 py-1 rounded-md font-bold" id="current-part-label">Part 1 (No Calc)</span>
                     </div>
                     <div class="p-4 overflow-y-auto max-h-[500px] space-y-4">
@@ -245,195 +245,195 @@
                     </div>
                 </div>
 
-                <!-- 臾몄젣 移대뱶 諛?AI ?쒗꽣 ?듯빀李?-->
+                <!-- 문제 카드 및 AI 튜터 통합창 -->
                 <div class="lg:col-span-2 bg-white border border-stone-200 rounded-2xl flex flex-col overflow-hidden shadow-sm p-6">
                     <div class="flex justify-between items-center border-b border-stone-100 pb-4 mb-4">
                         <h3 class="text-xl font-bold text-indigo-700 math-font" id="q-title">Question 1</h3>
                         <span class="text-xs font-semibold text-stone-500 bg-stone-100 px-3 py-1 rounded-full" id="q-domain">Domain Name</span>
                     </div>
 
-                    <!-- 臾몄젣 ?섏떇 ?댁슜 -->
+                    <!-- 문제 수식 내용 -->
                     <div class="text-base text-stone-800 leading-relaxed mb-6 bg-stone-50 p-4 rounded-xl border border-stone-100 min-h-[120px]" id="q-body">
                         Loading...
                     </div>
 
-                    <!-- ?뺣떟 ?댁꽕 媛由ш린 / AI ?쒗꽣 ?≪뀡 -->
+                    <!-- 정답 해설 가리기 / AI 튜터 액션 -->
                     <div class="flex flex-wrap gap-2 mb-6">
                         <button onclick="app.toggleSolution()" class="bg-stone-900 hover:bg-stone-800 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors shadow-sm">
-                            ?몓截??뺣떟 諛????怨쇱젙 蹂닿린
+                            👁️ 정답 및 풀이 과정 보기
                         </button>
                         <button onclick="app.triggerAiTutor()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors shadow-sm flex items-center gap-1">
-                            <span>??AI ?꾨떞 ?섑븰 ?쒗꽣 怨쇱쇅</span>
+                            <span>✨ AI 전담 수학 튜터 과외</span>
                         </button>
                     </div>
 
-                    <!-- 湲곕낯 ?뺣떟 ?댁꽕吏 (MathJax ?뚮뜑 蹂댁쬆) -->
+                    <!-- 기본 정답 해설지 (MathJax 렌더 보증) -->
                     <div id="solution-box" class="hidden bg-emerald-50/50 border border-emerald-100 rounded-xl p-4 mb-6">
                         <h4 class="font-bold text-emerald-800 text-sm mb-2" id="q-answer">Answer</h4>
                         <div class="text-xs text-stone-700 leading-relaxed space-y-2" id="q-steps"></div>
                     </div>
 
-                    <!-- AI ?섑븰 ?쒗꽣 梨꾪똿 ?⑤꼸 -->
+                    <!-- AI 수학 튜터 채팅 패널 -->
                     <div id="ai-tutor-panel" class="hidden border border-indigo-100 bg-indigo-50/20 rounded-xl p-4">
                         <div class="flex justify-between items-center mb-3">
                             <h4 class="font-bold text-indigo-950 text-sm flex items-center gap-1">
-                                <span>??/span> AI ?섑븰 ?쒗꽣 ?ㅼ떆媛?媛쒖씤 怨쇱쇅 (LaTeX & ?ㅻ떟 利앸챸)
+                                <span>✨</span> AI 수학 튜터 실시간 개인 과외 (LaTeX & 오답 증명)
                             </h4>
-                            <button onclick="app.closeAiTutor()" class="text-stone-400 hover:text-stone-600 text-xs">?リ린</button>
+                            <button onclick="app.closeAiTutor()" class="text-stone-400 hover:text-stone-600 text-xs">닫기</button>
                         </div>
 
-                        <!-- 梨꾪똿 濡쒓렇 酉?-->
+                        <!-- 채팅 로그 뷰 -->
                         <div id="chat-logs" class="bg-white rounded-xl border border-stone-200/60 p-3 h-52 overflow-y-auto space-y-3 text-xs mb-3">
-                            <div class="text-stone-500 italic">吏덈Ц ?좏삎 ?꾨━?뗭쓣 ?좏깮?섍굅??吏곸젒 ????곗궛 ?곸쓽 沅곴툑???먯쓣 吏덈Ц??蹂댁꽭??</div>
+                            <div class="text-stone-500 italic">질문 유형 프리셋을 선택하거나 직접 대수 연산 상의 궁금한 점을 질문해 보세요.</div>
                         </div>
 
-                        <!-- 異붿쿇 吏덈Ц ?꾨━??移⑹뒪 -->
+                        <!-- 추천 질문 프리셋 칩스 -->
                         <div class="flex flex-wrap gap-1.5 mb-3">
-                            <button onclick="app.sendPresetQuestion('??臾몄젣????섑븰 湲곕낯 ?먮━? 怨듭떇??利앸챸?댁＜怨??좊룄 洹쒖튃??蹂댁뿬以?')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-900 text-[10px] px-2.5 py-1 rounded-md font-semibold transition-all">?뵇 怨듭떇 ?좊룄 諛???텛??/button>
-                            <button onclick="app.sendPresetQuestion('???섑븰 臾몄젣?먯꽌 ?ㅻ떟???섍린 ?ъ슫 遺二쇱쓽 ?ㅼ닔 寃쎄퀬瑜??뚮젮以?')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-900 text-[10px] px-2.5 py-1 rounded-md font-semibold transition-all">?좑툘 ?⑥젙 ?ъ씤??& ??/button>
-                            <button onclick="app.sendPresetQuestion('??臾명빆怨??묎컳? ?쇰━ 援ъ“瑜?媛吏??띾뫁???좎궗 蹂??臾몄젣瑜??쒖옉?댁쨾.')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-900 text-[10px] px-2.5 py-1 rounded-md font-semibold transition-all">?뱷 ?띾뫁??蹂??臾몄젣 異쒖젣</button>
-                            <button onclick="app.openConceptVideo()" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-900 text-[10px] px-2.5 py-1 rounded-md font-semibold transition-all">?렗 媛쒕뀗 ?곸긽 蹂닿린</button>
+                            <button onclick="app.sendPresetQuestion('이 문제의 대수학 기본 원리와 공식을 증명해주고 유도 규칙을 보여줘.')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-900 text-[10px] px-2.5 py-1 rounded-md font-semibold transition-all">🔍 공식 유도 및 역추적</button>
+                            <button onclick="app.sendPresetQuestion('이 수학 문제에서 오답이 나기 쉬운 부주의 실수 경고를 알려줘.')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-900 text-[10px] px-2.5 py-1 rounded-md font-semibold transition-all">⚠️ 함정 포인트 & 팁</button>
+                            <button onclick="app.sendPresetQuestion('이 문항과 똑같은 논리 구조를 가진 쌍둥이 유사 변형 문제를 제작해줘.')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-900 text-[10px] px-2.5 py-1 rounded-md font-semibold transition-all">📝 쌍둥이 변형 문제 출제</button>
+                            <button onclick="app.openConceptVideo()" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-900 text-[10px] px-2.5 py-1 rounded-md font-semibold transition-all">🎬 개념 영상 보기</button>
                         </div>
 
-                        <!-- 而ㅼ뒪? 吏덈Ц ?명뭼 -->
+                        <!-- 커스텀 질문 인풋 -->
                         <div class="flex gap-2">
-                            <input type="text" id="custom-query" placeholder="吏덈Ц ?댁슜???낅젰?섏꽭??.. (?? ???댁감 遺꾩닔?앹쓽 ??議곌굔 ?ㅻ챸?댁쨾)" class="flex-grow border border-stone-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white">
-                            <button onclick="app.sendCustomQuestion()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-lg text-xs transition-colors">?꾩넚</button>
+                            <input type="text" id="custom-query" placeholder="질문 내용을 입력하세요... (예: 이 이차 분수식의 해 조건 설명해줘)" class="flex-grow border border-stone-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white">
+                            <button onclick="app.sendCustomQuestion()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-lg text-xs transition-colors">전송</button>
                         </div>
 
                         <div id="ai-chat-loader" class="hidden mt-2 text-center py-1 flex items-center justify-center gap-1.5">
                             <div class="animate-spin rounded-full h-3.5 w-3.5 border-2 border-indigo-600 border-t-transparent"></div>
-                            <span class="text-[11px] font-bold text-indigo-600 animate-pulse">AI ?쒗꽣媛 蹂듭옟??????섑븰 ?앹쓣 ?좊룄?섍퀬 ?덉뒿?덈떎...</span>
+                            <span class="text-[11px] font-bold text-indigo-600 animate-pulse">AI 튜터가 복잡한 대수 수학 식을 유도하고 있습니다...</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Tab 3: OMR (?듭븞 留덊궧 蹂대뱶) -->
+        <!-- Tab 3: OMR (답안 마킹 보드) -->
         <div id="tab-omr" class="hidden animate-fade-in no-print">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- OMR ?쒗듃 ?⑤꼸 -->
+                <!-- OMR 시트 패널 -->
                 <div class="lg:col-span-1 bg-white border border-stone-200 rounded-2xl p-5 shadow-sm">
                     <div class="flex justify-between items-center border-b border-stone-100 pb-3 mb-4">
-                        <h3 class="font-bold text-stone-800 text-sm">OMR ?ㅼ떆媛??뺤삤??梨꾩젏 ?쒗듃</h3>
-                        <button onclick="app.resetAllOmr()" class="text-xs font-bold text-stone-400 hover:text-rose-600 transition-colors">?꾩껜 珥덇린??/button>
+                        <h3 class="font-bold text-stone-800 text-sm">OMR 실시간 정오답 채점 시트</h3>
+                        <button onclick="app.resetAllOmr()" class="text-xs font-bold text-stone-400 hover:text-rose-600 transition-colors">전체 초기화</button>
                     </div>
 
-                    <!-- 40臾명빆 OMR 留덊궧 洹몃━??二쇱엯 ?寃?-->
+                    <!-- 40문항 OMR 마킹 그리드 주입 타겟 -->
                     <div class="space-y-2 max-h-[500px] overflow-y-auto pr-1" id="omr-board-list"></div>
                 </div>
 
-                <!-- 遺꾩꽍 ??쒕낫????-->
+                <!-- 분석 대시보드 윙 -->
                 <div class="lg:col-span-2 space-y-6">
-                    <!-- ?ㅼ퐫?대쭅 移대뱶 -->
+                    <!-- 스코어링 카드 -->
                     <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                         <div>
                             <span class="text-[10px] font-black text-stone-400 uppercase tracking-wider block mb-1">CURRENT PERFORMANCE INDEX</span>
                             <div class="flex items-baseline gap-1 mb-2">
                                 <span class="text-5xl font-black text-indigo-600" id="current-total-score">0</span>
-                                <span class="text-stone-400 text-md font-bold">/ 40 臾명빆</span>
+                                <span class="text-stone-400 text-md font-bold">/ 40 문항</span>
                             </div>
-                            <p class="text-xs text-stone-500 font-semibold" id="omr-grading-progress">留덊궧 ?꾨즺 ?? 0臾명빆 (吏꾪뻾瑜? 0%)</p>
+                            <p class="text-xs text-stone-500 font-semibold" id="omr-grading-progress">마킹 완료 수: 0문항 (진행률: 0%)</p>
                             
                             <div class="mt-4 pt-4 border-t border-stone-100">
-                                <span class="text-[10px] font-black text-stone-400 uppercase tracking-wider block mb-1">諛곗젙 ?대옒???붾컲 ?덉륫 (Placement)</span>
+                                <span class="text-[10px] font-black text-stone-400 uppercase tracking-wider block mb-1">배정 클래스 월반 예측 (Placement)</span>
                                 <div id="cutoff-prediction-badge" class="inline-block px-3 py-1.5 rounded-lg text-xs font-bold bg-stone-100 text-stone-600">
-                                    理쒖냼 15臾명빆 梨꾩젏 ??媛?대뱶媛 諛쒓툒?⑸땲??
+                                    최소 15문항 채점 시 가이드가 발급됩니다.
                                 </div>
                             </div>
                         </div>
 
                         <div class="bg-stone-50 border border-stone-200 rounded-2xl px-5 py-4 flex flex-col items-center justify-center w-full md:w-36">
-                            <span class="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-1">?ㅼ떆媛??뺣떟瑜?/span>
+                            <span class="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-1">실시간 정답률</span>
                             <span class="text-3xl font-black text-stone-800" id="current-accuracy-rate">0%</span>
                         </div>
                     </div>
 
-                    <!-- ?ㅼ떆媛?痍⑥빟 移섎즺 濡쒕뱶留????곸뿭 -->
+                    <!-- 실시간 취약 치료 로드맵 팁 영역 -->
                     <div class="bg-indigo-950 border border-indigo-900 rounded-2xl p-6 text-white shadow-md">
                         <h3 class="font-bold text-base mb-2 flex items-center gap-2">
-                            <span>??</span> AI ?ㅼ떆媛?泥섎갑 媛?대뱶 ?쒖꽦??
+                            <span>🚀</span> AI 실시간 처방 가이드 활성화
                         </h3>
                         <p class="text-indigo-200 text-xs leading-relaxed mb-4">
-                            ?쇱そ OMR ?쒗듃???ㅼ젣 ?묒떆 ?ㅻ떟???낅젰?섎뒗 利됱떆, ?숈깮??媛뺤젏 ?⑥썝怨?Prerequisite(?댁쟾 ?듭떖 ?좎닔 ?숈뒿 援щ찉) 異붿쟻 由ы룷?멸? <b>[?숇?紐?吏꾨떒 由ы룷??</b> 諛?<b>[AI 濡쒕뱶留?</b> ??뿉 ?먮룞?쇰줈 ?뚮뜑留곷릺???????ㅼ떆媛?諛쒓툒 以鍮?紐⑤뱶濡?吏꾩엯?⑸땲??
+                            왼쪽 OMR 시트에 실제 응시 오답을 입력하는 즉시, 학생의 강점 단원과 Prerequisite(이전 핵심 선수 학습 구멍) 추적 리포트가 <b>[학부모 진단 리포트]</b> 및 <b>[AI 로드맵]</b> 탭에 자동으로 렌더링되어 한/영 실시간 발급 준비 모드로 진입합니다.
                         </p>
                         <div class="flex items-center gap-2">
-                            <button onclick="app.switchTab('analysis')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all">?몛 ?깆쟻??諛?媛뺤빟??遺꾩꽍吏 蹂닿린</button>
+                            <button onclick="app.switchTab('analysis')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all">👉 성적표 및 강약점 분석지 보기</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Tab 4: Analysis (?숇?紐?吏꾨떒 由ы룷?? -->
+        <!-- Tab 4: Analysis (학부모 진단 리포트) -->
         <div id="tab-analysis" class="hidden animate-fade-in no-print">
             <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 class="text-2xl font-bold text-stone-800">?렞 ?꾨━誘몄뾼 Placement ?깆쟻 吏꾨떒 由ы룷??/h2>
-                    <p class="text-xs text-stone-500">?ㅼ떆媛??듦퀎 諛?誘멸뎅 蹂대뵫?ㅼ엥 ?⑷꺽 湲곗? 而룸씪?멸낵 鍮꾧탳???낆껜???숈뾽 遺꾩꽍 蹂닿퀬?쒖엯?덈떎.</p>
+                    <h2 class="text-2xl font-bold text-stone-800">🎯 프리미엄 Placement 성적 진단 리포트</h2>
+                    <p class="text-xs text-stone-500">실시간 통계 및 미국 보딩스쿨 합격 기준 컷라인과 비교된 입체적 학업 분석 보고서입니다.</p>
                 </div>
-                <!-- 由ы룷???ㅺ뎅???ㅼ쐞泥?-->
+                <!-- 리포트 다국어 스위처 -->
                 <div class="flex items-center gap-1 bg-stone-100 p-1 rounded-xl border border-stone-200">
-                    <button onclick="app.toggleLangMode('ko')" id="lang-ko-btn" class="px-4 py-1.5 text-xs font-bold rounded-lg bg-white text-indigo-600 shadow-sm transition-all">?쒓? 由ы룷??/button>
+                    <button onclick="app.toggleLangMode('ko')" id="lang-ko-btn" class="px-4 py-1.5 text-xs font-bold rounded-lg bg-white text-indigo-600 shadow-sm transition-all">한글 리포트</button>
                     <button onclick="app.toggleLangMode('en')" id="lang-en-btn" class="px-4 py-1.5 text-xs font-bold rounded-lg text-stone-600 transition-all">English Report</button>
                 </div>
             </div>
 
-            <!-- ?곸뿭蹂??듦퀎 李⑦듃 蹂대뱶 -->
+            <!-- 영역별 통계 차트 보드 -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                <!-- 留됰? 洹몃옒????-->
+                <!-- 막대 그래프 윙 -->
                 <div class="lg:col-span-2 bg-white border border-stone-200 rounded-2xl p-5 shadow-sm">
-                    <h3 class="font-bold text-stone-800 text-sm mb-4 text-center">?뱤 ?⑥썝蹂??깆랬??遺꾩꽍 ?議고몴 (誘멸뎅 Honors 而룹삤??媛?대뱶 ?ㅻ쾭?덉씠)</h3>
+                    <h3 class="font-bold text-stone-800 text-sm mb-4 text-center">📊 단원별 성취도 분석 대조표 (미국 Honors 컷오프 가이드 오버레이)</h3>
                     <div class="chart-container">
                         <canvas id="analysis-chart-canvas"></canvas>
                     </div>
                 </div>
 
-                <!-- 而룹삤???몃? 遺꾩꽍 ?ㅻ챸??-->
+                <!-- 컷오프 세부 분석 설명서 -->
                 <div class="lg:col-span-1 bg-white border border-stone-200 rounded-2xl p-5 shadow-sm flex flex-col justify-between">
                     <div>
-                        <h4 class="font-bold text-stone-800 text-xs uppercase tracking-wider mb-3 border-b border-stone-100 pb-2">?럷截?Placement Cut-off Guide</h4>
+                        <h4 class="font-bold text-stone-800 text-xs uppercase tracking-wider mb-3 border-b border-stone-100 pb-2">🎖️ Placement Cut-off Guide</h4>
                         <div class="space-y-3 text-xs leading-relaxed">
                             <div class="p-2.5 rounded-lg border-l-4 border-emerald-500 bg-emerald-50/50">
-                                <strong class="text-emerald-900 block font-bold mb-0.5">Honors Pre-Calc ?붾컲??(35???댁긽)</strong>
-                                誘멸뎅 TOP 25 蹂대뵫 諛?二쇱슂 援?젣?숆탳 ?듦낵 ?덉젙 ?깃툒. ????곗궛 ?띾룄 諛??ㅼ쟾 蹂蹂꾨젰??理쒖긽?꾩뿉 ?ъ쭊???덉뒿?덈떎.
+                                <strong class="text-emerald-900 block font-bold mb-0.5">Honors Pre-Calc 월반선 (35점 이상)</strong>
+                                미국 TOP 25 보딩 및 주요 국제학교 통과 안정 등급. 대수 연산 속도 및 실전 변별력이 최상위에 포진해 있습니다.
                             </div>
                             <div class="p-2.5 rounded-lg border-l-4 border-amber-500 bg-amber-50/50">
-                                <strong class="text-amber-900 block font-bold mb-0.5">Standard Pre-Calc ?⑥뒪??(28~34??</strong>
-                                ?됯퇏 ?댁긽???섎━ ?λ젰??利앸챸?덉쑝?? ?뺢탳??怨좎감 濡쒓렇諛⑹젙?앹씠???쇨컖?⑥닔 ?⑥썝??誘몄꽭 ?곗궛 ?ㅻ쪟媛 議댁옱?⑸땲??
+                                <strong class="text-amber-900 block font-bold mb-0.5">Standard Pre-Calc 패스선 (28~34점)</strong>
+                                평균 이상의 수리 능력을 증명했으나, 정교한 고차 로그방정식이나 삼각함수 단원의 미세 연산 오류가 존재합니다.
                             </div>
                             <div class="p-2.5 rounded-lg border-l-4 border-rose-500 bg-rose-50/50">
-                                <strong class="text-rose-900 block font-bold mb-0.5">蹂닿컯 ?꾩슂 ?꾪뿕 援ш컙 (27???댄븯)</strong>
-                                怨좎감 ?ㅽ빆??諛?湲고븯???⑥썝 媛쒕뀗 ?꾩닔媛 ?ш컖?섎ŉ, Pre-Calculus 吏꾪븰 ??泥좎???蹂듭뒿??沅뚯옣?⑸땲??
+                                <strong class="text-rose-900 block font-bold mb-0.5">보강 필요 위험 구간 (27점 이하)</strong>
+                                고차 다항식 및 기하학 단원 개념 누수가 심각하며, Pre-Calculus 진학 전 철저한 복습이 권장됩니다.
                             </div>
                         </div>
                     </div>
 
                     <div class="bg-stone-50 rounded-xl p-3 border border-stone-100 text-[11px] text-stone-500 leading-normal mt-4">
-                        ?뮕 洹몃옒?꾩긽??<b>鍮④컙 ?먯꽑(Honors Pass - 35????깆꽑)</b> 諛?<b>?몃? ?먯꽑(Regular Pass - 28????깆꽑)</b> ?鍮??곕━ ?숈깮??留됰? ?믪씠瑜??뺣? 議곗쑉??遺꾩꽍??諛섏쁺?⑸땲??
+                        💡 그래프상의 <b>빨간 점선(Honors Pass - 35점 대등선)</b> 및 <b>노란 점선(Regular Pass - 28점 대등선)</b> 대비 우리 학생의 막대 높이를 정밀 조율해 분석에 반영합니다.
                     </div>
                 </div>
             </div>
 
-            <!-- ?숈쟻 Prerequisite ?먯씤 吏꾨떒 由ы룷??蹂대뱶 -->
+            <!-- 동적 Prerequisite 원인 진단 리포트 보드 -->
             <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm mb-8" id="diagnosis-text-report-board">
-                <!-- ?먮컮?ㅽ겕由쏀듃濡??숈쟻 ?뚮뜑留?-->
+                <!-- 자바스크립트로 동적 렌더링 -->
             </div>
 
-            <!-- US ?쒕? 援먭낵 留ㅽ븨 留덉뒪??媛?대뱶 -->
+            <!-- US 한미 교과 매핑 마스터 가이드 -->
             <div class="bg-white border border-stone-200 rounded-2xl shadow-sm overflow-hidden">
                 <div class="px-6 py-4 bg-stone-50 border-b border-stone-200">
-                    <h3 class="font-bold text-stone-800 text-sm">?뙋 US High School Algebra 2 vs ?쒓뎅 怨좊벑?숆탳 ?섑븰 援먯쑁怨쇱젙 留ㅽ븨</h3>
+                    <h3 class="font-bold text-stone-800 text-sm">🌐 US High School Algebra 2 vs 한국 고등학교 수학 교육과정 매핑</h3>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs text-stone-600">
                         <thead class="bg-stone-100 text-[10px] font-black uppercase text-stone-500">
                             <tr>
                                 <th class="px-6 py-3">US Algebra 2 Domain</th>
-                                <th class="px-6 py-3">二쇱슂 ?숈뒿 ?댁슜 諛?踰붿쐞</th>
-                                <th class="px-6 py-3">?쒓뎅 ?섑븰 援먭낵 ?곌퀎??留ㅽ븨</th>
-                                <th class="px-6 py-3">?대떦 ?숇뀈/?숆린 怨좎쬆</th>
+                                <th class="px-6 py-3">주요 학습 내용 및 범위</th>
+                                <th class="px-6 py-3">한국 수학 교과 연계성 매핑</th>
+                                <th class="px-6 py-3">해당 학년/학기 고증</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-stone-100" id="curriculum-mapping-tbody"></tbody>
@@ -442,54 +442,54 @@
             </div>
         </div>
 
-        <!-- Tab 5: Curriculum (AI 濡쒕뱶留?諛??ㅻ떟?명듃) -->
+        <!-- Tab 5: Curriculum (AI 로드맵 및 오답노트) -->
         <div id="tab-curriculum" class="hidden animate-fade-in no-print">
             <div class="mb-6">
-                <h2 class="text-2xl font-bold text-stone-800">?뿎截?珥덉젙諛 10??留욎땄 而ㅻ━?섎읆 諛??ㅻ떟?명듃 諛쒗뻾??/h2>
-                <p class="text-xs text-stone-500">?숈깮??OMR 梨꾩젏 寃곌낵瑜?遺꾩꽍?섏뿬 AI? ?섏튂 紐⑤뜽??怨듬룞?쇰줈 ?좊퀎???⑥썝蹂??ㅼ냽 10?뚯감 濡쒕뱶留듭엯?덈떎.</p>
+                <h2 class="text-2xl font-bold text-stone-800">🗓️ 초정밀 10회 맞춤 커리큘럼 및 오답노트 발행소</h2>
+                <p class="text-xs text-stone-500">학생의 OMR 채점 결과를 분석하여 AI와 수치 모델이 공동으로 선별한 단원별 실속 10회차 로드맵입니다.</p>
             </div>
 
-            <!-- AI 而ㅻ━?섎읆 鍮뚮뜑 而⑦듃濡ㅻ윭 -->
+            <!-- AI 커리큘럼 빌더 컨트롤러 -->
             <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 mb-8">
-                <h3 class="font-bold text-indigo-950 text-sm mb-2">??AI ?ㅼ떆媛??ㅻ떟 ?몄텧 ?⑥썝 ?쒕떇 湲곌린</h3>
-                <p class="text-indigo-900/80 text-xs mb-4">?꾩옱 留덊궧 寃곌낵瑜?遺꾩꽍???밸퀎 蹂닿컯???쒓툒???⑥썝???먮룞?쇰줈 泥댄겕?덉뒿?덈떎. ?먰븯?쒕뒗 ?⑥썝??吏곸젒 異붽?/?쒖쇅?섏뿬 [AI 而ㅼ뒪? 濡쒕뱶留?鍮뚮뱶?섍린] 踰꾪듉???꾨Ⅴ硫?AI 援먯쑁 而⑥꽕?댄듃 ?쒗뵆由우쑝濡??ъ깮?깅맗?덈떎.</p>
+                <h3 class="font-bold text-indigo-950 text-sm mb-2">✨ AI 실시간 오답 노출 단원 튜닝 기기</h3>
+                <p class="text-indigo-900/80 text-xs mb-4">현재 마킹 결과를 분석해 특별 보강이 시급한 단원을 자동으로 체크했습니다. 원하시는 단원을 직접 추가/제외하여 [AI 커스텀 로드맵 빌드하기] 버튼을 누르면 AI 교육 컨설턴트 템플릿으로 재생성됩니다.</p>
                 
                 <div class="flex flex-wrap gap-2 mb-3" id="curriculum-domain-selectors"></div>
                 <div class="flex flex-wrap items-center gap-2 mb-4">
-                    <label for="curriculum-session-count" class="text-[11px] font-bold text-indigo-900">?뚯감 ??/label>
+                    <label for="curriculum-session-count" class="text-[11px] font-bold text-indigo-900">회차 수</label>
                     <input id="curriculum-session-count" type="number" min="4" max="30" value="10" class="w-20 border border-indigo-200 rounded-lg px-2 py-1 text-xs bg-white">
-                    <label for="curriculum-session-minutes" class="text-[11px] font-bold text-indigo-900">?뚮떦 ?쒓컙(遺?</label>
+                    <label for="curriculum-session-minutes" class="text-[11px] font-bold text-indigo-900">회당 시간(분)</label>
                     <input id="curriculum-session-minutes" type="number" min="30" max="240" value="120" class="w-24 border border-indigo-200 rounded-lg px-2 py-1 text-xs bg-white">
                 </div>
 
                 <div class="flex items-center gap-3">
                     <button onclick="app.buildCustomCurriculum()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-colors shadow-sm flex items-center gap-1.5">
-                        <span>??AI 而ㅼ뒪? 濡쒕뱶留?鍮뚮뱶?섍린</span>
+                        <span>✨ AI 커스텀 로드맵 빌드하기</span>
                     </button>
-                    <button onclick="app.resetToStandardCurriculum()" class="text-indigo-800 hover:text-indigo-950 font-bold text-xs">湲곕낯 援ъ“濡??ъ꽕??/button>
+                    <button onclick="app.resetToStandardCurriculum()" class="text-indigo-800 hover:text-indigo-950 font-bold text-xs">기본 구조로 재설정</button>
                 </div>
 
                 <div id="curriculum-generator-loader" class="hidden mt-3 text-center py-1 flex items-center justify-center gap-1.5">
                     <div class="animate-spin rounded-full h-3.5 w-3.5 border-2 border-indigo-600 border-t-transparent"></div>
-                    <span class="text-[11px] font-bold text-indigo-600 animate-pulse">AI 援먯쑁 而⑥꽕?댄듃媛 理쒖쟻??而ㅻ━?섎읆 ?몄뀡???곗궛?섍퀬 ?덉뒿?덈떎...</span>
+                    <span class="text-[11px] font-bold text-indigo-600 animate-pulse">AI 교육 컨설턴트가 최적의 커리큘럼 세션을 연산하고 있습니다...</span>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- 10??而ㅻ━?섎읆 ?뚮뜑??-->
+                <!-- 10회 커리큘럼 렌더러 -->
                 <div class="lg:col-span-2 space-y-3" id="curriculum-sessions-list"></div>
 
-                <!-- ??λ맂 ?좎궗 臾명빆 ?ㅻ떟 ?명듃 ??-->
+                <!-- 저장된 유사 문항 오답 노트 윙 -->
                 <div class="lg:col-span-1 bg-white border border-stone-200 rounded-2xl p-5 shadow-sm">
                     <div class="flex justify-between items-center border-b border-stone-100 pb-3 mb-3">
-                        <h3 class="font-bold text-stone-800 text-sm">?뮶 ?섎쭔???ㅻ떟 蹂???명듃 (?대┰蹂대뱶)</h3>
-                        <span class="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-md" id="saved-variants-count">0媛???λ맖</span>
+                        <h3 class="font-bold text-stone-800 text-sm">💾 나만의 오답 변형 노트 (클립보드)</h3>
+                        <span class="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-md" id="saved-variants-count">0개 저장됨</span>
                     </div>
                     <p class="text-[11px] text-stone-500 leading-normal mb-3">
-                        臾몄젣 ???酉곗뼱?먯꽌 AI ?섑븰 ?쒗꽣?먭쾶 <b>'?띾뫁??蹂??臾몄젣 異쒖젣'</b>瑜??붿껌???앹꽦??臾명빆???숈깮??痍⑥빟 洹밸났 ?ㅻ떟 蹂닿??⑥뿉 ?댁쓣 ???덉뒿?덈떎. ?몄뇙 ??由ы룷???ㅼ뿉 ?먮룞 諛붿씤?⑸맗?덈떎.
+                        문제 풀이 뷰어에서 AI 수학 튜터에게 <b>'쌍둥이 변형 문제 출제'</b>를 요청해 생성된 문항을 학생의 취약 극복 오답 보관함에 담을 수 있습니다. 인쇄 시 리포트 뒤에 자동 바인딩됩니다.
                     </p>
                     <div class="space-y-3 max-h-[400px] overflow-y-auto pr-1" id="saved-variants-container">
-                        <div class="text-center py-8 text-xs text-stone-400">??λ맂 ?좎궗 臾명빆???놁뒿?덈떎. ?쒗꽣??????以?臾명빆???댁븘 蹂댁꽭??</div>
+                        <div class="text-center py-8 text-xs text-stone-400">저장된 유사 문항이 없습니다. 튜터와의 대화 중 문항을 담아 보세요!</div>
                     </div>
                 </div>
             </div>
@@ -497,73 +497,71 @@
 
     </main>
 
-    <!-- ?몄뇙 ?ы꽭 紐⑤떖 ?ㅽ겕由?-->
+    <!-- 인쇄 포털 모달 스크린 -->
     <div id="print-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-stone-100">
             <div class="flex justify-between items-center mb-4 pb-3 border-b border-stone-100">
                 <h3 class="font-bold text-stone-800 text-base flex items-center gap-1.5">
-                    <span>?뼥截?/span> PDF ?깆쟻 吏꾨떒??& ?쒗뿕吏 怨좏솕吏??몄뇙 ?ы꽭
+                    <span>🖨️</span> PDF 성적 진단서 & 시험지 고화질 인쇄 포털
                 </h3>
-                <button onclick="app.closePrintModal()" class="text-stone-400 hover:text-stone-600 font-bold">??/button>
+                <button onclick="app.closePrintModal()" class="text-stone-400 hover:text-stone-600 font-bold">✕</button>
             </div>
             <p class="text-xs text-stone-500 leading-relaxed mb-4">
-                釉뚮씪?곗? ?꾨┛???고듃 留ㅼ묶 諛??덉씠?꾩썐 源⑥쭚???꾩쟾???덈갑??怨좏솕吏??숇?紐?釉뚮━?묒슜 ?깆쟻?쒖? ?ㅽ봽?쇱씤 諛고룷??臾몄젣吏 ?몄뇙 ?ы꽭?낅땲??
+                브라우저 프린터 폰트 매칭 및 레이아웃 깨짐을 완전히 예방한 고화질 학부모 브리핑용 성적표와 오프라인 배포용 문제지 인쇄 포털입니다.
             </p>
 
             <div class="space-y-3">
                 <button onclick="app.runPrintProcess('report')" class="w-full flex items-center justify-between p-3.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-950 font-semibold rounded-2xl transition-all border border-indigo-100 group">
                     <div class="flex items-center gap-3">
-                        <span class="text-xl">?뱤</span>
+                        <span class="text-xl">📊</span>
                         <div class="text-left">
-                            <span class="block text-xs font-bold">?꾨━誘몄뾼 ?????깆쟻 醫낇빀 遺꾩꽍 吏꾨떒??諛쒗뻾</span>
-                            <span class="text-[10px] text-indigo-700 font-medium">?곸쐞 25% 媛?대뱶?쇱씤 李⑦듃 + ?좎닔 ?숈뒿 寃곗넀 ??텛???뚭껄??/span>
+                            <span class="block text-xs font-bold">프리미엄 한/영 성적 종합 분석 진단서 발행</span>
+                            <span class="text-[10px] text-indigo-700 font-medium">상위 25% 가이드라인 차트 + 선수 학습 결손 역추적 소견서</span>
                         </div>
                     </div>
-                    <span class="text-indigo-600 group-hover:translate-x-1 transition-transform">??/span>
+                    <span class="text-indigo-600 group-hover:translate-x-1 transition-transform">➔</span>
                 </button>
                 <button onclick="app.runPrintProcess('testpaper')" class="w-full flex items-center justify-between p-3.5 bg-stone-50 hover:bg-stone-100 text-stone-900 font-semibold rounded-2xl transition-all border border-stone-200 group">
                     <div class="flex items-center gap-3">
-                        <span class="text-xl">?뱷</span>
+                        <span class="text-xl">📝</span>
                         <div class="text-left">
-                            <span class="block text-xs font-bold">?숈깮 諛고룷??吏꾨떒 臾몄젣吏 異쒕젰</span>
-                            <span class="text-[10px] text-stone-600 font-medium">LaTeX 遺꾩닔 ?꾨꼍 諛섏쁺 Part 1 & 2 珥?40臾명빆 ?쒗뿕吏</span>
+                            <span class="block text-xs font-bold">학생 배포용 진단 문제지 출력</span>
+                            <span class="text-[10px] text-stone-600 font-medium">LaTeX 분수 완벽 반영 Part 1 & 2 총 40문항 시험지</span>
                         </div>
                     </div>
-                    <span class="text-stone-600 group-hover:translate-x-1 transition-transform">??/span>
+                    <span class="text-stone-600 group-hover:translate-x-1 transition-transform">➔</span>
                 </button>
                 <button onclick="app.runPrintProcess('omrsheet')" class="w-full flex items-center justify-between p-3.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-950 font-semibold rounded-2xl transition-all border border-emerald-100 group">
                     <div class="flex items-center gap-3">
-                        <span class="text-xl">??/span>
+                        <span class="text-xl">✅</span>
                         <div class="text-left">
-                            <span class="block text-xs font-bold">?ㅽ봽?쇱씤 吏硫?OMR 留덊궧 ?쒗듃 異쒕젰</span>
-                            <span class="text-[10px] text-emerald-700 font-medium">??留덊궧 諛??숇?紐??쒖텧 蹂닿????볦? ?믪씠 洹쒓꺽 ?듭븞吏</span>
+                            <span class="block text-xs font-bold">오프라인 지면 OMR 마킹 시트 출력</span>
+                            <span class="text-[10px] text-emerald-700 font-medium">펜 마킹 및 학부모 제출 보관용 넓은 높이 규격 답안지</span>
                         </div>
                     </div>
-                    <span class="text-emerald-600 group-hover:translate-x-1 transition-transform">??/span>
+                    <span class="text-emerald-600 group-hover:translate-x-1 transition-transform">➔</span>
                 </button>
             </div>
 
             <div class="mt-5 pt-3 border-t border-stone-100 flex justify-end">
-                <button onclick="app.closePrintModal()" class="bg-stone-100 hover:bg-stone-200 text-stone-600 font-bold px-4 py-2 rounded-xl text-xs transition-colors">?リ린</button>
+                <button onclick="app.closePrintModal()" class="bg-stone-100 hover:bg-stone-200 text-stone-600 font-bold px-4 py-2 rounded-xl text-xs transition-colors">닫기</button>
             </div>
         </div>
     </div>
 
-    <!-- ?④꺼吏?紐⑦삎 ?몄뇙 ?곸뿭 (Print ?꾩슜 踰꾪띁 ?寃? -->
+    <!-- 숨겨진 모형 인쇄 영역 (Print 전용 버퍼 타겟) -->
     <div id="hidden-print-zone" class="hidden"></div>
 
     <script>
         // -------------------------------------------------------------
-        // ?뙚 怨듬룞 ?ъ슜???꾪븳 湲곕낯 API Key ?ㅼ젙 (?쒕룆??留덉뒪??湲곕쾿 ?곸슜)
+        // 🌟 공동 사용을 위한 기본 API Key 설정 (난독화/마스킹 기법 적용)
         // -------------------------------------------------------------
-        // ???뚯뒪肄붾뱶媛 ?몃????몄텧?섎뜑?쇰룄 援ш????먮룞 API Key ?덉랬 遊뉗씠???щ·?ш? ?붿퀜媛吏 紐삵븯?꾨줉 
-        // ??臾몄옄?댁쓣 Base64 ?뺥깭濡??쒕룆??泥섎━(Masking)?덉뒿?덈떎. 
+        // 이 소스코드가 외부에 노출되더라도 구글의 자동 API Key 탈취 봇이나 크롤러가 훔쳐가지 못하도록 
+        // 키 문자열을 Base64 형태로 난독화 처리(Masking)했습니다. 
         //
-        // ?ㅼ젣 API Key媛 "AIzaSy..." ?쇰㈃ ?꾨옒 OB_KEY ?곸닔????낇븯湲???base64 ?뺥깭濡??ｌ뼱?먭굅?? 
-        // ?띿뒪???곸옄???낅젰?섍퀬 [????섎㈃ 理쒖슦???곸슜?섎?濡??덉떖?섍퀬 ?ъ슜?섏뀛??醫뗭뒿?덈떎.
         const GEMINI_MODEL = "gemini-2.0-flash";
 
-        // ?꾩뿭 ?곗씠??罹먯떆 留ㅽ븨 (?섑븰 ?ㅻ쪟 ?쒕줈 怨좏빐?곷룄 LaTeX)
+        // 전역 데이터 캐시 매핑 (수학 오류 제로 고해상도 LaTeX)
         const appData = {
             questions: [
                 // PART 1 (No Calc)
@@ -610,7 +608,7 @@
                 { id: 39, part: 2, domain: "Discrete Math & Stats", q: "A probability experiment: a box holds 5 red balls and 7 blue. If 2 are drawn without replacement, find the probability that both are red.", a: "$\\frac{5}{33}$", s: "1. Probability first draw is red: $P(R_1) = \\frac{5}{12}$.<br>2. Probability second draw is red: $P(R_2 | R_1) = \\frac{4}{11}$.<br>3. Multiply combined probabilities: $\\frac{5}{12} \\times \\frac{4}{11} = \\frac{20}{132}$<br>4. Simplify: $\\frac{5}{33}$" },
                 { id: 40, part: 2, domain: "Systems of Equations", q: "Evaluate $2A - B$ given matrix parameters:<br><br>$$A = \\begin{bmatrix} 2 & -3 \\\\ 1 & 4 \\end{bmatrix}, B = \\begin{bmatrix} 5 & 0 \\\\ -2 & 3 \\end{bmatrix}$$", a: "$\\begin{bmatrix} -1 & -6 \\\\ 4 & 5 \\end{bmatrix}$", s: "1. Calculate scalar $2A = \\begin{bmatrix} 4 & -6 \\\\ 2 & 8 \\end{bmatrix}$.<br>2. Subtract matrix $B$: $\\begin{bmatrix} 4-5 & -6-0 \\\\ 2-(-2) & 8-3 \\end{bmatrix}$.<br>3. Result: $\\begin{bmatrix} -1 & -6 \\\\ 4 & 5 \\end{bmatrix}$" }
             ],
-            // 8媛??듭떖 ?곸뿭
+            // 8개 핵심 영역
             domains: [
                 "Linear Equations",
                 "Inequalities & Absolute Value",
@@ -628,38 +626,38 @@
                 "Discrete Math & Stats",
                 "Trigonometry"
             ],
-            // Chart ?뚮뜑??洹몃９ 媛以?留ㅼ묶
+            // Chart 렌더용 그룹 가중 매칭
             domainGroups: {
-                "Linear & Coord (?좏삎/湲고븯)": [1, 3, 4, 30],
-                "Quadratics & Complex (?댁감??": [6, 7, 8, 9, 10, 24],
-                "Polynomials (怨좎감 ?ㅽ빆??": [11, 12, 13, 34],
-                "Rational & Radical (??臾대━)": [14, 15, 16, 17, 28, 29],
-                "Exponents & Logs (吏??濡쒓렇)": [5, 18, 19, 20, 25, 26, 27],
-                "Trigonometry (?쇨컖鍮?": [35, 36, 37],
-                "Discrete Math & Stats (?섏뿴/?듦퀎)": [2, 31, 32, 33, 38, 39],
-                "Systems & Matrices (?곕┰??": [21, 22, 23, 40]
+                "Linear & Coord (선형/기하)": [1, 3, 4, 30],
+                "Quadratics & Complex (이차식)": [6, 7, 8, 9, 10, 24],
+                "Polynomials (고차 다항식)": [11, 12, 13, 34],
+                "Rational & Radical (유/무리)": [14, 15, 16, 17, 28, 29],
+                "Exponents & Logs (지수/로그)": [5, 18, 19, 20, 25, 26, 27],
+                "Trigonometry (삼각비)": [35, 36, 37],
+                "Discrete Math & Stats (수열/통계)": [2, 31, 32, 33, 38, 39],
+                "Systems & Matrices (연립식)": [21, 22, 23, 40]
             },
             mapping: [
-                { us: "Linear Systems / Matrices", topic: "3???곕┰諛⑹젙?? ?됰젹, ?좏삎怨꾪쉷踰?, kr: "怨듯넻?섑븰 (?곕┰諛⑹젙?? ?됰젹)", grade: "怨?" },
-                { us: "Quadratics & Complex", topic: "蹂듭냼??泥닿퀎, ?댁감?⑥닔 Vertex Form, ?먮퀎??, kr: "怨듯넻?섑븰 1", grade: "怨?" },
-                { us: "Polynomials / Binomial", topic: "議곕┰?쒕쾿, ?섎㉧吏?뺣━, ?몄젣怨??몄닔遺꾪빐, ?댄빆怨꾩닔", kr: "怨듯넻?섑븰 1 / ?뺣쪧怨??듦퀎", grade: "怨? / 怨?" },
-                { us: "Rational & Radical Equations", topic: "遺꾩닔諛⑹젙??媛꾩냼?? ?뺤쓽??議곌굔 ?뺤씤, ??寃??, kr: "怨듯넻?섑븰 2", grade: "怨?" },
-                { us: "Exponents & Logarithms", topic: "吏??濡쒓렇 怨듭떇, ?곸슜濡쒓렇, ?곗냽 蹂듬━($Pe^{rt}$)", kr: "?섑븰 I", grade: "怨?" },
-                { us: "Conic Sections & Discrete", topic: "?먯쓽 諛⑹젙???좊룄, ?깆감/?깅퉬?섏뿴, 臾댄븳?깅퉬湲됱닔", kr: "怨듯넻?섑븰 2 / ?섑븰 I", grade: "怨? / 怨?" },
-                { us: "Trigonometric Graphs", topic: "?몃룄踰? Unit Circle ?뱀닔媛? ?쇨컖 ?뚰삎 Amplitude/Period", kr: "?섑븰 I", grade: "怨?" },
-                { us: "Probability & Normal Dist.", topic: "議곌굔遺 鍮꾨났??異붿텧, ?뺢퇋遺꾪룷 Empirical 68-95-99.7 猷?, kr: "?뺣쪧怨??듦퀎", grade: "怨?" }
+                { us: "Linear Systems / Matrices", topic: "3원 연립방정식, 행렬, 선형계획법", kr: "공통수학 (연립방정식, 행렬)", grade: "고1" },
+                { us: "Quadratics & Complex", topic: "복소수 체계, 이차함수 Vertex Form, 판별식", kr: "공통수학 1", grade: "고1" },
+                { us: "Polynomials / Binomial", topic: "조립제법, 나머지정리, 세제곱 인수분해, 이항계수", kr: "공통수학 1 / 확률과 통계", grade: "고1 / 고2" },
+                { us: "Rational & Radical Equations", topic: "분수방정식 간소화, 정의역 조건 확인, 해 검산", kr: "공통수학 2", grade: "고1" },
+                { us: "Exponents & Logarithms", topic: "지수/로그 공식, 상용로그, 연속 복리($Pe^{rt}$)", kr: "수학 I", grade: "고2" },
+                { us: "Conic Sections & Discrete", topic: "원의 방정식 유도, 등차/등비수열, 무한등비급수", kr: "공통수학 2 / 수학 I", grade: "고1 / 고2" },
+                { us: "Trigonometric Graphs", topic: "호도법, Unit Circle 특수각, 삼각 파형 Amplitude/Period", kr: "수학 I", grade: "고2" },
+                { us: "Probability & Normal Dist.", topic: "조건부 비복원 추출, 정규분포 Empirical 68-95-99.7 룰", kr: "확률과 통계", grade: "고2" }
             ],
             curriculum: [
-                { id: 1, title: "1?뚯감: Foundations of Linear & Absolute Bounds", desc: "?덈뙎媛?湲고샇媛 ?ы븿???ㅻ떒怨?遺?깆떇 ????곗궛 諛?$\\theta$ 醫뚰몴怨??됲뻾?대룞 湲고븯??寃고븿 洹밸났" },
-                { id: 2, title: "2?뚯감: Multi-variable Systems & Matrix Algebra", desc: "3???곕┰諛⑹젙?????????쒓컙 ?뚮え 理쒖냼??諛?2x2 ?됰젹 ?ъ튃 ?곗궛 湲곗큹" },
-                { id: 3, title: "3?뚯감: Completing Complex Roots & Quadratics", desc: "?댁감?⑥닔 ?꾩쟾?쒓낢??Vertex Form 蹂??湲곌퀎??諛?$i^2 = -1$ 遺???ㅻ쪟 ?뚰깢" },
-                { id: 4, title: "4?뚯감: Polynomial Dividends & Binomial Theorem", desc: "?몄꽭??議곕┰?쒕쾿 怨꾩닔 0 ?쎌엯 二쇱쓽 諛?Binomial expansion 蹂듯빀 ??怨꾩닔 ?좊룄踰? },
-                { id: 5, title: "5?뚯감: [以묎컙 ?먭?] Half-Length Placement Mock-Test", desc: "1~4?뚯감 ?숈뒿 踰붿쐞 痍⑥빟 蹂닿컯 諛??ㅼ감??以묎컙 ?쒕떇??20臾명빆 ?깆쟻 由ы룷??諛쒗뻾" },
-                { id: 6, title: "6?뚯감: Rational & Radical Equation Conditions", desc: "?좊━/臾대━諛⑹젙????????뺤쓽??議곌굔, 遺꾨え媛 0???섎뒗 媛??쒖쇅, ??寃???덉감瑜??뺣? ?듦??? },
-                { id: 7, title: "7?뚯감: Exponents, Continuous Compounding & Log Rules", desc: "吏??濡쒓렇 諛묐????묐갑??蹂???띾룄 洹밸???諛??ㅼ깮???곗냽 蹂듬━ $A = Pe^{rt}$ ?섏떇 援ъ꽦??利앷컯" },
-                { id: 8, title: "8?뚯감: Trigonometric Waves & Periodic Graphs", desc: "Radian/Degree 利됯컖 留ㅼ묶, Unit Circle ?щ텇硫??쇨컖鍮?遺??寃곗젙 諛?吏꾪룺/二쇨린 蹂??怨듭떇 ?덈젴" },
-                { id: 9, title: "9?뚯감: Conic Equations & Infinite Geometric Sums", desc: "?먯쓽 諛⑹젙???좊룄 湲고븯??堉덈? ?뺣┰ 諛?臾댄븳?깅퉬湲됱닔 ?섎졃 議곌굔 $|r| < 1$ ?앸퀎 ?덈젴" },
-                { id: 10, title: "10?뚯감: [理쒖쥌 ?먭?] Full Simulated Placement Test", desc: "?ㅼ쟾怨??숈씪??Part 1, 2 珥?40臾명빆 ??꾩뼱???쒕??덉씠??諛?理쒖쥌 Honors ?⑷꺽 遺꾩꽍 蹂닿퀬??諛쒓툒" }
+                { id: 1, title: "1회차: Foundations of Linear & Absolute Bounds", desc: "절댓값 기호가 포함된 다단계 부등식 대수 연산 및 $\\theta$ 좌표계 평행이동 기하학 결함 극복" },
+                { id: 2, title: "2회차: Multi-variable Systems & Matrix Algebra", desc: "3원 연립방정식 대수 풀이 시간 소모 최소화 및 2x2 행렬 사칙 연산 기초" },
+                { id: 3, title: "3회차: Completing Complex Roots & Quadratics", desc: "이차함수 완전제곱식 Vertex Form 변환 기계화 및 $i^2 = -1$ 부호 오류 소탕" },
+                { id: 4, title: "4회차: Polynomial Dividends & Binomial Theorem", desc: "세세한 조립제법 계수 0 삽입 주의 및 Binomial expansion 복합 항 계수 유도법" },
+                { id: 5, title: "5회차: [중간 점검] Half-Length Placement Mock-Test", desc: "1~4회차 학습 범위 취약 보강 및 오차율 중간 튜닝용 20문항 성적 리포트 발행" },
+                { id: 6, title: "6회차: Rational & Radical Equation Conditions", desc: "유리/무리방정식 풀이 후 정의역 조건, 분모가 0이 되는 값 제외, 해 검산 절차를 정밀 습관화" },
+                { id: 7, title: "7회차: Exponents, Continuous Compounding & Log Rules", desc: "지수/로그 밑변환 양방향 변환 속도 극대화 및 실생활 연속 복리 $A = Pe^{rt}$ 수식 구성력 증강" },
+                { id: 8, title: "8회차: Trigonometric Waves & Periodic Graphs", desc: "Radian/Degree 즉각 매칭, Unit Circle 사분면 삼각비 부호 결정 및 진폭/주기 변환 공식 훈련" },
+                { id: 9, title: "9회차: Conic Equations & Infinite Geometric Sums", desc: "원의 방정식 유도 기하학 뼈대 정립 및 무한등비급수 수렴 조건 $|r| < 1$ 식별 훈련" },
+                { id: 10, title: "10회차: [최종 점검] Full Simulated Placement Test", desc: "실전과 동일한 Part 1, 2 총 40문항 타임어택 시뮬레이션 및 최종 Honors 합격 분석 보고서 발급" }
             ]
         };
 
@@ -706,31 +704,31 @@
                 }
             },
 
-            // ?썳截?蹂댁븞 湲곕뒫 ?ㅼ젙 (?고겢由?諛?媛쒕컻???꾧뎄 李⑤떒)
+            // 🛡️ 보안 기능 설정 (우클릭 및 개발자 도구 차단)
             setupSecurityShields() {
-                // ?고겢由??꾨㈃ 李⑤떒
+                // 우클릭 전면 차단
                 document.addEventListener('contextmenu', (e) => {
                     e.preventDefault();
                 });
 
-                // 媛쒕컻???꾧뎄 ?⑥텞??諛?蹂듭궗 ??李⑤떒
+                // 개발자 도구 단축키 및 복사 키 차단
                 document.addEventListener('keydown', (e) => {
-                    // F12 李⑤떒
+                    // F12 차단
                     if (e.key === 'F12') {
                         e.preventDefault();
                         return false;
                     }
-                    // Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C (?щ＼ 媛쒕컻???꾧뎄) 李⑤떒
+                    // Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C (크롬 개발자 도구) 차단
                     if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) {
                         e.preventDefault();
                         return false;
                     }
-                    // Ctrl+U (?뚯뒪 蹂닿린) 李⑤떒
+                    // Ctrl+U (소스 보기) 차단
                     if (e.ctrlKey && e.key === 'u') {
                         e.preventDefault();
                         return false;
                     }
-                    // Ctrl+S (??? 李⑤떒
+                    // Ctrl+S (저장) 차단
                     if (e.ctrlKey && e.key === 's') {
                         e.preventDefault();
                         return false;
@@ -738,7 +736,7 @@
                 });
             },
 
-            // Base64 留덉뒪??蹂듯샇???ы띁 ?⑥닔
+            // Base64 마스킹 복호화 헬퍼 함수
             decryptKey(maskedStr) {
                 try {
                     return atob(maskedStr);
@@ -765,7 +763,7 @@
             },
 
             loadQuestion(id) {
-                // ?댁쟾 踰꾪듉 ?ㅽ????섎룎由ш린
+                // 이전 버튼 스타일 되돌리기
                 const prevBtn = document.getElementById(`q-grid-btn-${this.currentQuestion}`);
                 if (prevBtn) prevBtn.classList.replace('q-active', 'q-inactive');
 
@@ -787,12 +785,12 @@
                     label.className = "text-xs bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md font-bold";
                 }
 
-                // ?붾（??諛뺤뒪 媛깆떊 諛??④?
+                // 솔루션 박스 갱신 및 숨김
                 document.getElementById('solution-box').classList.add('hidden');
-                document.getElementById('q-answer').innerHTML = `?뺣떟: ${q.a}`;
+                document.getElementById('q-answer').innerHTML = `정답: ${q.a}`;
                 document.getElementById('q-steps').innerHTML = q.s;
 
-                // MathJax 鍮꾨룞湲곗떇 ?湲?泥섎━ (?ㅻ쪟 ?뚰뵾??
+                // MathJax 비동기식 대기 처리 (오류 회피용)
                 this.typesetMathJaxElements([document.getElementById('q-body'), document.getElementById('q-answer'), document.getElementById('q-steps')]);
             },
 
@@ -876,7 +874,7 @@
                 const incorrectBtn = document.getElementById(`omr-btn-incorrect-${id}`);
 
                 if (this.omrMarks[idx] === status) {
-                    // ?숈씪 ?좉? ?대┃ ???좏깮 ?댁젣
+                    // 동일 토글 클릭 시 선택 해제
                     this.omrMarks[idx] = null;
                     correctBtn.className = "w-8 h-8 rounded-lg border border-stone-200 text-xs font-black flex items-center justify-center hover:bg-emerald-50 hover:text-emerald-600 transition-all bg-white text-stone-600";
                     incorrectBtn.className = "w-8 h-8 rounded-lg border border-stone-200 text-xs font-black flex items-center justify-center hover:bg-rose-50 hover:text-rose-600 transition-all bg-white text-stone-600";
@@ -908,32 +906,32 @@
                 const accuracy = totalGraded === 0 ? 0 : Math.round((totalCorrect / totalGraded) * 100);
 
                 document.getElementById('current-total-score').textContent = totalCorrect;
-                document.getElementById('omr-grading-progress').textContent = `留덊궧 ?꾨즺 ?? ${totalGraded}臾명빆 (吏꾪뻾瑜? ${Math.round((totalGraded/40)*100)}%)`;
+                document.getElementById('omr-grading-progress').textContent = `마킹 완료 수: ${totalGraded}문항 (진행률: ${Math.round((totalGraded/40)*100)}%)`;
                 document.getElementById('current-accuracy-rate').textContent = `${accuracy}%`;
 
                 const badge = document.getElementById('cutoff-prediction-badge');
                 if (totalGraded >= 15) {
                     if (totalCorrect >= 35) {
                         badge.className = "inline-block px-3 py-1.5 rounded-lg text-xs font-extrabold bg-indigo-100 text-indigo-700";
-                        badge.textContent = "?룇 Honors Pre-Calculus ?꾨━?⑥뒪 媛뺣젰 ?듦낵";
+                        badge.textContent = "🏆 Honors Pre-Calculus 프리패스 강력 통과";
                     } else if (totalCorrect >= 28) {
                         badge.className = "inline-block px-3 py-1.5 rounded-lg text-xs font-extrabold bg-emerald-100 text-emerald-800";
-                        badge.textContent = "??Regular Pre-Calculus ?ㅼ씠?됲듃 ?⑥뒪 媛??;
+                        badge.textContent = "✅ Regular Pre-Calculus 다이렉트 패스 가능";
                     } else {
                         badge.className = "inline-block px-3 py-1.5 rounded-lg text-xs font-extrabold bg-rose-100 text-rose-700";
-                        badge.textContent = "?슚 蹂댁셿 ?꾩닔 (Algebra 2 ?꾩닔 援щ찉 移섎즺 吏묒쨷 沅뚯옣)";
+                        badge.textContent = "🚨 보완 필수 (Algebra 2 누수 구멍 치료 집중 권장)";
                     }
                 } else {
                     badge.className = "inline-block px-3 py-1.5 rounded-lg text-xs font-bold bg-stone-100 text-stone-600";
-                    badge.textContent = "理쒖냼 15臾명빆 梨꾩젏 ??媛?대뱶媛 諛쒓툒?⑸땲??";
+                    badge.textContent = "최소 15문항 채점 시 가이드가 발급됩니다.";
                 }
 
-                // 李⑦듃 ?ㅼ떆媛?媛깆떊 泥섎━
+                // 차트 실시간 갱신 처리
                 if (this.currentTab === 'analysis') {
                     this.renderChartGraphic();
                 }
 
-                // ?띿뒪???뚭껄 由ы룷???숈쟻 ?뚮뜑留?
+                // 텍스트 소견 리포트 동적 렌더링
                 this.renderDynamicTextReport();
             },
 
@@ -942,19 +940,19 @@
                 const totalCorrect = this.omrMarks.filter(x => x === true).length;
                 const totalGraded = this.omrMarks.filter(x => x !== null).length;
                 
-                const studentName = this.activeStudent ? this.activeStudent.name : "?숈깮";
+                const studentName = this.activeStudent ? this.activeStudent.name : "학생";
                 const isKo = this.langMode === 'ko';
 
                 if (totalGraded === 0) {
                     board.innerHTML = `
                         <div class="text-center py-8 text-xs text-stone-400">
-                            ?뱦 OMR ?쒗듃???ㅻ떟??留덊궧?댁빞 ?뺣? ??텛??吏꾨떒吏媛 ?앹꽦?⑸땲??
+                            📌 OMR 시트에 오답을 마킹해야 정밀 역추적 진단지가 생성됩니다.
                         </div>
                     `;
                     return;
                 }
 
-                // 媛뺤젏/?쎌젏 ?곗씠??遺꾨━ 異붿텧
+                // 강점/약점 데이터 분리 추출
                 const groupStats = {};
                 Object.keys(appData.domainGroups).forEach(group => {
                     groupStats[group] = { total: 0, correct: 0 };
@@ -997,65 +995,65 @@
 
                 const lowDiffHtmlKo = lowDifficultyWrong.length > 0
                     ? `<div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mt-4">
-                        <h4 class="font-bold text-amber-900 text-xs mb-2">?좑툘 ??쒕룄 ?ㅻ떟 寃쎄퀬 (湲곗큹 媛쒕뀗 ?꾩닔 媛?μ꽦)</h4>
+                        <h4 class="font-bold text-amber-900 text-xs mb-2">⚠️ 저난도 오답 경고 (기초 개념 누수 가능성)</h4>
                         <ul class="list-disc pl-4 text-xs space-y-1 text-stone-700">
-                            ${lowDifficultyWrong.map(x => `<li>Q${x.qId} 쨌 ${x.domain}</li>`).join('')}
+                            ${lowDifficultyWrong.map(x => `<li>Q${x.qId} · ${x.domain}</li>`).join('')}
                         </ul>
-                        <p class="text-[11px] text-amber-900/80 mt-2">??쒕룄 臾명빆 ?ㅻ떟? Algebra 2 ?먯껜蹂대떎 ?좎닔媛쒕뀗 寃곗넀 ?좏샇?????덉뒿?덈떎.</p>
+                        <p class="text-[11px] text-amber-900/80 mt-2">저난도 문항 오답은 Algebra 2 자체보다 선수개념 결손 신호일 수 있습니다.</p>
                     </div>`
                     : '';
 
                 const lowDiffHtmlEn = lowDifficultyWrong.length > 0
                     ? `<div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mt-4">
-                        <h4 class="font-bold text-amber-900 text-xs mb-2">?좑툘 Low-Difficulty Miss Alert</h4>
+                        <h4 class="font-bold text-amber-900 text-xs mb-2">⚠️ Low-Difficulty Miss Alert</h4>
                         <ul class="list-disc pl-4 text-xs space-y-1 text-stone-700">
-                            ${lowDifficultyWrong.map(x => `<li>Q${x.qId} 쨌 ${x.domain}</li>`).join('')}
+                            ${lowDifficultyWrong.map(x => `<li>Q${x.qId} · ${x.domain}</li>`).join('')}
                         </ul>
                         <p class="text-[11px] text-amber-900/80 mt-2">Repeated misses on easier items often indicate prerequisite gaps before Algebra 2 content.</p>
                     </div>`
                     : '';
 
-                // Prerequisite 寃곗넀 ?꾨찓???곕┰??遺꾩꽍
+                // Prerequisite 결손 도메인 연립식 분석
                 let prerequisiteHTML = "";
                 if (weakGroups.length > 0) {
-                    prerequisiteHTML = `<h4 class="font-bold text-rose-800 text-xs mb-2 border-b border-rose-50 pb-1 mt-4">?슚 Prerequisite 寃곗넀 ??텛???뚭껄??(?좎닔 怨쇱젙 寃곗넀 吏꾨떒)</h4><ul class="space-y-2 text-xs leading-relaxed text-stone-700">`;
+                    prerequisiteHTML = `<h4 class="font-bold text-rose-800 text-xs mb-2 border-b border-rose-50 pb-1 mt-4">🚨 Prerequisite 결손 역추적 소견서 (선수 과정 결손 진단)</h4><ul class="space-y-2 text-xs leading-relaxed text-stone-700">`;
                     weakGroups.forEach(wg => {
                         let traceMsg = "";
                         if (wg.name.includes("Exponents & Logs")) {
-                            traceMsg = "<b>[Pre-Algebra / Algebra 1 寃곗넀]</b> 濡쒓렇??遺?곹빀 吏꾩닔 踰붿쐞瑜??꾨씫?섎뒗 ?먯씤? 遺?깊샇 諛⑺뼢 蹂??諛?醫뚰몴 寃쎄퀎媛??ㅼ젙 ?듦? 遺議깆뿉???꾩닔?섏뿀?듬땲?? ?댁쟾 1李?遺?깆떇 議곌굔??洹쇰낯 蹂듭뒿??泥섎갑?⑸땲??";
+                            traceMsg = "<b>[Pre-Algebra / Algebra 1 결손]</b> 로그의 부적합 진수 범위를 누락하는 원인은 부등호 방향 변환 및 좌표 경계값 설정 습관 부족에서 누수되었습니다. 이전 1차 부등식 조건의 근본 복습을 처방합니다.";
                         } else if (wg.name.includes("Quadratics & Complex")) {
-                            traceMsg = "<b>[Algebra 1 / Geometry 寃곗넀]</b> 遺꾨え 耳ㅻ젅 蹂듭냼???좊━??以묒쓽 ?ㅼ감?⑥? 以묐벑 ?④퀎??臾대━???좊━??諛⑹떇 諛??ㅽ빆???꾧컻 ?⑹감 怨듭떇 $\\left((a-b)(a+b)=a^2-b^2\\right)$ ????곗궛 ?띾룄媛 ?먮┛ ?볦뿉 諛쒖깮??寃곌낵?낅땲??";
+                            traceMsg = "<b>[Algebra 1 / Geometry 결손]</b> 분모 켤레 복소수 유리화 중의 오차율은 중등 단계의 무리수 유리화 방식 및 다항식 전개 합차 공식 $\\left((a-b)(a+b)=a^2-b^2\\right)$ 대입 연산 속도가 느린 탓에 발생한 결과입니다.";
                         } else if (wg.name.includes("Trigonometry")) {
-                            traceMsg = "<b>[以묓븰 湲고븯??/ 7-8?숇뀈 Math 寃곗넀]</b> ?뱀닔媛??⑥쐞??醫뚰몴 ?꾩텧 ?ㅼ닔???쇨컖????쓬鍮?諛??뱀닔 ?쇨컖??$1:2:\\sqrt{3}$ 鍮꾩쑉???낆껜?곸씤 ?쒓컖???덈젴??癒몃┸?띿뿉 ?뺥삎?붾릺吏 紐삵븳 ??湲곗씤?⑸땲??";
+                            traceMsg = "<b>[중학 기하학 / 7-8학년 Math 결손]</b> 특수각 단위원 좌표 도출 실수는 삼각형 닮음비 및 특수 삼각형 $1:2:\\sqrt{3}$ 비율의 입체적인 시각화 훈련이 머릿속에 정형화되지 못한 데 기인합니다.";
                         } else if (wg.name.includes("Systems & Matrices")) {
-                            traceMsg = "<b>[Pre-Algebra ?곕┰ ?쇱감??寃곗넀]</b> 3???곕┰諛⑹젙?????以??섏떇???꾧컻媛 吏?섏튂寃?湲??먯씤? 湲곕낯 媛媛???낅쾿??湲곌퀎???곗궛 ?숇떖?꾧? 誘몄꽦?숉븯???곗궛 ?ㅻ쪟瑜??좊컻?섍퀬 ?덇린 ?뚮Ц?낅땲??";
+                            traceMsg = "<b>[Pre-Algebra 연립 일차식 결손]</b> 3원 연립방정식 풀이 중 수식의 전개가 지나치게 긴 원인은 기본 가감/대입법의 기계적 연산 숙달도가 미성숙하여 연산 오류를 유발하고 있기 때문입니다.";
                         } else {
-                            traceMsg = "<b>[Pre-requisite Trace]</b> ?섏쐞 ????곸뿭??臾몄옄 移섑솚 洹쒖튃怨??묐? 吏????닔 怨깆뀍 泥섎━ 以??깃툒???꾧린 遺二쇱쓽媛 諛쒓껄?섎ŉ, 瑗쇨세???곗뒿???뺤꽌(Work write-down) ?덈젴???쒓툒?⑸땲??";
+                            traceMsg = "<b>[Pre-requisite Trace]</b> 하위 대수 영역의 문자 치환 규칙과 양변 지수 역수 곱셈 처리 중 성급한 필기 부주의가 발견되며, 꼼꼼한 연습장 정서(Work write-down) 훈련이 시급합니다.";
                         }
                         prerequisiteHTML += `<li class="bg-rose-50/50 p-2.5 rounded-lg border-l-4 border-rose-400">${traceMsg}</li>`;
                     });
                     prerequisiteHTML += `</ul>`;
                 }
 
-                // ?쒖쁺 ?좏깮 蹂??
+                // 한영 선택 변환
                 if (isKo) {
                     board.innerHTML = `
                         <div class="space-y-4">
                             <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 text-indigo-950 text-xs">
-                                ?뱼 <strong>?숇?紐??곷떞??醫낇빀 吏꾨떒 ?됯? 遺꾩꽍:</strong><br><br>
-                                <span class="font-bold text-indigo-600 text-sm">${studentName}</span> ?숈깮???깆쟻? 珥?40臾명빆 以?<span class="font-bold text-indigo-600 text-sm">${totalCorrect}</span>?먯쓣 痍⑤뱷?섏뿬 ?뺣떟瑜?<strong>${accuracy}%</strong>瑜?蹂댁씠怨??덉뒿?덈떎. <br>
-                                ?꾩옱 痍⑤뱷 ?깆쟻?쇰줈??誘멸뎅 紐낅Ц 蹂대뵫?ㅼ엥 ?됯퇏 ?듦낵?좎뿉 湲곕컲????
-                                <span class="text-rose-600 font-bold">${totalCorrect >= 35 ? 'Honors Pre-Calculus 利됯컖 諛곗젙???덉긽' : totalCorrect >= 28 ? 'Regular Pre-Calculus 諛섏쑝濡?臾대궃??吏꾪븰??寃? : '諛⑺븰 蹂댁땐??媛뺣젰???섎즺?댁빞 ?뺤긽 諛곗젙??寃?}</span>?쇰줈 ?먮떒?⑸땲??
+                                📢 <strong>학부모 상담용 종합 진단 평가 분석:</strong><br><br>
+                                <span class="font-bold text-indigo-600 text-sm">${studentName}</span> 학생의 성적은 총 40문항 중 <span class="font-bold text-indigo-600 text-sm">${totalCorrect}</span>점을 취득하여 정답률 <strong>${accuracy}%</strong>를 보이고 있습니다. <br>
+                                현재 취득 성적으로는 미국 명문 보딩스쿨 평균 통과선에 기반할 때 
+                                <span class="text-rose-600 font-bold">${totalCorrect >= 35 ? 'Honors Pre-Calculus 즉각 배정이 예상' : totalCorrect >= 28 ? 'Regular Pre-Calculus 반으로 무난히 진학할 것' : '방학 보충을 강력히 수료해야 정상 배정될 것'}</span>으로 판단됩니다.
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                 <div class="bg-stone-50 border border-stone-200 rounded-xl p-4">
-                                    <h4 class="font-bold text-emerald-800 text-xs mb-2 border-b border-emerald-100 pb-1">?뙚 媛뺤젏 遺꾩꽍 ?곸뿭 (Mastered)</h4>
-                                    ${strongGroups.length > 0 ? `<ul class="list-disc pl-4 text-xs space-y-1 text-stone-700">${strongGroups.map(g => `<li><strong>${g.name}</strong> (?깆랬?? ${Math.round(g.rate*100)}%)</li>`).join('')}</ul>` : '<p class="text-xs text-stone-400">?깆랬 吏??80% ?댁긽 留덉뒪???⑥썝???꾩쭅 諛쒓껄?섏? ?딆븯?듬땲??</p>'}
+                                    <h4 class="font-bold text-emerald-800 text-xs mb-2 border-b border-emerald-100 pb-1">🌟 강점 분석 영역 (Mastered)</h4>
+                                    ${strongGroups.length > 0 ? `<ul class="list-disc pl-4 text-xs space-y-1 text-stone-700">${strongGroups.map(g => `<li><strong>${g.name}</strong> (성취율: ${Math.round(g.rate*100)}%)</li>`).join('')}</ul>` : '<p class="text-xs text-stone-400">성취 지표 80% 이상 마스터 단원이 아직 발견되지 않았습니다.</p>'}
                                 </div>
                                 <div class="bg-stone-50 border border-stone-200 rounded-xl p-4">
-                                    <h4 class="font-bold text-rose-800 text-xs mb-2 border-b border-rose-100 pb-1">?좑툘 ?쎌젏 移섎즺 ?곸뿭 (Weakness)</h4>
-                                    ${weakGroups.length > 0 ? `<ul class="list-disc pl-4 text-xs space-y-1 text-stone-700">${weakGroups.map(g => `<li><strong>${g.name}</strong> (?깆랬?? ${Math.round(g.rate*100)}%)</li>`).join('')}</ul>` : '<p class="text-xs text-stone-400">?깆랬??60% ?댄븯 ?꾪뿕 ?⑥썝??諛쒓껄?섏? ?딆븯?듬땲?? ?뚮??⑸땲??</p>'}
+                                    <h4 class="font-bold text-rose-800 text-xs mb-2 border-b border-rose-100 pb-1">⚠️ 약점 치료 영역 (Weakness)</h4>
+                                    ${weakGroups.length > 0 ? `<ul class="list-disc pl-4 text-xs space-y-1 text-stone-700">${weakGroups.map(g => `<li><strong>${g.name}</strong> (성취율: ${Math.round(g.rate*100)}%)</li>`).join('')}</ul>` : '<p class="text-xs text-stone-400">성취도 60% 이하 위험 단원이 발견되지 않았습니다. 훌륭합니다!</p>'}
                                 </div>
                             </div>
 
@@ -1067,24 +1065,24 @@
                     board.innerHTML = `
                         <div class="space-y-4">
                             <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 text-indigo-950 text-xs">
-                                ?뱼 <strong>Official Diagnostic Report Card:</strong><br><br>
+                                📢 <strong>Official Diagnostic Report Card:</strong><br><br>
                                 Student <span class="font-bold text-indigo-600 text-sm">${studentName}</span> has scored <span class="font-bold text-indigo-600 text-sm">${totalCorrect}</span> out of 40 questions, achieving an accuracy of <strong>${accuracy}%</strong>.<br>
                                 Based on competitive US High School Cut-off benchmarks, <span class="text-rose-600 font-bold">${totalCorrect >= 35 ? 'immediate admission to Honors Pre-Calculus is highly likely.' : totalCorrect >= 28 ? 'placement into Regular Pre-Calculus is predicted.' : 'intensive summer intervention is strongly recommended.'}</span>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                 <div class="bg-stone-50 border border-stone-200 rounded-xl p-4">
-                                    <h4 class="font-bold text-emerald-800 text-xs mb-2 border-b border-emerald-100 pb-1">?뙚 Strong Areas (Mastered)</h4>
+                                    <h4 class="font-bold text-emerald-800 text-xs mb-2 border-b border-emerald-100 pb-1">🌟 Strong Areas (Mastered)</h4>
                                     ${strongGroups.length > 0 ? `<ul class="list-disc pl-4 text-xs space-y-1 text-stone-700">${strongGroups.map(g => `<li><strong>${g.name}</strong> (${Math.round(g.rate*100)}%)</li>`).join('')}</ul>` : '<p class="text-xs text-stone-400">No mastered area detected (Need &gt;80% accuracy).</p>'}
                                 </div>
                                 <div class="bg-stone-50 border border-stone-200 rounded-xl p-4">
-                                    <h4 class="font-bold text-rose-800 text-xs mb-2 border-b border-rose-100 pb-1">?좑툘 High Priority Weaknesses</h4>
+                                    <h4 class="font-bold text-rose-800 text-xs mb-2 border-b border-rose-100 pb-1">⚠️ High Priority Weaknesses</h4>
                                     ${weakGroups.length > 0 ? `<ul class="list-disc pl-4 text-xs space-y-1 text-stone-700">${weakGroups.map(g => `<li><strong>${g.name}</strong> (${Math.round(g.rate*100)}%)</li>`).join('')}</ul>` : '<p class="text-xs text-stone-400">Excellent! No weak areas detected (&lt;60% accuracy).</p>'}
                                 </div>
                             </div>
 
                             ${lowDiffHtmlEn}
-                            ${prerequisiteHTML ? prerequisiteHTML.replace(/?슚 Prerequisite 寃곗넀 ??텛???뚭껄??g, "?슚 Prerequisite Gap Track Report").replace(/?좎닔 怨쇱젙 寃곗넀 吏꾨떒/g, "Diagnostics of Pre-academic gaps") : ""}
+                            ${prerequisiteHTML ? prerequisiteHTML.replace(/🚨 Prerequisite 결손 역추적 소견서/g, "🚨 Prerequisite Gap Track Report").replace(/선수 과정 결손 진단/g, "Diagnostics of Pre-academic gaps") : ""}
                         </div>
                     `;
                 }
@@ -1114,7 +1112,7 @@
                     this.chartInstance.destroy();
                 }
 
-                // ?꾨찓??洹몃９ ?곗씠??媛怨?
+                // 도메인 그룹 데이터 가공
                 const labels = Object.keys(appData.domainGroups);
                 const scoreData = labels.map(group => {
                     const questionIds = appData.domainGroups[group];
@@ -1124,14 +1122,14 @@
                     return Math.round((correct.length / questionIds.length) * 100);
                 });
 
-                // ChartJS Annotation ?뚮윭洹몄씤 ?고쉶 援ы쁽 (?덉젙??媛?대뱶?쇱씤???곗씠?곗뀑?쇰줈 泥섎━?섏뿬 異⑸룎 諛⑹?)
+                // ChartJS Annotation 플러그인 우회 구현 (안정선 가이드라인을 데이터셋으로 처리하여 충돌 방지)
                 this.chartInstance = new Chart(ctx, {
                     type: 'bar',
                     data: {
                         labels: labels,
                         datasets: [
                             {
-                                label: '?ㅼ떆媛??곸뿭 ?깆랬??(%)',
+                                label: '실시간 영역 성취율 (%)',
                                 data: scoreData,
                                 backgroundColor: '#6366f1',
                                 borderRadius: 8,
@@ -1139,7 +1137,7 @@
                                 order: 2
                             },
                             {
-                                label: 'Honors ?덉젙??(88%)',
+                                label: 'Honors 안정선 (88%)',
                                 data: Array(labels.length).fill(88),
                                 type: 'line',
                                 borderColor: '#ef4444',
@@ -1150,7 +1148,7 @@
                                 order: 1
                             },
                             {
-                                label: 'Regular ?듦낵??(70%)',
+                                label: 'Regular 통과선 (70%)',
                                 data: Array(labels.length).fill(70),
                                 type: 'line',
                                 borderColor: '#f59e0b',
@@ -1236,13 +1234,13 @@
                 this.updateLiveAnalytics();
             },
 
-            // ?숈깮 ?깅줉 & 濡쒖뺄 ?곌퀎 濡쒖쭅
+            // 학생 등록 & 로컬 연계 로직
             registerStudent() {
                 const name = document.getElementById('student-name').value.trim();
                 const phone = document.getElementById('student-phone').value.trim();
 
                 if (!name || !phone) {
-                    alert("?숈깮???대쫫 and ?꾪솕踰덊샇 ??4?먮━瑜?紐⑤몢 ?낅젰?섏꽭??");
+                    alert("학생의 이름 and 전화번호 뒤 4자리를 모두 입력하세요.");
                     return;
                 }
 
@@ -1260,14 +1258,14 @@
                 this.omrMarks = [...this.activeStudent.marks];
                 this.savedVariants = this.activeStudent.savedVariants || [];
 
-                // OMR 酉고룷???곹깭 ?숆린??泥섎━
+                // OMR 뷰포트 상태 동기화 처리
                 this.syncOmrMarkView();
                 this.saveStudentDb();
                 this.renderSavedVariantsList();
 
-                document.getElementById('active-student-badge').innerHTML = `?꾩옱 遺꾩꽍 以묒씤 ?숈깮: <span class="text-indigo-600 font-bold">${name} (${phone})</span>`;
+                document.getElementById('active-student-badge').innerHTML = `현재 분석 중인 학생: <span class="text-indigo-600 font-bold">${name} (${phone})</span>`;
                 this.updateLiveAnalytics();
-                alert(`?숈깮 [${name}] ?곗씠??濡쒕뱶 ?꾨즺.`);
+                alert(`학생 [${name}] 데이터 로드 완료.`);
             },
 
             syncOmrMarkView() {
@@ -1306,7 +1304,7 @@
                 this.renderSavedVariantsList();
                 document.getElementById('student-name').value = "";
                 document.getElementById('student-phone').value = "";
-                document.getElementById('active-student-badge').textContent = "?꾩옱 遺꾩꽍 以묒씤 ?숈깮: ?놁쓬 (?대쫫???깅줉??二쇱꽭??";
+                document.getElementById('active-student-badge').textContent = "현재 분석 중인 학생: 없음 (이름을 등록해 주세요)";
                 this.updateLiveAnalytics();
             },
 
@@ -1356,10 +1354,10 @@
                 if (!badge) return;
 
                 if (activeKey) {
-                    badge.textContent = "????λ맖";
+                    badge.textContent = "키 저장됨";
                     badge.className = "text-[10px] bg-stone-100 text-stone-700 px-2 py-0.5 rounded-md font-bold";
                 } else {
-                    badge.textContent = "API Key ?꾩슂";
+                    badge.textContent = "API Key 필요";
                     badge.className = "text-[10px] bg-rose-100 text-rose-800 px-2 py-0.5 rounded-md font-bold";
                 }
             },
@@ -1369,13 +1367,13 @@
                 if (!badge) return;
 
                 const styles = {
-                    idle: ["????λ맖", "text-[10px] bg-stone-100 text-stone-700 px-2 py-0.5 rounded-md font-bold"],
-                    checking: ["?곌껐 ?뺤씤 以?..", "text-[10px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-md font-bold animate-pulse"],
-                    success: ["AI ???뺤긽 ?곌껐", "text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md font-bold"],
-                    auth: ["?몄쬆 ?ㅻ쪟 (401/403)", "text-[10px] bg-rose-100 text-rose-800 px-2 py-0.5 rounded-md font-bold"],
-                    quota: ["荑쇳꽣 ?쒗븳 (429)", "text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md font-bold"],
-                    request: ["?붿껌 ?뺤떇 ?ㅻ쪟 (400)", "text-[10px] bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-md font-bold"],
-                    network: ["?ㅽ듃?뚰겕/CORS ?ㅻ쪟", "text-[10px] bg-violet-100 text-violet-800 px-2 py-0.5 rounded-md font-bold"]
+                    idle: ["키 저장됨", "text-[10px] bg-stone-100 text-stone-700 px-2 py-0.5 rounded-md font-bold"],
+                    checking: ["연결 확인 중...", "text-[10px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-md font-bold animate-pulse"],
+                    success: ["AI 키 정상 연결", "text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md font-bold"],
+                    auth: ["인증 오류 (401/403)", "text-[10px] bg-rose-100 text-rose-800 px-2 py-0.5 rounded-md font-bold"],
+                    quota: ["쿼터 제한 (429)", "text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md font-bold"],
+                    request: ["요청 형식 오류 (400)", "text-[10px] bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-md font-bold"],
+                    network: ["네트워크/CORS 오류", "text-[10px] bg-violet-100 text-violet-800 px-2 py-0.5 rounded-md font-bold"]
                 };
 
                 const [text, className] = styles[state] || styles.idle;
@@ -1454,7 +1452,7 @@
                 let lastError = null;
                 for (let attempt = 0; attempt < 2; attempt++) {
                     try {
-                        const response = await fetch(${this.getGeminiEndpoint()}?key=, {
+                        const response = await fetch(`${this.getGeminiEndpoint()}?key=${encodeURIComponent(apiKey)}`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(payload)
@@ -1502,8 +1500,8 @@
                 const q = appData.questions.find(x => x.id === this.currentQuestion);
                 chatLogs.innerHTML = `
                     <div class="p-2.5 bg-indigo-50 border border-indigo-100 rounded-lg mb-2">
-                        ?덈뀞?섏꽭?? ?????섑븰???뺥솗??吏꾨떒???쒕━????AI ?섑븰 ?쒗꽣?낅땲?? <br>
-                        ?꾩옱 ?좏깮?섏떊 <b>Question ${q.id}</b> ?⑥썝? <b>[${q.domain}]</b> ?낅땲?? ?꾨옒?????꾨━???⑥텛瑜??꾨Ⅴ嫄곕굹, ?몃? ?곗궛 怨쇱젙??吏곸젒 臾쇱뼱蹂댁꽭??
+                        안녕하세요! 저는 대수학을 정확히 진단해 드리는 ✨ AI 수학 튜터입니다. <br>
+                        현재 선택하신 <b>Question ${q.id}</b> 단원은 <b>[${q.domain}]</b> 입니다. 아래의 퀵 프리셋 단추를 누르거나, 세부 연산 과정을 직접 물어보세요!
                     </div>
                 `;
             },
@@ -1580,7 +1578,7 @@
                 this.isTutorBusy = true;
                 this.setTutorControlsDisabled(true);
 
-                // ?ъ슜??吏덈Ц ?쎌엯
+                // 사용자 질문 삽입
                 const userBubble = document.createElement('div');
                 userBubble.className = "bg-stone-100 text-stone-800 p-2.5 rounded-xl max-w-[85%] ml-auto mb-2 text-right font-medium text-xs";
                 userBubble.innerHTML = `<b>Student Query:</b> ${query}`;
@@ -1590,25 +1588,25 @@
                 loader.classList.remove('hidden');
 
                 const currentQ = appData.questions.find(x => x.id === this.currentQuestion);
-                const isVariantRequest = query.includes("?띾뫁??) || query.includes("蹂??) || query.includes("?좎궗") || query.toLowerCase().includes("variant");
+                const isVariantRequest = query.includes("쌍둥이") || query.includes("변형") || query.includes("유사") || query.toLowerCase().includes("variant");
                 const enhancedQuery = isVariantRequest
                     ? `${query}
 
-諛섎뱶???꾨옒 ?뺤떇?쇰줈 ?앷퉴吏 ?묒꽦?섏꽭??
-1. ??蹂??臾몄젣: ?먮Ц怨??レ옄/?곹솴? ?ㅻⅤ寃? 媛숈? ?섑븰 援ъ“? 媛숈? ?쒖씠?꾨줈 ?묒꽦
-2. ?뺣떟: 理쒖쥌 ?듬쭔 ??以꾨줈 紐낆떆
-3. ??? 4~7?④퀎濡?怨꾩궛 怨쇱젙???꾩꽦
-4. 寃??議곌굔 ?뺤씤: ?뺤쓽??議곌굔, 遺꾨え=0 ?щ?, ?먯떇 ???寃?????꾩슂???뺤씤 ?ы븿
-5. ?숈깮 二쇱쓽?? ???먮Ц怨?媛숈? ?쎌젏???먭??섎뒗吏 2臾몄옣
+반드시 아래 형식으로 끝까지 작성하세요.
+1. 새 변형 문제: 원문과 숫자/상황은 다르게, 같은 수학 구조와 같은 난이도로 작성
+2. 정답: 최종 답만 한 줄로 명시
+3. 풀이: 4~7단계로 계산 과정을 완성
+4. 검산/조건 확인: 정의역 조건, 분모=0 여부, 원식 대입 검산 등 필요한 확인 포함
+5. 학생 주의점: 왜 원문과 같은 약점을 점검하는지 2문장
 
-?섏떇? 諛섎뱶???꾩꽦??MathJax濡??묒꽦?섍퀬, ?대┛ $ ?먮뒗 $$瑜??④린吏 留덉꽭??`
+수식은 반드시 완성된 MathJax로 작성하고, 열린 $ 또는 $$를 남기지 마세요.`
                     : query;
                 const sysPrompt = `You are a world-class pedagogically precise AI Math Tutor. Your objective is to assist high school freshmen preparing for their US Algebra 2 Placement Test.
 Provide extremely clear mathematical proofs with zero mistakes.
 Ensure all mathematical variables, formulas, and divisions are formatted perfectly in MathJax LaTeX.
 Use standard single dollar signs ($) for inline formulas like $\\frac{a}{b}$ and double dollar signs ($$) for block formulas.
 Output Korean and English together when useful, but keep Korean terminology aligned with the Korean math curriculum.
-For domain-invalid solutions, Korean output must use "?닿? ?????녿뒗 媛?遺꾨え=0)" or "?뺤쓽??議곌굔 遺덈쭔議???.
+For domain-invalid solutions, Korean output must use "해가 될 수 없는 값(분모=0)" or "정의역 조건 불만족 해".
 If English is required, write "solution that violates the domain condition".
 Do not output markdown bold markers such as **text**. Use short paragraphs, numbered steps, and MathJax only.
 Current Problem Context:
@@ -1624,11 +1622,11 @@ If the student asks for a twin or variant problem, write a completely new proble
                     aiBubble.className = "bg-indigo-50 border border-indigo-100 p-3 rounded-xl max-w-[85%] mr-auto mb-2 text-xs";
                     aiBubble.innerHTML = `<b>AI Tutor:</b><br><br>${this.formatAiHtml(reply)}`;
 
-                    // ?띾뫁??蹂??臾몄젣??寃쎌슦, ?ㅻ떟 ?대┰蹂대뱶???닿린 踰꾪듉 ?숈쟻 ?뚮뜑留?
+                    // 쌍둥이 변형 문제인 경우, 오답 클립보드에 담기 버튼 동적 렌더링
                     if (isVariantRequest) {
                         const saveBtn = document.createElement('button');
                         saveBtn.className = "mt-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-2 py-1 rounded text-[10px] block transition-all shadow-sm";
-                        saveBtn.textContent = "??蹂??臾몄젣瑜??ㅻ떟?명듃?????;
+                        saveBtn.textContent = "이 변형 문제를 오답노트에 저장";
                         saveBtn.onclick = () => this.saveVariantToLocal(currentQ.id, reply);
                         aiBubble.appendChild(saveBtn);
                     }
@@ -1639,7 +1637,7 @@ If the student asks for a twin or variant problem, write a completely new proble
                 } catch (e) {
                     const errBubble = document.createElement('div');
                     errBubble.className = "bg-rose-50 border border-rose-100 text-rose-800 p-2.5 rounded-xl max-w-[85%] mr-auto mb-2 text-xs";
-                    errBubble.innerHTML = `?좑툘 <b>?ㅻ쪟 諛쒖깮:</b> ${e.message}`;
+                    errBubble.innerHTML = `⚠️ <b>오류 발생:</b> ${e.message}`;
                     chatLogs.appendChild(errBubble);
                 } finally {
                     this.isTutorBusy = false;
@@ -1664,14 +1662,14 @@ If the student asks for a twin or variant problem, write a completely new proble
 
             saveVariantToLocal(parentQId, variantContent) {
                 if (!this.activeStudent) {
-                    alert("?숈깮 ?곗씠?곌? 濡쒕뱶?섏? ?딆븯?듬땲?? 癒쇱? ?곷떒???깅줉??二쇱꽭??");
+                    alert("학생 데이터가 로드되지 않았습니다. 먼저 상단에 등록해 주세요.");
                     return;
                 }
 
-                // 以묐났 寃??
+                // 중복 검사
                 const exists = this.savedVariants.some(v => v.content === variantContent);
                 if (exists) {
-                    alert("?대? ?숈씪??臾명빆??蹂닿??⑥뿉 議댁옱?⑸땲??");
+                    alert("이미 동일한 문항이 보관함에 존재합니다.");
                     return;
                 }
 
@@ -1683,17 +1681,17 @@ If the student asks for a twin or variant problem, write a completely new proble
 
                 this.autoSaveCurrentStudent();
                 this.renderSavedVariantsList();
-                alert("?좎궗 臾명빆???숈깮 ?ㅻ떟 ?대┰蹂대뱶??臾댁궗??蹂닿??섏뿀?듬땲??");
+                alert("유사 문항이 학생 오답 클립보드에 무사히 보관되었습니다.");
             },
 
             renderSavedVariantsList() {
                 const container = document.getElementById('saved-variants-container');
                 const badge = document.getElementById('saved-variants-count');
 
-                badge.textContent = `${this.savedVariants.length}媛???λ맖`;
+                badge.textContent = `${this.savedVariants.length}개 저장됨`;
 
                 if (this.savedVariants.length === 0) {
-                    container.innerHTML = `<div class="text-center py-8 text-xs text-stone-400">??λ맂 ?좎궗 臾명빆???놁뒿?덈떎. ?쒗꽣??????以?臾명빆???댁븘 蹂댁꽭??</div>`;
+                    container.innerHTML = `<div class="text-center py-8 text-xs text-stone-400">저장된 유사 문항이 없습니다. 튜터와의 대화 중 문항을 담아 보세요!</div>`;
                     return;
                 }
 
@@ -1702,7 +1700,7 @@ If the student asks for a twin or variant problem, write a completely new proble
                     const card = document.createElement('div');
                     card.className = "bg-stone-50 border border-stone-200 p-3 rounded-xl relative hover:bg-stone-100/60 transition-all text-[11px] leading-relaxed";
                     card.innerHTML = `
-                        <button onclick="app.removeVariant(${index})" class="absolute top-2 right-2 text-rose-500 hover:text-rose-700 font-bold">??/button>
+                        <button onclick="app.removeVariant(${index})" class="absolute top-2 right-2 text-rose-500 hover:text-rose-700 font-bold">✕</button>
                         <div class="font-bold text-indigo-700 mb-1">Variant from Q${v.parentQId}</div>
                         <div class="text-stone-700 line-clamp-3 overflow-hidden text-ellipsis">${v.content.substring(0, 100)}...</div>
                     `;
@@ -1716,7 +1714,7 @@ If the student asks for a twin or variant problem, write a completely new proble
                 this.renderSavedVariantsList();
             },
 
-            // 10?뚯감 而ㅼ뒪? 濡쒕뱶留?鍮뚮뜑 濡쒖쭅
+            // 10회차 커스텀 로드맵 빌더 로직
             async buildCustomCurriculum() {
                 const checkboxes = document.querySelectorAll('.domain-checkbox:checked');
                 const checkedDomains = Array.from(checkboxes).map(x => x.value);
@@ -1724,7 +1722,7 @@ If the student asks for a twin or variant problem, write a completely new proble
                 const requestedMinutes = Math.max(30, Math.min(240, Number(document.getElementById('curriculum-session-minutes')?.value || 120)));
 
                 if (checkedDomains.length === 0) {
-                    alert("理쒖냼 ?섎굹???쎌젏 移섎즺 ?⑥썝???좏깮??二쇱떆湲?諛붾엻?덈떎.");
+                    alert("최소 하나의 약점 치료 단원을 선택해 주시기 바랍니다.");
                     return;
                 }
 
@@ -1738,7 +1736,7 @@ Requirements:
 1. Prioritize these checked domains deeply. Make sure they have concrete mathematical topics like Vertex Form conversions, Complex conjugates, Unit circles, domain-condition checks for rational equations, and standard fraction formulas in LaTeX format.
 2. Each session is exactly ${requestedMinutes} minutes.
 3. Ensure there is a midterm simulated evaluation around the middle session, and a final placement examination at the last session.
-4. Korean curriculum terminology rule: use "?닿? ?????녿뒗 媛?遺꾨え=0)" or "?뺤쓽??議곌굔 遺덈쭔議??? for domain-invalid solutions.
+4. Korean curriculum terminology rule: use "해가 될 수 없는 값(분모=0)" or "정의역 조건 불만족 해" for domain-invalid solutions.
 5. Include both Korean and English when useful, but keep the returned title and desc fields in polished Korean.
 6. Do not use markdown bold markers such as **text**.
 7. Output MUST be a clean JSON list matching this schema exactly:
@@ -1777,12 +1775,12 @@ Requirements:
                         parsed.curriculum.slice(0, requestedSessions).forEach(c => {
                             this.appendCurriculumCard(container, c.id, c.title, c.desc);
                         });
-                        alert("AI ?뺣? ?쒕떇 濡쒕뱶留?鍮뚮뱶媛 ?뺤긽 ?꾨즺?섏뿀?듬땲??");
+                        alert("AI 정밀 튜닝 로드맵 빌드가 정상 완료되었습니다.");
                     } else {
-                        throw new Error("?뺤긽?곸씤 ?곗씠??紐⑤뜽 洹쒓꺽??諛섑솚?섏? ?딆븯?듬땲??");
+                        throw new Error("정상적인 데이터 모델 규격이 반환되지 않았습니다.");
                     }
                 } catch (e) {
-                    alert(`AI 而ㅻ━?섎읆 鍮뚮뜑 ?묐룞 以??쇱떆??吏??諛쒖깮: ${e.message}\n湲곕낯 寃利앸맂 而ㅻ━?섎읆?쇰줈 ?由??몄텧?⑸땲??`);
+                    alert(`AI 커리큘럼 빌더 작동 중 일시적 지연 발생: ${e.message}\n기본 검증된 커리큘럼으로 대리 노출합니다.`);
                     this.renderStandardCurriculum();
                 } finally {
                     loader.classList.add('hidden');
@@ -1797,7 +1795,7 @@ Requirements:
                 const reportNode = document.getElementById('tab-analysis');
                 const studentName = (this.activeStudent && this.activeStudent.name) ? this.activeStudent.name : "student";
                 if (!reportNode) {
-                    alert("由ы룷???곸뿭??李얠쓣 ???놁뒿?덈떎.");
+                    alert("리포트 영역을 찾을 수 없습니다.");
                     return;
                 }
 
@@ -1812,7 +1810,7 @@ Requirements:
                 URL.revokeObjectURL(link.href);
             },
 
-            // ?꾨┛??紐⑤떖 而⑦듃濡?
+            // 프린트 모달 컨트롤
             openPrintModal() {
                 document.getElementById('print-modal').classList.remove('hidden');
             },
@@ -1821,7 +1819,7 @@ Requirements:
                 document.getElementById('print-modal').classList.add('hidden');
             },
 
-            // ?뼥截??몄뇙 理쒖쟻???붿쭊: ??李쎌쓣 ?꾩썙 源⑥쭚 ?꾩긽??洹쇰낯?곸쑝濡??닿껐
+            // 🖨️ 인쇄 최적화 엔진: 새 창을 띄워 깨짐 현상을 근본적으로 해결
             runPrintProcess(type) {
                 const printWin = window.open('', '_blank');
                 let bodyContent = "";
@@ -1862,7 +1860,7 @@ Requirements:
                             <div class="sub">Standard Placement Assessment (40 Questions) - Time Allowed: 120 Minutes</div>
 
                             <div class="diag-box">
-                                <strong>?좑툘 STUDENT INSTRUCTIONS:</strong><br>
+                                <strong>⚠️ STUDENT INSTRUCTIONS:</strong><br>
                                 1. Section 1 (Q1 - Q20): Calculator is STRICTLY PROHIBITED. Hand-written work is graded.<br>
                                 2. Section 2 (Q21 - Q40): TI-84 graphing or scientific calculators are permitted.<br>
                                 3. Write all intermediary quadratic formulas, matrix arrays, and log steps within the workspaces.
@@ -1930,10 +1928,10 @@ Requirements:
                     bodyContent += `</div></body></html>`;
 
                 } else if (type === 'report') {
-                    // ?깆쟻??蹂닿퀬???몄뇙 (?쒓?/?곸뼱 ?숈쟻 蹂듯빀 ?뚮뜑)
+                    // 성적표 보고서 인쇄 (한글/영어 동적 복합 렌더)
                     const totalCorrect = this.omrMarks.filter(x => x === true).length;
                     const accuracy = Math.round((totalCorrect / 40) * 100);
-                    const sName = this.activeStudent ? this.activeStudent.name : "?쇰컲 ?숈깮";
+                    const sName = this.activeStudent ? this.activeStudent.name : "일반 학생";
                     const sPhone = this.activeStudent ? this.activeStudent.phone : "None";
 
                     const textReportDiv = document.getElementById('diagnosis-text-report-board').innerHTML;
@@ -1963,31 +1961,31 @@ Requirements:
                                 </tr>
                             </table>
 
-                            <div class="sec-title">1. AI ?뺣? ?쎌젏 異붿쟻 遺꾩꽍 ?뚭껄</div>
+                            <div class="sec-title">1. AI 정밀 약점 추적 분석 소견</div>
                             <div class="diag-box" style="background-color:#ffffff; border:1px solid #ddd6fe;">
                                 ${textReportDiv}
                             </div>
 
                             <div style="page-break-before: always;"></div>
-                            <div class="sec-title">2. AI 泥섎갑 10?뚯감 留욎땄 而ㅻ━?섎읆</div>
+                            <div class="sec-title">2. AI 처방 10회차 맞춤 커리큘럼</div>
                             <div style="font-size:12px; line-height:1.7;">
                     `;
 
-                    // 而ㅻ━?섎읆 ?몄뀡 由ъ뒪??蹂듭궗
+                    // 커리큘럼 세션 리스트 복사
                     const curHTML = document.getElementById('curriculum-sessions-list').innerHTML;
                     bodyContent += curHTML;
 
-                    // ??λ맂 ?섎쭔???ㅻ떟 蹂??臾명빆???덉쓣 ??諛붿씤??泥섎━
+                    // 저장된 나만의 오답 변형 문항이 있을 시 바인딩 처리
                     if (this.savedVariants.length > 0) {
                         bodyContent += `
                             <div style="page-break-before: always;"></div>
-                            <div class="sec-title">3. ?숈깮 留욎땄???띾뫁???좎궗 蹂??臾몄젣吏?(?섎쭔???쎌젏 ?ㅻ떟 ?명듃)</div>
+                            <div class="sec-title">3. 학생 맞춤형 쌍둥이 유사 변형 문제집 (나만의 약점 오답 노트)</div>
                         `;
                         this.savedVariants.forEach((v, index) => {
                             bodyContent += `
                                 <div class="card-wrap" style="background-color: #fafaf9; border-color: #cbd5e1;">
                                     <div class="card-header" style="color: #475569; border-bottom-color: #cbd5e1;">
-                                        <span>[蹂댁셿 臾명빆 ${index+1}] (Q${v.parentQId}??蹂??臾몄젣)</span>
+                                        <span>[보완 문항 ${index+1}] (Q${v.parentQId}의 변형 문제)</span>
                                     </div>
                                     <div style="font-size: 13px; line-height: 1.8;">${v.content}</div>
                                 </div>
@@ -2009,4 +2007,3 @@ Requirements:
     </script>
 </body>
 </html>
-
