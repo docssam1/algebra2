@@ -1,0 +1,541 @@
+name: Patch Gemini Diagnostics
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-index:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Patch index.html
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          from textwrap import dedent
+
+          path = Path('index.html')
+          text = path.read_text(encoding='utf-8')
+
+          if 'classifyGeminiApiError(rawError, httpStatus = 0)' in text:
+              print('Gemini diagnostics already patched.')
+          else:
+              old_button = '<button onclick="app.verifyGeminiConnection()" class="bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold px-2 py-0.5 rounded text-[10px] transition-all">연결 확인</button>\n                        <span id="api-status-badge" class="text-[10px] px-2 py-0.5 rounded-md font-bold">확인 중...</span>'
+              new_button = '<button id="gemini-verify-btn" onclick="app.verifyGeminiConnection(true)" class="bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold px-2 py-0.5 rounded text-[10px] transition-all">연결 확인</button>\n                        <span id="api-status-badge" class="text-[10px] px-2 py-0.5 rounded-md font-bold cursor-help" onclick="app.openGeminiErrorModal()">확인 중...</span>\n                        <span class="basis-full text-[10px] text-indigo-700/70 leading-snug">입력한 키는 이 브라우저에만 저장됩니다. 공개 저장소에는 저장되지 않습니다. Gemini API 전용/HTTP referrer 제한을 권장합니다.</span>'
+              if old_button not in text:
+                  raise SystemExit('API verify button snippet not found')
+              text = text.replace(old_button, new_button, 1)
+
+              old_save = """            async saveApiKey() {
+                const key = (document.getElementById('gemini-api-key')?.value || '').trim();
+                if (key) {
+                    localStorage.setItem('gemini_api_key_temp', key);
+                } else {
+                    localStorage.removeItem('gemini_api_key_temp');
+                }
+                this.updateApiKeyStatusBadge();
+                await this.verifyGeminiConnection();
+            },"""
+              new_save = """            async saveApiKey() {
+                const key = (document.getElementById('gemini-api-key')?.value || '').trim();
+                if (key) {
+                    localStorage.setItem('gemini_api_key_temp', key);
+                } else {
+                    localStorage.removeItem('gemini_api_key_temp');
+                }
+                localStorage.removeItem('gemini_verify_cache_v2');
+                this.lastGeminiDiagnosis = null;
+                this.updateApiKeyStatusBadge();
+            },"""
+              if old_save not in text:
+                  raise SystemExit('saveApiKey snippet not found')
+              text = text.replace(old_save, new_save, 1)
+
+              old_status = """            setApiStatusBadge(state, detail = "") {
+                const badge = document.getElementById('api-status-badge');
+                if (!badge) return;
+
+                const styles = {
+                    idle: ["Key saved", "text-[10px] bg-stone-100 text-stone-700 px-2 py-0.5 rounded-md font-bold"],
+                    checking: ["Checking...", "text-[10px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-md font-bold animate-pulse"],
+                    success: ["AI connected", "text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md font-bold"],
+                    auth: ["Auth error", "text-[10px] bg-rose-100 text-rose-800 px-2 py-0.5 rounded-md font-bold"],
+                    quota: ["429 error", "text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md font-bold"],
+                    request: ["Bad request", "text-[10px] bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-md font-bold"],
+                    network: ["Network/CORS", "text-[10px] bg-violet-100 text-violet-800 px-2 py-0.5 rounded-md font-bold"]
+                };
+
+                const [text, className] = styles[state] || styles.idle;
+                const shortDetail = detail ? `: ${String(detail).slice(0, 80)}` : "";
+                badge.textContent = `${text}${shortDetail}`;
+                badge.className = className;
+                badge.title = detail || text;
+            },
+
+            getGeminiErrorMessage(result, fallback = "AI request failed.") {
+                const message = result?.error?.message || result?.error || fallback;
+                const details = Array.isArray(result?.error?.details)
+                    ? result.error.details
+                        .map((item) => item?.reason || item?.violations?.[0]?.quotaMetric || "")
+                        .filter(Boolean)
+                        .join(" / ")
+                    : "";
+                return details ? `${message} (${details})` : message;
+            },
+            async verifyGeminiConnection() {
+                const apiKey = this.getApiKey();
+                if (!apiKey) {
+                    this.setApiStatusBadge('auth');
+                    return false;
+                }
+
+                this.setApiStatusBadge('checking');
+                try {
+                    const response = await fetch(`${this.getGeminiEndpoint()}?key=${encodeURIComponent(apiKey)}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: 'ping' }] }],
+                            systemInstruction: { parts: [{ text: 'Return only pong.' }] },
+                            generationConfig: { maxOutputTokens: 16 }
+                        })
+                    });
+
+                    if (response.ok) {
+                        this.setApiStatusBadge('success');
+                        return true;
+                    }
+
+                    const result = await response.json().catch(() => ({}));
+                    const message = this.getGeminiErrorMessage(result, `HTTP ${response.status}`);
+                    if (response.status === 401 || response.status === 403) {
+                        this.setApiStatusBadge('auth', message);
+                    } else if (response.status === 429) {
+                        this.setApiStatusBadge('quota', message);
+                    } else if (response.status === 400) {
+                        this.setApiStatusBadge('request', message);
+                    } else {
+                        this.setApiStatusBadge('network', message);
+                    }
+                } catch (error) {
+                    this.setApiStatusBadge('network', error?.message || 'Network request failed');
+                }
+                return false;
+            },"""
+
+              new_status = dedent(r'''            getGeminiErrorMessage(result, fallback = "AI request failed.") {
+                const message = result?.error?.message || result?.error || fallback;
+                const details = Array.isArray(result?.error?.details)
+                    ? result.error.details
+                        .flatMap((item) => {
+                            const values = [];
+                            if (item?.reason) values.push(item.reason);
+                            if (item?.domain) values.push(item.domain);
+                            if (Array.isArray(item?.violations)) {
+                                item.violations.forEach((v) => {
+                                    if (v?.quotaMetric) values.push(v.quotaMetric);
+                                    if (v?.quotaId) values.push(v.quotaId);
+                                    if (v?.subject) values.push(v.subject);
+                                    if (v?.description) values.push(v.description);
+                                });
+                            }
+                            return values;
+                        })
+                        .filter(Boolean)
+                        .join(" / ")
+                    : "";
+                return details ? `${message} (${details})` : message;
+            },
+
+            flattenGeminiError(rawError) {
+                const error = rawError?.error || rawError || {};
+                const details = Array.isArray(error?.details) ? error.details : [];
+                const parts = [
+                    error?.message,
+                    error?.status,
+                    error?.code,
+                    ...details.flatMap((item) => [
+                        item?.reason,
+                        item?.domain,
+                        item?.metadata?.service,
+                        item?.metadata?.consumer,
+                        item?.metadata?.quota_location,
+                        item?.metadata?.quota_metric,
+                        item?.metadata?.quota_limit,
+                        ...(Array.isArray(item?.violations)
+                            ? item.violations.flatMap((v) => [v?.quotaMetric, v?.quotaId, v?.subject, v?.description])
+                            : [])
+                    ])
+                ];
+                return parts.filter(Boolean).map(String).join(' | ');
+            },
+
+            classifyGeminiApiError(rawError, httpStatus = 0) {
+                const error = rawError?.error || rawError || {};
+                const code = Number(error?.code || httpStatus || 0);
+                const status = String(error?.status || '').toUpperCase();
+                const message = String(error?.message || rawError?.message || '');
+                const flat = this.flattenGeminiError(rawError);
+                const haystack = `${code} ${status} ${message} ${flat}`.toLowerCase();
+                const rawText = flat || message || `HTTP ${code || httpStatus || 'ERROR'}`;
+                const has = (...needles) => needles.some((needle) => haystack.includes(String(needle).toLowerCase()));
+
+                let diagnosis = {
+                    code: code || httpStatus || 0,
+                    status: status || 'UNKNOWN',
+                    category: 'unknown',
+                    badge: '오류 확인',
+                    titleKo: '원인을 자동 분류하지 못했습니다.',
+                    titleEn: 'Unknown Gemini API error',
+                    messageKo: 'Google API가 돌려준 원문을 확인해야 합니다. 배지에 마우스를 올리거나 상세 안내에서 원문을 복사하세요.',
+                    messageEn: 'Check the original Google API response shown below.',
+                    actionKo: ['오류 원문을 복사해 관리자에게 전달하세요.', 'API Key, 모델명, 네트워크 상태를 순서대로 확인하세요.'],
+                    actionEn: ['Copy the original error and send it to the administrator.', 'Check the API key, model name, and network status.'],
+                    severity: 'warning',
+                    retryable: false,
+                    rawText
+                };
+
+                if (code === 429 || has('resource_exhausted', 'quota_exceeded', 'quota exceeded', 'exceeded your current quota', 'rate limit', 'ratelimit', 'free tier', 'quota_metric', 'generativelanguage.googleapis.com/generate_content')) {
+                    diagnosis = {
+                        ...diagnosis,
+                        category: 'free_tier_quota_exhausted',
+                        badge: '쿼터 제한',
+                        titleKo: '무료 할당량 또는 분당 요청 제한에 걸렸습니다.',
+                        titleEn: 'Free-tier quota or rate limit exceeded',
+                        messageKo: 'Google 응답에 429/RESOURCE_EXHAUSTED 또는 quota/rate limit 관련 원문이 포함되어 있습니다. 키 자체가 틀린 문제가 아니라 사용량 제한일 가능성이 큽니다.',
+                        messageEn: 'The response contains 429/RESOURCE_EXHAUSTED or quota/rate-limit details. This is usually a usage-limit issue, not simply a bad key.',
+                        actionKo: ['잠시 후 다시 연결 확인을 누르세요.', 'Google AI Studio의 Rate limit/Usage를 확인하세요.', '계속 반복되면 새 Google Cloud 프로젝트에서 키를 발급하거나 billing/쿼터 증설을 검토하세요.'],
+                        actionEn: ['Try again later.', 'Check Rate limits/Usage in Google AI Studio.', 'If it persists, create a key from a new Google Cloud project or review billing/quota increase.'],
+                        severity: 'quota',
+                        retryable: false
+                    };
+                } else if (has('api key not valid', 'invalid api key', 'api_key_invalid', 'key not valid', 'bad request: api key')) {
+                    diagnosis = {
+                        ...diagnosis,
+                        category: 'api_key_invalid',
+                        badge: '키 오류',
+                        titleKo: 'API 키가 잘못되었거나 복사 과정에서 누락되었습니다.',
+                        titleEn: 'Invalid API key',
+                        messageKo: 'Google 응답에 API key invalid 계열 원문이 포함되어 있습니다.',
+                        messageEn: 'The response indicates an invalid API key.',
+                        actionKo: ['Google AI Studio에서 새 API Key를 발급하세요.', '앞뒤 공백 없이 전체 키를 다시 붙여넣고 저장하세요.', '기존 유출/차단 키는 폐기하세요.'],
+                        actionEn: ['Generate a new API key in Google AI Studio.', 'Paste the full key again without extra spaces.', 'Discard leaked or blocked keys.'],
+                        severity: 'error',
+                        retryable: false
+                    };
+                } else if (has('service_disabled', 'api has not been used', 'disabled', 'generative language api has not been used', 'generativelanguage.googleapis.com has not been used')) {
+                    diagnosis = {
+                        ...diagnosis,
+                        category: 'api_not_enabled',
+                        badge: 'API 비활성화',
+                        titleKo: '프로젝트에서 Gemini API가 활성화되어 있지 않습니다.',
+                        titleEn: 'Gemini API is not enabled for this project',
+                        messageKo: 'Google 응답에 SERVICE_DISABLED/API has not been used/disabled 계열 원문이 포함되어 있습니다.',
+                        messageEn: 'The response indicates that the API is disabled or has not been used in this project.',
+                        actionKo: ['Google Cloud Console 또는 AI Studio에서 Generative Language API/Gemini API를 활성화하세요.', '활성화 후 1~3분 뒤 다시 연결 확인을 누르세요.'],
+                        actionEn: ['Enable the Generative Language API/Gemini API in Google Cloud Console or AI Studio.', 'Wait a few minutes, then verify again.'],
+                        severity: 'error',
+                        retryable: false
+                    };
+                } else if (code === 403 || has('permission_denied', 'forbidden', 'not authorized', 'does not have permission', 'caller does not have permission', 'api key has restrictions')) {
+                    diagnosis = {
+                        ...diagnosis,
+                        category: 'project_key_not_authorized',
+                        badge: '권한 제한',
+                        titleKo: '프로젝트/키 권한 또는 키 제한 설정 문제입니다.',
+                        titleEn: 'Project/key is not authorized',
+                        messageKo: 'Google 응답에 403/PERMISSION_DENIED/authorized/restriction 계열 원문이 포함되어 있습니다.',
+                        messageEn: 'The response contains 403/PERMISSION_DENIED or authorization/restriction details.',
+                        actionKo: ['API Key의 API 제한에 Gemini/Generative Language API가 포함되어 있는지 확인하세요.', 'HTTP referrer 제한을 걸었다면 docssam1.github.io/algebra2/* 주소가 허용되어야 합니다.', '다른 프로젝트의 키를 잘못 넣지 않았는지 확인하세요.'],
+                        actionEn: ['Check that the key allows Gemini/Generative Language API.', 'If HTTP referrer restrictions are enabled, allow docssam1.github.io/algebra2/*.', 'Confirm that the key belongs to the intended project.'],
+                        severity: 'error',
+                        retryable: false
+                    };
+                } else if (code === 404 || has('not_found', 'model not found', 'models/', 'not supported for this model', 'is not found', 'not available for this model')) {
+                    diagnosis = {
+                        ...diagnosis,
+                        category: 'model_access_limited',
+                        badge: '모델 오류',
+                        titleKo: '현재 모델을 이 키/프로젝트에서 사용할 수 없습니다.',
+                        titleEn: 'Model not found or not available',
+                        messageKo: 'Google 응답에 model not found/not supported/not available 계열 원문이 포함되어 있습니다.',
+                        messageEn: 'The response indicates that the selected model is not found or not available.',
+                        actionKo: ['GEMINI_MODEL 값을 사용 가능한 모델명으로 바꾸세요.', '현재 기본값 gemini-2.0-flash-lite가 제한되면 gemini-2.5-flash-lite 등 계정에서 보이는 모델로 변경하세요.', 'v1beta 엔드포인트에서 지원되는 모델인지 확인하세요.'],
+                        actionEn: ['Change GEMINI_MODEL to an available model.', 'If gemini-2.0-flash-lite is restricted, use a model visible in your account such as gemini-2.5-flash-lite.', 'Confirm the model supports the v1beta endpoint.'],
+                        severity: 'error',
+                        retryable: false
+                    };
+                } else if (code === 400 && has('failed_precondition', 'free tier is not available', 'billing', 'paid plan', 'enable billing', 'payment')) {
+                    diagnosis = {
+                        ...diagnosis,
+                        category: 'billing_required',
+                        badge: '결제 필요',
+                        titleKo: '무료 tier/지역 제한 또는 결제 연결이 필요한 상태입니다.',
+                        titleEn: 'Billing or paid plan is required',
+                        messageKo: 'Google 응답에 FAILED_PRECONDITION/free tier not available/billing 계열 원문이 포함되어 있습니다.',
+                        messageEn: 'The response indicates a free-tier location limit or billing requirement.',
+                        actionKo: ['Google AI Studio에서 billing/paid plan 연결 상태를 확인하세요.', '무료 tier 지원 지역/계정 조건을 확인하세요.'],
+                        actionEn: ['Check billing or paid-plan setup in Google AI Studio.', 'Check free-tier availability for the account/region.'],
+                        severity: 'error',
+                        retryable: false
+                    };
+                } else if (has('failed to fetch', 'networkerror', 'cors', 'err_', 'load failed')) {
+                    diagnosis = {
+                        ...diagnosis,
+                        category: 'network_or_cors',
+                        badge: '네트워크',
+                        titleKo: '브라우저 네트워크 또는 차단 문제입니다.',
+                        titleEn: 'Network or browser blocking issue',
+                        messageKo: 'API 응답 JSON이 아니라 브라우저 fetch 실패/CORS/네트워크 원문이 감지되었습니다.',
+                        messageEn: 'The browser failed before receiving a normal Google API JSON response.',
+                        actionKo: ['인터넷 연결, 광고 차단/보안 확장 프로그램, 학교/회사망 차단 여부를 확인하세요.', '시크릿 창 또는 다른 브라우저에서 다시 시도하세요.'],
+                        actionEn: ['Check internet, browser extensions, and network restrictions.', 'Try an incognito window or another browser.'],
+                        severity: 'warning',
+                        retryable: true
+                    };
+                }
+
+                this.lastGeminiDiagnosis = diagnosis;
+                return diagnosis;
+            },
+
+            setApiStatusBadge(state, detail = "", diagnosis = null) {
+                const badge = document.getElementById('api-status-badge');
+                if (!badge) return;
+
+                const styles = {
+                    idle: ["키 저장됨", "text-[10px] bg-stone-100 text-stone-700 px-2 py-0.5 rounded-md font-bold cursor-help"],
+                    checking: ["확인 중...", "text-[10px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-md font-bold animate-pulse cursor-help"],
+                    success: ["AI 연결됨", "text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md font-bold cursor-help"],
+                    auth: ["키/권한 오류", "text-[10px] bg-rose-100 text-rose-800 px-2 py-0.5 rounded-md font-bold cursor-help"],
+                    quota: ["쿼터 제한", "text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md font-bold cursor-help"],
+                    request: ["요청 오류", "text-[10px] bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-md font-bold cursor-help"],
+                    network: ["네트워크", "text-[10px] bg-violet-100 text-violet-800 px-2 py-0.5 rounded-md font-bold cursor-help"]
+                };
+
+                const d = diagnosis || this.lastGeminiDiagnosis;
+                const [baseText, className] = styles[state] || styles.idle;
+                const label = d?.badge || baseText;
+                const shortDetail = detail ? `: ${String(detail).slice(0, 80)}` : "";
+                badge.textContent = `${label}${shortDetail}`;
+                badge.className = className;
+                badge.title = d ? `${d.titleKo}\n${d.rawText || detail || ''}` : (detail || label);
+            },
+
+            getGeminiBadgeState(diagnosis, httpStatus = 0) {
+                if (!diagnosis) return 'network';
+                if (diagnosis.category === 'free_tier_quota_exhausted') return 'quota';
+                if (['api_key_invalid', 'api_not_enabled', 'project_key_not_authorized', 'billing_required'].includes(diagnosis.category)) return 'auth';
+                if (diagnosis.category === 'model_access_limited') return 'request';
+                if (diagnosis.category === 'network_or_cors') return 'network';
+                if (httpStatus === 400) return 'request';
+                return 'network';
+            },
+
+            showGeminiDiagnosis(diagnosis) {
+                if (!diagnosis) return;
+                this.lastGeminiDiagnosis = diagnosis;
+                this.ensureGeminiErrorModal();
+                const title = document.getElementById('gemini-error-title');
+                const message = document.getElementById('gemini-error-message');
+                const actionList = document.getElementById('gemini-error-actions');
+                const raw = document.getElementById('gemini-error-raw');
+                if (title) title.textContent = `${diagnosis.titleKo} / ${diagnosis.titleEn}`;
+                if (message) message.textContent = `${diagnosis.messageKo} / ${diagnosis.messageEn}`;
+                if (actionList) {
+                    actionList.innerHTML = diagnosis.actionKo
+                        .map((item, idx) => `<li><b>${idx + 1}.</b> ${this.escapeHtml(item)}<br><span class="text-stone-500">${this.escapeHtml(diagnosis.actionEn[idx] || '')}</span></li>`)
+                        .join('');
+                }
+                if (raw) raw.textContent = diagnosis.rawText || '';
+                const modal = document.getElementById('gemini-error-modal');
+                if (modal) modal.classList.remove('hidden');
+            },
+
+            openGeminiErrorModal() {
+                if (this.lastGeminiDiagnosis) {
+                    this.showGeminiDiagnosis(this.lastGeminiDiagnosis);
+                }
+            },
+
+            closeGeminiErrorModal() {
+                const modal = document.getElementById('gemini-error-modal');
+                if (modal) modal.classList.add('hidden');
+            },
+
+            ensureGeminiErrorModal() {
+                if (document.getElementById('gemini-error-modal')) return;
+                const wrapper = document.createElement('div');
+                wrapper.id = 'gemini-error-modal';
+                wrapper.className = 'fixed inset-0 z-[100] hidden bg-black/40 px-4 py-6 no-print';
+                wrapper.innerHTML = `
+                    <div class="max-w-2xl mx-auto bg-white rounded-3xl shadow-2xl border border-stone-200 overflow-hidden">
+                        <div class="p-5 border-b border-stone-200 flex justify-between items-start gap-3">
+                            <div>
+                                <p class="text-[11px] font-bold text-indigo-600 uppercase tracking-wide">Gemini API 진단</p>
+                                <h3 id="gemini-error-title" class="text-lg font-extrabold text-stone-900 mt-1">API 오류 안내</h3>
+                            </div>
+                            <button onclick="app.closeGeminiErrorModal()" class="text-stone-400 hover:text-stone-700 text-xl leading-none">×</button>
+                        </div>
+                        <div class="p-5 space-y-4 text-sm">
+                            <p id="gemini-error-message" class="text-stone-700 leading-relaxed"></p>
+                            <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4">
+                                <p class="font-bold text-indigo-900 mb-2">복구 절차 / Recovery steps</p>
+                                <ol id="gemini-error-actions" class="list-none space-y-2 text-indigo-950 text-xs leading-relaxed"></ol>
+                            </div>
+                            <div>
+                                <p class="font-bold text-stone-800 mb-1">Google 원문 / Raw response</p>
+                                <pre id="gemini-error-raw" class="bg-stone-950 text-stone-100 text-[11px] rounded-2xl p-3 overflow-auto max-h-40 whitespace-pre-wrap"></pre>
+                            </div>
+                            <div class="flex flex-wrap justify-end gap-2 pt-2">
+                                <button onclick="app.closeGeminiErrorModal()" class="bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold px-3 py-2 rounded-xl text-xs">닫기</button>
+                                <button onclick="app.closeGeminiErrorModal(); document.getElementById('gemini-api-key')?.focus();" class="bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold px-3 py-2 rounded-xl text-xs">API 키 다시 입력</button>
+                                <button onclick="app.verifyGeminiConnection(true)" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-2 rounded-xl text-xs">다시 연결 확인</button>
+                            </div>
+                        </div>
+                    </div>`;
+                document.body.appendChild(wrapper);
+            },
+
+            createGeminiRequestError(diagnosis, fallback = 'AI request failed.') {
+                const err = new Error(diagnosis?.messageKo || fallback);
+                err.geminiDiagnosis = diagnosis;
+                err.nonRetryable = !diagnosis?.retryable;
+                return err;
+            },
+
+            async verifyGeminiConnection(force = false) {
+                const apiKey = this.getApiKey();
+                if (!apiKey) {
+                    const diagnosis = this.classifyGeminiApiError({ error: { code: 401, status: 'API_KEY_MISSING', message: 'Gemini API Key is missing.' } }, 401);
+                    diagnosis.category = 'api_key_invalid';
+                    diagnosis.badge = '키 필요';
+                    diagnosis.titleKo = 'Gemini API Key를 먼저 입력해야 합니다.';
+                    diagnosis.titleEn = 'Gemini API key is required';
+                    diagnosis.messageKo = '브라우저에 저장된 Gemini API Key가 없습니다.';
+                    diagnosis.messageEn = 'No Gemini API key is stored in this browser.';
+                    diagnosis.actionKo = ['Google AI Studio에서 발급한 키를 입력하세요.', '저장을 누른 뒤 연결 확인을 다시 실행하세요.'];
+                    diagnosis.actionEn = ['Enter a key from Google AI Studio.', 'Save it, then verify again.'];
+                    this.setApiStatusBadge('auth', '', diagnosis);
+                    this.showGeminiDiagnosis(diagnosis);
+                    return false;
+                }
+
+                if (this.isVerifyingGemini) return false;
+                const cacheKey = `gemini_verify_cache_v2:${GEMINI_MODEL}:${apiKey.slice(-8)}`;
+                if (!force) {
+                    const cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+                    if (cached?.ok && Date.now() - cached.ts < 180000) {
+                        this.setApiStatusBadge('success');
+                        return true;
+                    }
+                }
+
+                const button = document.getElementById('gemini-verify-btn');
+                this.isVerifyingGemini = true;
+                if (button) button.disabled = true;
+                this.setApiStatusBadge('checking');
+                try {
+                    const response = await fetch(`${this.getGeminiEndpoint()}?key=${encodeURIComponent(apiKey)}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: 'ping' }] }],
+                            systemInstruction: { parts: [{ text: 'Return only pong.' }] },
+                            generationConfig: { maxOutputTokens: 16 }
+                        })
+                    });
+
+                    if (response.ok) {
+                        localStorage.setItem(cacheKey, JSON.stringify({ ok: true, ts: Date.now() }));
+                        this.lastGeminiDiagnosis = null;
+                        this.setApiStatusBadge('success');
+                        return true;
+                    }
+
+                    const result = await response.json().catch(() => ({ error: { code: response.status, status: `HTTP_${response.status}`, message: `HTTP ${response.status}` } }));
+                    const diagnosis = this.classifyGeminiApiError(result, response.status);
+                    const message = this.getGeminiErrorMessage(result, `HTTP ${response.status}`);
+                    this.setApiStatusBadge(this.getGeminiBadgeState(diagnosis, response.status), message, diagnosis);
+                    this.showGeminiDiagnosis(diagnosis);
+                } catch (error) {
+                    const diagnosis = this.classifyGeminiApiError({ error: { code: 0, status: 'NETWORK_ERROR', message: error?.message || 'Network request failed' } }, 0);
+                    this.setApiStatusBadge('network', error?.message || 'Network request failed', diagnosis);
+                    this.showGeminiDiagnosis(diagnosis);
+                } finally {
+                    this.isVerifyingGemini = false;
+                    if (button) button.disabled = false;
+                }
+                return false;
+            },''')
+              if old_status not in text:
+                  raise SystemExit('Gemini status/verify block not found')
+              text = text.replace(old_status, new_status, 1)
+
+              old_error_handling = """                            const message = this.getGeminiErrorMessage(result, `HTTP ${response.status}`);
+                            if (response.status === 401 || response.status === 403) {
+                                this.setApiStatusBadge('auth', message);
+                            } else if (response.status === 429) {
+                                this.setApiStatusBadge('quota', message);
+                            } else if (response.status === 400) {
+                                this.setApiStatusBadge('request', message);
+                            } else {
+                                this.setApiStatusBadge('network', message);
+                            }
+                            throw new Error(message);"""
+              new_error_handling = """                            const diagnosis = this.classifyGeminiApiError(result, response.status);
+                            const message = this.getGeminiErrorMessage(result, `HTTP ${response.status}`);
+                            this.setApiStatusBadge(this.getGeminiBadgeState(diagnosis, response.status), message, diagnosis);
+                            this.showGeminiDiagnosis(diagnosis);
+                            throw this.createGeminiRequestError(diagnosis, message);"""
+              if old_error_handling not in text:
+                  raise SystemExit('executeGeminiCall error handling snippet not found')
+              text = text.replace(old_error_handling, new_error_handling, 1)
+
+              old_retry = """                    } catch (err) {
+                        lastError = err;
+                        if (attempt === 1) break;
+                        await new Promise((res) => setTimeout(res, retryDelay));
+                        retryDelay *= 2;
+                    }"""
+              new_retry = """                    } catch (err) {
+                        lastError = err;
+                        if (err?.nonRetryable || attempt === 1) break;
+                        await new Promise((res) => setTimeout(res, retryDelay));
+                        retryDelay *= 2;
+                    }"""
+              if old_retry not in text:
+                  raise SystemExit('retry snippet not found')
+              text = text.replace(old_retry, new_retry, 1)
+
+              # Remove this one-time workflow after it successfully patches index.html.
+              workflow_path = Path('.github/workflows/patch-gemini-diagnostics.yml')
+              if workflow_path.exists():
+                  workflow_path.unlink()
+
+              path.write_text(text, encoding='utf-8')
+              print('Patched Gemini diagnostics in index.html')
+          PY
+
+      - name: Commit patch
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/patch-gemini-diagnostics.yml
+          git commit -m "Improve Gemini API error diagnostics"
+          git push
