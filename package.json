@@ -1,0 +1,21 @@
+{
+  "name": "algebra2-openai-proxy",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "OpenAI GPT proxy server for the Algebra 2 Placement dashboard.",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "@openai/openai": "^4.87.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "openai": "^4.87.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
