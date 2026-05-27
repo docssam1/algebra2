@@ -1,0 +1,1 @@
+trigger gemini diagnostics patch
