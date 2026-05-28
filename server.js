@@ -2,6 +2,7 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import { GoogleGenAI } from "@google/genai";
+import crypto from "crypto";
 
 dotenv.config();
 
@@ -53,6 +54,8 @@ app.get("/api/health", (_req, res) => {
 
 // NOTE: route name is kept as /api/openai for frontend compatibility.
 app.post("/api/openai", async (req, res) => {
+  const startedAt = Date.now();
+  const traceId = crypto.randomUUID();
   try {
     if (!project) {
       return res.status(500).json({
@@ -91,6 +94,14 @@ app.post("/api/openai", async (req, res) => {
     }
 
     const { text, resolvedModel } = await generateWithFallback(request);
+    emitStructuredLog({
+      traceId,
+      endpoint: "/api/openai",
+      statusCode: 200,
+      latencyMs: Date.now() - startedAt,
+      modelActive: resolvedModel,
+      category: "success"
+    });
 
     return res.json({
       ok: true,
@@ -101,8 +112,18 @@ app.post("/api/openai", async (req, res) => {
     const status = Number(error?.status || error?.code || 500);
     const raw = String(error?.message || "Vertex AI Gemini request failed");
     const category = classifyGeminiError(status, raw);
+    const safeStatus = status >= 400 && status < 600 ? status : 500;
+    emitStructuredLog({
+      traceId,
+      endpoint: "/api/openai",
+      statusCode: safeStatus,
+      latencyMs: Date.now() - startedAt,
+      modelActive: model,
+      category,
+      errorMessage: raw
+    });
 
-    return res.status(status >= 400 && status < 600 ? status : 500).json({
+    return res.status(safeStatus).json({
       ok: false,
       category,
       message: getKoreanErrorMessage(category),
@@ -167,3 +188,31 @@ function getKoreanErrorMessage(category) {
 app.listen(port, () => {
   console.log(`Vertex AI Gemini proxy server running on port ${port}`);
 });
+
+function emitStructuredLog({
+  traceId,
+  endpoint,
+  statusCode,
+  latencyMs,
+  modelActive,
+  category,
+  errorMessage = ""
+}) {
+  console.log(
+    JSON.stringify({
+      context: "PLACEMENT_ENGINE",
+      trace_id: traceId,
+      timestamp: new Date().toISOString(),
+      network: {
+        endpoint,
+        status_code: Number(statusCode),
+        latency_ms: Number(latencyMs)
+      },
+      payload: {
+        model_active: modelActive,
+        category,
+        developer_detail: String(errorMessage || "").slice(0, 500)
+      }
+    })
+  );
+}
