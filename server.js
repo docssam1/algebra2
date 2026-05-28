@@ -10,6 +10,7 @@ const port = Number(process.env.PORT || 3000);
 const project = process.env.GOOGLE_CLOUD_PROJECT || "";
 const location = process.env.GOOGLE_CLOUD_LOCATION || "asia-northeast3";
 const model = process.env.GEMINI_MODEL || "gemini-2.0-flash-lite";
+const fallbackModels = ["gemini-2.0-flash", "gemini-1.5-flash"];
 
 const allowedOrigins = (
   process.env.ALLOWED_ORIGINS ||
@@ -45,6 +46,7 @@ app.get("/api/health", (_req, res) => {
     project,
     location,
     model,
+    fallbackModels,
     time: new Date().toISOString()
   });
 });
@@ -88,12 +90,12 @@ app.post("/api/openai", async (req, res) => {
       request.config.responseSchema = schema;
     }
 
-    const response = await client.models.generateContent(request);
-    const text = (response?.text || "").trim();
+    const { text, resolvedModel } = await generateWithFallback(request);
 
     return res.json({
       ok: true,
-      text
+      text,
+      model: resolvedModel
     });
   } catch (error) {
     const status = Number(error?.status || error?.code || 500);
@@ -108,6 +110,34 @@ app.post("/api/openai", async (req, res) => {
     });
   }
 });
+
+async function generateWithFallback(baseRequest) {
+  const candidates = [baseRequest.model, ...fallbackModels.filter((m) => m !== baseRequest.model)];
+  let lastError = null;
+
+  for (const candidate of candidates) {
+    try {
+      const request = { ...baseRequest, model: candidate };
+      const response = await client.models.generateContent(request);
+      const text = (response?.text || "").trim();
+      if (!text) {
+        throw new Error(`Empty response from model: ${candidate}`);
+      }
+      return { text, resolvedModel: candidate };
+    } catch (error) {
+      const raw = String(error?.message || "");
+      const isModelIssue =
+        Number(error?.status || error?.code || 0) === 404 ||
+        /model.*not found|does not have access|publisher model/i.test(raw);
+      if (!isModelIssue) {
+        throw error;
+      }
+      lastError = error;
+    }
+  }
+
+  throw lastError || new Error("No available Gemini model succeeded.");
+}
 
 function classifyGeminiError(status, raw) {
   const text = String(raw || "").toLowerCase();
