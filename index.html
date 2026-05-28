@@ -136,10 +136,10 @@
                     </div>
                 </div>
 
-                <!-- GPT 프록시 상태 & 학생 데이터 컨트롤 -->
+                <!-- Gemini 프록시 상태 & 학생 데이터 컨트롤 -->
                 <div class="flex flex-wrap items-center gap-2">
                     <div class="bg-indigo-50 border border-indigo-100 rounded-xl px-3 py-1.5 flex items-center gap-2 text-xs">
-                        <span class="font-bold text-indigo-800">GPT 엔진:</span>
+                        <span class="font-bold text-indigo-800">Gemini 엔진:</span>
                         <span class="bg-white border border-indigo-200 rounded px-2 py-0.5 text-[10px] text-stone-700">Google Cloud Gemini Proxy</span>
 
                         <button onclick="app.verifyGeminiConnection()" class="bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold px-2 py-0.5 rounded text-[10px] transition-all">서버 확인</button>
@@ -151,6 +151,12 @@
                     </button>
                     <button onclick="app.downloadCurrentReportHtml()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors flex items-center gap-1.5 shadow-sm">
                         <span>💾 HTML 다운로드</span>
+                    </button>
+                    <button onclick="app.downloadMaterialPack('workbook')" class="bg-sky-600 hover:bg-sky-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors flex items-center gap-1.5 shadow-sm">
+                        <span>📘 워크북 다운로드</span>
+                    </button>
+                    <button onclick="app.downloadMaterialPack('answerkey')" class="bg-violet-600 hover:bg-violet-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors flex items-center gap-1.5 shadow-sm">
+                        <span>🧾 해설지 다운로드</span>
                     </button>
                 </div>
             </div>
@@ -554,12 +560,12 @@
 
     <script>
         // -------------------------------------------------------------
-        // GPT 프록시 설정
+        // Gemini 프록시 설정
         // -------------------------------------------------------------
-        // 브라우저에는 OpenAI API Key를 저장하지 않습니다.
+        // 브라우저에는 API Key를 저장하지 않습니다.
         // 모든 AI 요청은 별도 서버의 /api/openai 프록시를 통해 처리합니다.
         //
-        const GPT_PROXY_URL = window.GPT_PROXY_URL || "http://localhost:3000/api/openai";
+        const GPT_PROXY_URL = window.GPT_PROXY_URL || "https://algebra2-gemini-proxy-v2-274099580288.asia-northeast3.run.app/api/openai";
 
         // 전역 데이터 캐시 매핑 (수학 오류 제로 고해상도 LaTeX)
         const appData = {
@@ -670,6 +676,7 @@
             activeStudent: null,
             chartInstance: null,
             savedVariants: [],
+            lastGeneratedCurriculum: [],
             requestCache: {},
             isTutorBusy: false,
             isAiRequestLocked: false,
@@ -739,7 +746,7 @@
                 });
             },
 
-            // 이전 Gemini 키 호환용 헬퍼: 현재 GPT 프록시 구조에서는 사용하지 않습니다.
+            // 이전 Gemini 키 호환용 헬퍼: 현재 Gemini 프록시 구조에서는 사용하지 않습니다.
             decryptKey(maskedStr) {
                 try {
                     return atob(maskedStr);
@@ -834,6 +841,7 @@
                 const sessions = Math.max(4, Math.min(30, Number(document.getElementById('curriculum-session-count')?.value || 10)));
                 const minutes = Math.max(30, Math.min(240, Number(document.getElementById('curriculum-session-minutes')?.value || 120)));
                 const adaptive = this.generateAdaptiveCurriculum(defaultDomains, sessions, minutes);
+                this.lastGeneratedCurriculum = adaptive;
                 adaptive.forEach(c => {
                     this.appendCurriculumCard(list, c.id, c.title, c.desc, c.meta);
                 });
@@ -1025,6 +1033,7 @@
 
                 const studentName = this.activeStudent ? this.activeStudent.name : "학생";
                 const isKo = this.langMode === 'ko';
+                const usGradeBand = accuracy >= 88 ? "US Grade 9 Honors-ready" : accuracy >= 70 ? "US Grade 9 On-track" : "US Grade 9 Intervention";
 
                 if (totalGraded === 0) {
                     board.innerHTML = `
@@ -1127,6 +1136,7 @@
                                 <span class="font-bold text-indigo-600 text-sm">${studentName}</span> 학생의 성적은 총 40문항 중 <span class="font-bold text-indigo-600 text-sm">${totalCorrect}</span>점을 취득하여 정답률 <strong>${accuracy}%</strong>를 보이고 있습니다. <br>
                                 현재 취득 성적으로는 미국 명문 보딩스쿨 평균 통과선에 기반할 때
                                 <span class="text-rose-600 font-bold">${totalCorrect >= 35 ? 'Honors Pre-Calculus 즉각 배정이 예상' : totalCorrect >= 28 ? 'Regular Pre-Calculus 반으로 무난히 진학할 것' : '방학 보충을 강력히 수료해야 정상 배정될 것'}</span>으로 판단됩니다.
+                                <br><span class="text-indigo-700 font-semibold">미국 학년 기준 밴드: ${usGradeBand}</span>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -1151,6 +1161,7 @@
                                 📢 <strong>Official Diagnostic Report Card:</strong><br><br>
                                 Student <span class="font-bold text-indigo-600 text-sm">${studentName}</span> has scored <span class="font-bold text-indigo-600 text-sm">${totalCorrect}</span> out of 40 questions, achieving an accuracy of <strong>${accuracy}%</strong>.<br>
                                 Based on competitive US High School Cut-off benchmarks, <span class="text-rose-600 font-bold">${totalCorrect >= 35 ? 'immediate admission to Honors Pre-Calculus is highly likely.' : totalCorrect >= 28 ? 'placement into Regular Pre-Calculus is predicted.' : 'intensive summer intervention is strongly recommended.'}</span>
+                                <br><span class="text-indigo-700 font-semibold">US Grade Band: ${usGradeBand}</span>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -1487,13 +1498,33 @@
                     const message = result?.message || result?.detail || `HTTP ${response.status}`;
                     this.setApiStatusBadge('network', message);
                 } catch (error) {
-                    this.setApiStatusBadge('network', error?.message || 'GPT proxy connection failed');
+                    this.setApiStatusBadge('network', error?.message || 'Gemini proxy connection failed');
                 }
                 return false;
             },
 
             async executeGeminiCall(prompt, sysInstruction, schema = null, maxOutputTokens = null) {
                 return this.executeAiCall(prompt, sysInstruction, schema, maxOutputTokens);
+            },
+
+            async postToProxyWithRetry(payload, retryCount = 1) {
+                let lastError = null;
+                for (let attempt = 0; attempt <= retryCount; attempt++) {
+                    try {
+                        const response = await fetch(GPT_PROXY_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        return response;
+                    } catch (error) {
+                        lastError = error;
+                        if (attempt < retryCount) {
+                            await new Promise(r => setTimeout(r, 300 * (attempt + 1)));
+                        }
+                    }
+                }
+                throw lastError || new Error('Network request failed');
             },
 
             async executeAiCall(prompt, sysInstruction, schema = null, maxOutputTokens = null) {
@@ -1504,16 +1535,12 @@
                     return cached.text;
                 }
 
-                const response = await fetch(GPT_PROXY_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        prompt: String(prompt),
-                        instructions: String(sysInstruction || ''),
-                        schema: schema || null,
-                        maxOutputTokens: maxOutputTokens || (schema ? 1400 : 1800)
-                    })
-                });
+                const response = await this.postToProxyWithRetry({
+                    prompt: String(prompt),
+                    instructions: String(sysInstruction || ''),
+                    schema: schema || null,
+                    maxOutputTokens: maxOutputTokens || (schema ? 1400 : 1800)
+                }, 1);
 
                 const result = await response.json().catch(() => ({}));
                 if (!response.ok || result?.ok === false) {
@@ -1770,77 +1797,69 @@ If the student asks for a twin or variant problem, write a completely new proble
                 this.renderSavedVariantsList();
             },
 
-            // 10회차 커스텀 로드맵 빌더 로직
             async buildCustomCurriculum() {
+                if (!this.activeStudent) {
+                    alert("학생을 먼저 등록/불러오기 해주세요.");
+                    return;
+                }
+
+                const markedCount = this.omrMarks.filter(x => x !== null).length;
+                if (markedCount === 0) {
+                    alert("OMR 마킹이 1개 이상 있어야 로드맵/진단 생성이 가능합니다.");
+                    return;
+                }
+
                 const checkboxes = document.querySelectorAll('.domain-checkbox:checked');
-                const checkedDomains = Array.from(checkboxes).map(x => x.value);
+                let checkedDomains = Array.from(checkboxes).map(x => x.value);
                 const requestedSessions = Math.max(4, Math.min(30, Number(document.getElementById('curriculum-session-count')?.value || 10)));
                 const requestedMinutes = Math.max(30, Math.min(240, Number(document.getElementById('curriculum-session-minutes')?.value || 120)));
 
                 if (checkedDomains.length === 0) {
-                    alert("최소 하나의 약점 치료 단원을 선택해 주시기 바랍니다.");
+                    checkedDomains = this.getWeakestDomainGroups(3);
+                    this.autoCheckDomainSelectors(checkedDomains);
+                }
+
+                if (checkedDomains.length === 0) {
+                    alert("약점 단원을 찾지 못했습니다. OMR 마킹 후 다시 시도해 주세요.");
                     return;
                 }
 
                 const loader = document.getElementById('curriculum-generator-loader');
                 const container = document.getElementById('curriculum-sessions-list');
-
                 loader.classList.remove('hidden');
 
-                const sysPrompt = `You are a high school mathematics curriculum design director. Based on the selected weakness areas: ${checkedDomains.join(', ')}, rewrite a highly detailed ${requestedSessions}-session prep curriculum.
-Requirements:
-1. Prioritize these checked domains deeply. Make sure they have concrete mathematical topics like Vertex Form conversions, Complex conjugates, Unit circles, domain-condition checks for rational equations, and standard fraction formulas in LaTeX format.
-2. Each session is exactly ${requestedMinutes} minutes.
-3. Ensure there is a midterm simulated evaluation around the middle session, and a final placement examination at the last session.
-4. Korean curriculum terminology rule: use "해가 될 수 없는 값(분모=0)" or "정의역 조건 불만족 해" for domain-invalid solutions.
-5. Include both Korean and English when useful, but keep the returned title and desc fields in polished Korean.
-6. Do not use markdown bold markers such as **text**.
-7. Output MUST be a clean JSON list matching this schema exactly:
-{
-  "curriculum": [
-    { "id": 1, "title": "Session 1 Topic in Korean", "desc": "Detailed bullet-point objectives in Korean" },
-    ...
-    { "id": ${requestedSessions}, "title": "Session ${requestedSessions} Topic in Korean", "desc": "Detailed objectives" }
-  ]
-}`;
-
-                const schema = {
-                    type: "OBJECT",
-                    properties: {
-                        curriculum: {
-                            type: "ARRAY",
-                            items: {
-                                type: "OBJECT",
-                                properties: {
-                                    id: { type: "INTEGER" },
-                                    title: { type: "STRING" },
-                                    desc: { type: "STRING" }
-                                },
-                                required: ["id", "title", "desc"]
-                            }
-                        }
-                    },
-                    required: ["curriculum"]
-                };
-
                 try {
-                    const rawJson = await this.executeGeminiCall(`Generate customized ${requestedSessions}-session program`, sysPrompt, schema);
-                    const parsed = JSON.parse(rawJson);
-                    if (parsed && Array.isArray(parsed.curriculum)) {
-                        container.innerHTML = "";
-                        parsed.curriculum.slice(0, requestedSessions).forEach(c => {
-                            this.appendCurriculumCard(container, c.id, c.title, c.desc);
-                        });
-                        alert("AI 정밀 튜닝 로드맵 빌드가 정상 완료되었습니다.");
-                    } else {
-                        throw new Error("정상적인 데이터 모델 규격이 반환되지 않았습니다.");
-                    }
+                    const generated = this.generateAdaptiveCurriculum(checkedDomains, requestedSessions, requestedMinutes);
+                    this.lastGeneratedCurriculum = generated;
+                    container.innerHTML = "";
+                    generated.forEach(c => {
+                        this.appendCurriculumCard(container, c.id, c.title, c.desc, c.meta);
+                    });
+                    alert(`학생 맞춤 커리큘럼 ${requestedSessions}회차 생성 완료 (${requestedMinutes}분/회)`);
                 } catch (e) {
-                    alert(`AI 커리큘럼 빌더 작동 중 일시적 지연 발생: ${e.message}\n기본 검증된 커리큘럼으로 대리 노출합니다.`);
+                    alert(`커리큘럼 생성 중 오류: ${e.message}`);
                     this.renderStandardCurriculum();
                 } finally {
                     loader.classList.add('hidden');
                 }
+            },
+
+            getWeakestDomainGroups(topN = 3) {
+                const entries = Object.keys(appData.domainGroups).map(groupName => {
+                    const perf = this.getGroupPerformance(groupName);
+                    return { groupName, accuracy: perf.accuracy, marked: perf.marked };
+                }).filter(x => x.marked > 0);
+
+                if (entries.length === 0) return [];
+                entries.sort((a, b) => a.accuracy - b.accuracy);
+                return entries.slice(0, topN).map(x => x.groupName);
+            },
+
+            autoCheckDomainSelectors(groups) {
+                const selected = new Set(groups);
+                document.querySelectorAll('.domain-checkbox').forEach(cb => {
+                    cb.checked = selected.has(cb.value);
+                });
             },
 
             resetToStandardCurriculum() {
@@ -1860,6 +1879,78 @@ Requirements:
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
                 link.download = `${studentName}_diagnostic_report.html`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
+            },
+
+            downloadMaterialPack(type = 'workbook') {
+                const sessions = this.lastGeneratedCurriculum?.length
+                    ? this.lastGeneratedCurriculum
+                    : this.generateAdaptiveCurriculum(this.getWeakestDomainGroups(3), 10, 120);
+                const studentName = (this.activeStudent && this.activeStudent.name) ? this.activeStudent.name : "student";
+                const html = this.buildMaterialPackHtml(type, sessions);
+                const filename = `${studentName}_${type === 'workbook' ? 'workbook' : 'answer_key'}.html`;
+                this.downloadHtmlFile(filename, html);
+            },
+
+            buildMaterialPackHtml(type, sessions) {
+                const isWorkbook = type === 'workbook';
+                const title = isWorkbook ? "Algebra 2 맞춤 워크북" : "Algebra 2 수업 해설지/교안";
+                const subtitle = isWorkbook
+                    ? "회차별 문제 구성, 난이도 비율, 가정학습 분량"
+                    : "회차별 수업 목표, 채점 포인트, 선수개념-다음개념 연계";
+                const rows = sessions.map(session => {
+                    const meta = session.meta || {};
+                    return `
+                        <tr>
+                            <td>${session.id}</td>
+                            <td>${session.title}</td>
+                            <td>${meta.minutes || '-'}분</td>
+                            <td>${meta.itemCount || '-'}문항</td>
+                            <td>B ${meta.mix?.basic ?? '-'} / C ${meta.mix?.core ?? '-'} / A ${meta.mix?.advanced ?? '-'}</td>
+                            <td>${isWorkbook ? `${meta.homework?.easy ?? '-'} / ${meta.homework?.medium ?? '-'} / ${meta.homework?.hard ?? '-'}` : `${meta.lessonPlan?.concept ?? '-'}-${meta.lessonPlan?.guided ?? '-'}-${meta.lessonPlan?.independent ?? '-'}-${meta.lessonPlan?.exit ?? '-'}`}</td>
+                        </tr>
+                    `;
+                }).join("");
+
+                const studentName = (this.activeStudent && this.activeStudent.name) ? this.activeStudent.name : "학생";
+                const baseLine = isWorkbook
+                    ? "Homework(E/M/H)은 쉬움/보통/어려움 문항 수입니다."
+                    : "교안 시간 비율은 개념-유도-실전-피드백(분) 순서입니다.";
+
+                return `<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>${title}</title>
+<style>
+body{font-family:'Noto Sans KR',Arial,sans-serif;padding:24px;color:#111827}
+h1{margin-bottom:6px} .sub{color:#4b5563;font-size:13px;margin-bottom:18px}
+table{border-collapse:collapse;width:100%;font-size:12px}
+th,td{border:1px solid #d1d5db;padding:8px;vertical-align:top}
+th{background:#f5f3ff}
+</style>
+</head>
+<body>
+<h1>${title}</h1>
+<div class="sub">${studentName} · ${subtitle}</div>
+<table>
+<thead><tr><th>회차</th><th>주제</th><th>시간</th><th>문항수</th><th>난이도</th><th>${isWorkbook ? 'Homework(E/M/H)' : '교안 시간(개념-유도-실전-피드백)'}</th></tr></thead>
+<tbody>${rows}</tbody>
+</table>
+<p style="margin-top:12px;font-size:11px;color:#6b7280">${baseLine}</p>
+</body>
+</html>`;
+            },
+
+            downloadHtmlFile(filename, html) {
+                const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = filename;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
