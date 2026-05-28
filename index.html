@@ -559,7 +559,7 @@
         // 브라우저에는 OpenAI API Key를 저장하지 않습니다.
         // 모든 AI 요청은 별도 서버의 /api/openai 프록시를 통해 처리합니다.
         //
-        const GPT_PROXY_URL = window.GPT_PROXY_URL || "http://localhost:3000/api/openai";
+        const GPT_PROXY_URL = window.GPT_PROXY_URL || "https://algebra2-gemini-proxy-v2-274099580288.asia-northeast3.run.app/api/openai";
 
         // 전역 데이터 캐시 매핑 (수학 오류 제로 고해상도 LaTeX)
         const appData = {
