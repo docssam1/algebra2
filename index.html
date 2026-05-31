@@ -940,6 +940,11 @@
                 container.innerHTML = "";
                 container.className = "grid grid-cols-1 lg:grid-cols-2 gap-4";
 
+                const legend = document.createElement('div');
+                legend.className = "lg:col-span-2 bg-indigo-50 border border-indigo-100 rounded-xl px-3 py-2 text-[11px] font-bold text-indigo-800";
+                legend.textContent = "난이도 표시: B = Basic / C = Core / A = Advanced";
+                container.appendChild(legend);
+
                 const difficultyBadge = (difficulty) => {
                     const label = difficulty === 'Basic' ? 'B' : difficulty === 'Core' ? 'C' : 'A';
                     const cls = difficulty === 'Basic'
