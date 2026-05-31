@@ -138,12 +138,9 @@
 
                 <!-- Gemini 프록시 상태 & 학생 데이터 컨트롤 -->
                 <div class="flex flex-wrap items-center gap-2">
-                    <div class="bg-indigo-50 border border-indigo-100 rounded-xl px-3 py-1.5 flex items-center gap-2 text-xs">
-                        <span class="font-bold text-indigo-800">Gemini 엔진:</span>
-                        <span class="bg-white border border-indigo-200 rounded px-2 py-0.5 text-[10px] text-stone-700">Google Cloud Gemini Proxy</span>
-
-                        <button onclick="app.verifyGeminiConnection()" class="bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold px-2 py-0.5 rounded text-[10px] transition-all">서버 확인</button>
-                        <span id="api-status-badge" class="text-[10px] px-2 py-0.5 rounded-md font-bold">확인 중...</span>
+                    <div class="bg-stone-50 border border-stone-200 rounded-xl px-3 py-1.5 flex items-center gap-2 text-xs">
+                        <span class="font-bold text-stone-700">AI 서버:</span>
+                        <span id="api-status-badge" class="text-[10px] px-2 py-0.5 rounded-md font-bold bg-stone-100 text-stone-600">● 연결 중</span>
                     </div>
 
                     <button onclick="app.openPrintModal()" class="bg-stone-800 hover:bg-stone-900 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors flex items-center gap-1.5 shadow-sm">
