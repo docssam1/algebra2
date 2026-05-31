@@ -1887,9 +1887,11 @@ If the student asks for a twin or variant problem, write a completely new proble
             },
 
             downloadMaterialPack(type = 'workbook') {
+                const requestedSessions = Math.max(4, Math.min(30, Number(document.getElementById('curriculum-session-count')?.value || 10)));
+                const requestedMinutes = Math.max(30, Math.min(240, Number(document.getElementById('curriculum-session-minutes')?.value || 120)));
                 const sessions = this.lastGeneratedCurriculum?.length
                     ? this.lastGeneratedCurriculum
-                    : this.generateAdaptiveCurriculum(this.getWeakestDomainGroups(3), 10, 120);
+                    : this.generateAdaptiveCurriculum(this.getWeakestDomainGroups(3), requestedSessions, requestedMinutes);
                 const studentName = (this.activeStudent && this.activeStudent.name) ? this.activeStudent.name : "student";
                 const html = this.buildMaterialPackHtml(type, sessions);
                 const filename = `${studentName}_${type === 'workbook' ? 'workbook' : 'answer_key'}.html`;
