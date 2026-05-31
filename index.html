@@ -1142,7 +1142,7 @@
                     const difficultyLabel = lang === 'ko' ? '난이도' : 'Level';
                     const title = lang === 'ko' ? '1~40번 정오답 · 난이도 확인표' : 'Q1-Q40 Answer & Difficulty Matrix';
                     const guide = lang === 'ko'
-                        ? 'O = 정답, X = 오답, - = 미채점 / B = Basic, C = Core, A = Advanced'
+                        ? 'O = 정답, X = 오답, - = 미채점 / B = 기본, C = 핵심, A = 심화'
                         : 'O = Correct, X = Incorrect, - = Ungraded / B = Basic, C = Core, A = Advanced';
 
                     const makeCell = (qId, type) => {
@@ -1240,12 +1240,6 @@
 
                             ${answerMatrixHtmlKo}
 
-                            ${answerMatrixHtmlEn}
-
-                            ${answerMatrixHtmlKo}
-
-                            ${answerMatrixHtmlEn}
-
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                 <div class="bg-stone-50 border border-stone-200 rounded-xl p-4">
                                     <h4 class="font-bold text-emerald-800 text-xs mb-2 border-b border-emerald-100 pb-1">🌟 강점 분석 영역 (Mastered)</h4>
@@ -1270,6 +1264,8 @@
                                 Based on competitive US High School Cut-off benchmarks, <span class="text-rose-600 font-bold">${totalCorrect >= 35 ? 'immediate admission to Honors Pre-Calculus is highly likely.' : totalCorrect >= 28 ? 'placement into Regular Pre-Calculus is predicted.' : 'intensive summer intervention is strongly recommended.'}</span>
                                 <br><span class="text-indigo-700 font-semibold">US Grade Band: ${usGradeBand}</span>
                             </div>
+
+                            ${answerMatrixHtmlEn}
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                 <div class="bg-stone-50 border border-stone-200 rounded-xl p-4">
