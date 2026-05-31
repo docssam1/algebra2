@@ -1030,6 +1030,7 @@
                 const board = document.getElementById('diagnosis-text-report-board');
                 const totalCorrect = this.omrMarks.filter(x => x === true).length;
                 const totalGraded = this.omrMarks.filter(x => x !== null).length;
+                const accuracy = totalGraded === 0 ? 0 : Math.round((totalCorrect / totalGraded) * 100);
 
                 const studentName = this.activeStudent ? this.activeStudent.name : "학생";
                 const isKo = this.langMode === 'ko';
