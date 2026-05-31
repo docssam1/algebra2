@@ -1137,6 +1137,73 @@
                     </div>`
                     : '';
 
+                const buildAnswerMatrixHtml = (lang = 'ko') => {
+                    const resultLabel = lang === 'ko' ? '결과' : 'Result';
+                    const difficultyLabel = lang === 'ko' ? '난이도' : 'Level';
+                    const title = lang === 'ko' ? '1~40번 정오답 · 난이도 확인표' : 'Q1-Q40 Answer & Difficulty Matrix';
+                    const guide = lang === 'ko'
+                        ? 'O = 정답, X = 오답, - = 미채점 / B = Basic, C = Core, A = Advanced'
+                        : 'O = Correct, X = Incorrect, - = Ungraded / B = Basic, C = Core, A = Advanced';
+
+                    const makeCell = (qId, type) => {
+                        const status = this.omrMarks[qId - 1];
+                        const difficulty = this.getDifficultyByQuestionId(qId);
+                        if (type === 'number') return `<div class="text-[10px] font-black text-stone-600 text-center">${qId}</div>`;
+                        if (type === 'result') {
+                            const label = status === true ? 'O' : status === false ? 'X' : '-';
+                            const cls = status === true
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                : status === false
+                                    ? 'bg-rose-50 text-rose-700 border-rose-200'
+                                    : 'bg-stone-50 text-stone-400 border-stone-200';
+                            return `<div class="rounded-md border ${cls} text-[10px] font-black py-1 text-center">${label}</div>`;
+                        }
+                        const label = difficulty === 'Basic' ? 'B' : difficulty === 'Core' ? 'C' : 'A';
+                        const cls = difficulty === 'Basic'
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                            : difficulty === 'Core'
+                                ? 'bg-amber-50 text-amber-700 border-amber-100'
+                                : 'bg-rose-50 text-rose-700 border-rose-100';
+                        return `<div class="rounded-md border ${cls} text-[10px] font-black py-1 text-center">${label}</div>`;
+                    };
+
+                    const makeBand = (start, end, label) => {
+                        const nums = [];
+                        const results = [];
+                        const levels = [];
+                        for (let i = start; i <= end; i++) {
+                            nums.push(makeCell(i, 'number'));
+                            results.push(makeCell(i, 'result'));
+                            levels.push(makeCell(i, 'difficulty'));
+                        }
+                        return `
+                            <div class="bg-white border border-stone-200 rounded-xl p-3 overflow-x-auto">
+                                <div class="text-[11px] font-black text-stone-700 mb-2">${label}</div>
+                                <div class="grid grid-cols-[46px_repeat(20,minmax(28px,1fr))] gap-1 min-w-[720px]">
+                                    <div></div>${nums.join('')}
+                                    <div class="text-[10px] font-bold text-stone-500 flex items-center">${resultLabel}</div>${results.join('')}
+                                    <div class="text-[10px] font-bold text-stone-500 flex items-center">${difficultyLabel}</div>${levels.join('')}
+                                </div>
+                            </div>
+                        `;
+                    };
+
+                    return `
+                        <div class="bg-stone-50 border border-stone-200 rounded-xl p-4 mt-4">
+                            <h4 class="font-bold text-stone-800 text-xs mb-1">${title}</h4>
+                            <p class="text-[11px] text-stone-500 mb-3">${guide}</p>
+                            <div class="space-y-3">
+                                ${makeBand(1, 20, 'Q1-Q20')}
+                                ${makeBand(21, 40, 'Q21-Q40')}
+                            </div>
+                        </div>
+                    `;
+                };
+
+                const answerMatrixHtmlKo = buildAnswerMatrixHtml('ko');
+                const answerMatrixHtmlEn = buildAnswerMatrixHtml('en');
+
+
                 // Prerequisite 결손 도메인 연립식 분석
                 let prerequisiteHTML = "";
                 if (weakGroups.length > 0) {
@@ -1170,6 +1237,10 @@
                                 <span class="text-rose-600 font-bold">${totalCorrect >= 35 ? 'Honors Pre-Calculus 즉각 배정이 예상' : totalCorrect >= 28 ? 'Regular Pre-Calculus 반으로 무난히 진학할 것' : '방학 보충을 강력히 수료해야 정상 배정될 것'}</span>으로 판단됩니다.
                                 <br><span class="text-indigo-700 font-semibold">미국 학년 기준 밴드: ${usGradeBand}</span>
                             </div>
+
+                            ${answerMatrixHtmlKo}
+
+                            ${answerMatrixHtmlEn}
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                 <div class="bg-stone-50 border border-stone-200 rounded-xl p-4">
