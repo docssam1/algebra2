@@ -1,4 +1,4 @@
-﻿import express from "express";
+import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { GoogleGenAI } from "@google/genai";
@@ -50,6 +50,63 @@ app.get("/api/health", (_req, res) => {
     fallbackModels,
     time: new Date().toISOString()
   });
+});
+
+// HF AI 튜터 엔드포인트
+app.post("/api/tutor", async (req, res) => {
+  const startedAt = Date.now();
+  const traceId = crypto.randomUUID();
+  try {
+    if (!project) {
+      return res.status(500).json({ text: "서버 프로젝트 설정이 없습니다." });
+    }
+
+    const { system, messages } = req.body || {};
+    if (!messages || !messages.length) {
+      return res.status(400).json({ text: "messages가 없습니다." });
+    }
+
+    const userMessages = messages.map((m) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }]
+    }));
+
+    const request = {
+      model,
+      contents: userMessages,
+      config: {
+        systemInstruction: system || "당신은 7세 어린이를 위한 수학 튜터입니다.",
+        maxOutputTokens: 1024,
+        temperature: 0.7
+      }
+    };
+
+    const { text, resolvedModel } = await generateWithFallback(request);
+    emitStructuredLog({
+      traceId,
+      endpoint: "/api/tutor",
+      statusCode: 200,
+      latencyMs: Date.now() - startedAt,
+      modelActive: resolvedModel,
+      category: "success"
+    });
+
+    return res.json({ text });
+  } catch (error) {
+    const status = Number(error?.status || error?.code || 500);
+    const raw = String(error?.message || "Vertex AI Gemini request failed");
+    const category = classifyGeminiError(status, raw);
+    emitStructuredLog({
+      traceId,
+      endpoint: "/api/tutor",
+      statusCode: status,
+      latencyMs: Date.now() - startedAt,
+      modelActive: model,
+      category,
+      errorMessage: raw
+    });
+    return res.status(500).json({ text: "잠시 후 다시 시도해주세요." });
+  }
 });
 
 // NOTE: route name is kept as /api/openai for frontend compatibility.
