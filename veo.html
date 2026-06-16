@@ -36,11 +36,11 @@
      일본 애니풍 8초 영상이 만들어집니다. 다 되면 다운로드하세요.</p>
 
   <div class="box">
-    <h2>① 사진 (최대 3장 — 끌어다 놓거나 칸을 클릭)</h2>
+    <h2>① 사진 (최대 3장 — 끌어다 놓기 · 클릭 · 붙여넣기 Ctrl+V)</h2>
     <div class="ings">
-      <div class="ing"><div class="drop" id="d0"><span class="hint">끌어다 놓기<br>또는 클릭</span><img id="t0"></div><input type="file" id="f0" accept="image/png,image/jpeg"></div>
-      <div class="ing"><div class="drop" id="d1"><span class="hint">끌어다 놓기<br>또는 클릭</span><img id="t1"></div><input type="file" id="f1" accept="image/png,image/jpeg"></div>
-      <div class="ing"><div class="drop" id="d2"><span class="hint">끌어다 놓기<br>또는 클릭</span><img id="t2"></div><input type="file" id="f2" accept="image/png,image/jpeg"></div>
+      <div class="ing"><div class="drop" id="d0"><span class="hint">끌어다 놓기<br>클릭 · Ctrl+V</span><img id="t0"></div><input type="file" id="f0" accept="image/png,image/jpeg"></div>
+      <div class="ing"><div class="drop" id="d1"><span class="hint">끌어다 놓기<br>클릭 · Ctrl+V</span><img id="t1"></div><input type="file" id="f1" accept="image/png,image/jpeg"></div>
+      <div class="ing"><div class="drop" id="d2"><span class="hint">끌어다 놓기<br>클릭 · Ctrl+V</span><img id="t2"></div><input type="file" id="f2" accept="image/png,image/jpeg"></div>
     </div>
 
     <label>② 대본 / 설명</label>
@@ -70,13 +70,12 @@
     };
     r.readAsDataURL(file);
   }
+  function firstEmpty(){ return ing.findIndex(x=>!x); }
 
   [0,1,2].forEach(i=>{
     const slot=$(`d${i}`), input=$(`f${i}`);
-    // 클릭 → 파일 선택창
     slot.addEventListener("click", ()=> input.click());
     input.addEventListener("change", e=> setImage(i, e.target.files[0]));
-    // 드래그앤드롭
     ["dragenter","dragover"].forEach(ev=>
       slot.addEventListener(ev, e=>{ e.preventDefault(); slot.classList.add("drag"); }));
     ["dragleave","dragend"].forEach(ev=>
@@ -86,6 +85,22 @@
       const f = e.dataTransfer.files && e.dataTransfer.files[0];
       setImage(i, f);
     });
+  });
+
+  // 붙여넣기(Ctrl+V): 클립보드 이미지를 빈 칸에 자동 추가
+  window.addEventListener("paste", (e)=>{
+    const items = e.clipboardData && e.clipboardData.items;
+    if(!items) return;
+    for(const it of items){
+      if(it.type && it.type.startsWith("image/")){
+        const f = it.getAsFile();
+        const idx = firstEmpty();
+        if(idx===-1){ alert("사진 칸 3개가 모두 찼어요."); return; }
+        setImage(idx, f);
+        e.preventDefault();
+        break;
+      }
+    }
   });
 
   $("make").addEventListener("click", async ()=>{
