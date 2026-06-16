@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { GoogleGenAI } from "@google/genai";
 import crypto from "crypto";
+import { veoRouter } from "./veoRoutes.js";
 
 dotenv.config();
 
@@ -32,7 +33,10 @@ app.use(
     }
   })
 );
-app.use(express.json({ limit: "1mb" }));
+app.use(express.json({ limit: "20mb" }));
+
+// Veo 3.1 영상 생성 라우트 (/api/video, /api/video/status)
+app.use(veoRouter);
 
 const client = new GoogleGenAI({
   vertexai: true,
