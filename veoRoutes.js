@@ -2,13 +2,7 @@
 // Veo 3.1 영상 생성 라우트. 기존 server.js 스타일/인증 방식과 충돌 없도록 작성.
 //
 // 인증: Cloud Run/GCE 메타데이터 서버에서 액세스 토큰을 받아 사용 → 새 npm 패키지 불필요.
-//       (기존 @google/genai 의 ADC 와 동일한 서비스 계정을 그대로 사용)
 // Veo 리전: us-central1 (서버 기본 리전 asia-northeast3 와 별개로 둠 — Veo 지원 리전)
-//
-// server.js 에 아래 3줄만 추가하면 됩니다:
-//   import { veoRouter } from "./veoRoutes.js";
-//   // app.use(express.json({ limit: "1mb" }))  →  "20mb" 로 변경
-//   app.use(veoRouter);
 
 import express from "express";
 
@@ -24,10 +18,9 @@ const BASE =
 const STYLE_PREFIX =
   "일본 애니메이션 화풍(셀 애니, 선명한 윤곽선, 부드러운 채색). " +
   "등장인물은 한국어로 말한다. " +
-  '주인공 남자 "유준": 18세, 키 130cm, 몸무게 40kg. ' +
-  "살짝 통통하지만 과하게 뚱뚱하지는 않은 귀여운 체형(너무 살찌게 그리지 말 것). " +
-  "검은색 짧은 스파이키 헤어, 굵은 눈썹, 큰 눈, 발그레한 볼, 밝고 활기찬 미소. " +
-  "주황색 별무늬 셔츠 착용(가슴에 별 문양). " +
+  '주인공 "유준": 20세 성인 남성(동안이라 어려 보임). ' +
+  "키 130cm, 몸무게 40kg, 조금 통통한 귀여운 체형. 커피를 즐겨 마신다. " +
+  "검은색 짧은 스파이키 헤어, 굵은 눈썹, 큰 눈, 발그레한 볼, 밝고 활기찬 미소, 주황색 별무늬 셔츠. " +
   "레퍼런스 이미지와 100% 동일하게 유지하며, 남자 캐릭터를 절대 바꾸지 않는다. " +
   '나머지 등장 캐릭터는 "이탈리안 브레인롯(Italian Brainrot)" 밈 스타일의 의인화 캐릭터로 그린다. ' +
   "모든 캐릭터 디자인은 회차 내내 일관되게 유지. ";
@@ -37,7 +30,6 @@ const NEGATIVE_PROMPT =
 
 const FIXED_PARAMS = { generateAudio: true, sampleCount: 1 };
 
-// 메타데이터 서버에서 OAuth 액세스 토큰 획득 (Cloud Run/GCE 에서 동작)
 async function getToken() {
   const r = await fetch(
     "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token",
@@ -59,7 +51,6 @@ function toImg(item, defaultMime) {
 
 export const veoRouter = express.Router();
 
-// 1) 생성 시작: 사진(재료, 최대 3장) + 대본 → operationName
 veoRouter.post("/api/video", async (req, res) => {
   try {
     if (!VEO_PROJECT) {
@@ -67,8 +58,8 @@ veoRouter.post("/api/video", async (req, res) => {
     }
     const {
       prompt = "",
-      images,                 // 재료 사진 배열(최대 3장)
-      imageBase64,            // 단일 첫 프레임(선택)
+      images,
+      imageBase64,
       mimeType = "image/png",
       aspectRatio = "16:9",
       durationSeconds = 8
@@ -106,7 +97,6 @@ veoRouter.post("/api/video", async (req, res) => {
   }
 });
 
-// 2) 상태 폴링: operationName → done / 영상(base64 또는 gcsUri)
 veoRouter.post("/api/video/status", async (req, res) => {
   try {
     const { operationName } = req.body || {};
