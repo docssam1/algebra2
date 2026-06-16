@@ -11,9 +11,13 @@
   .box{ border:1px solid #e3e3e3; border-radius:12px; padding:18px; margin-top:16px; }
   .ings{ display:flex; gap:12px; flex-wrap:wrap; }
   .ing{ width:150px; }
-  .ing img{ width:150px; height:110px; object-fit:cover; border-radius:8px;
-            border:1px dashed #bbb; background:#fafafa; display:block; }
-  .ing input{ width:150px; font-size:.78rem; margin-top:6px; }
+  .drop{ position:relative; width:150px; height:110px; border:2px dashed #bbb;
+         border-radius:8px; background:#fafafa; cursor:pointer; overflow:hidden;
+         display:flex; align-items:center; justify-content:center; }
+  .drop.drag{ border-color:#2563eb; background:#eef3ff; }
+  .drop img{ width:100%; height:100%; object-fit:cover; display:none; }
+  .drop .hint{ font-size:.78rem; color:#888; text-align:center; padding:4px; }
+  .ing input[type=file]{ display:none; }
   textarea{ width:100%; box-sizing:border-box; min-height:96px; margin-top:10px;
             padding:11px; border:1px solid #ccc; border-radius:8px; font-size:.96rem; line-height:1.5; }
   label{ font-weight:600; display:block; margin-top:6px; }
@@ -32,11 +36,11 @@
      일본 애니풍 8초 영상이 만들어집니다. 다 되면 다운로드하세요.</p>
 
   <div class="box">
-    <h2>① 사진 (최대 3장 — 유준 레퍼런스 등)</h2>
+    <h2>① 사진 (최대 3장 — 끌어다 놓거나 칸을 클릭)</h2>
     <div class="ings">
-      <div class="ing"><img id="t0"><input type="file" id="f0" accept="image/png,image/jpeg"></div>
-      <div class="ing"><img id="t1"><input type="file" id="f1" accept="image/png,image/jpeg"></div>
-      <div class="ing"><img id="t2"><input type="file" id="f2" accept="image/png,image/jpeg"></div>
+      <div class="ing"><div class="drop" id="d0"><span class="hint">끌어다 놓기<br>또는 클릭</span><img id="t0"></div><input type="file" id="f0" accept="image/png,image/jpeg"></div>
+      <div class="ing"><div class="drop" id="d1"><span class="hint">끌어다 놓기<br>또는 클릭</span><img id="t1"></div><input type="file" id="f1" accept="image/png,image/jpeg"></div>
+      <div class="ing"><div class="drop" id="d2"><span class="hint">끌어다 놓기<br>또는 클릭</span><img id="t2"></div><input type="file" id="f2" accept="image/png,image/jpeg"></div>
     </div>
 
     <label>② 대본 / 설명</label>
@@ -56,12 +60,31 @@
   const $ = (id)=>document.getElementById(id);
   const ing = [null,null,null];
 
+  function setImage(i, file){
+    if(!file || !file.type.startsWith("image/")){ return; }
+    const r=new FileReader();
+    r.onload=()=>{
+      ing[i]={base64:r.result, mimeType:file.type};
+      const img=$(`t${i}`); img.src=r.result; img.style.display="block";
+      const hint=$(`d${i}`).querySelector(".hint"); if(hint) hint.style.display="none";
+    };
+    r.readAsDataURL(file);
+  }
+
   [0,1,2].forEach(i=>{
-    $(`f${i}`).addEventListener("change", e=>{
-      const f=e.target.files[0]; if(!f) return;
-      const r=new FileReader();
-      r.onload=()=>{ ing[i]={base64:r.result, mimeType:f.type}; $(`t${i}`).src=r.result; };
-      r.readAsDataURL(f);
+    const slot=$(`d${i}`), input=$(`f${i}`);
+    // 클릭 → 파일 선택창
+    slot.addEventListener("click", ()=> input.click());
+    input.addEventListener("change", e=> setImage(i, e.target.files[0]));
+    // 드래그앤드롭
+    ["dragenter","dragover"].forEach(ev=>
+      slot.addEventListener(ev, e=>{ e.preventDefault(); slot.classList.add("drag"); }));
+    ["dragleave","dragend"].forEach(ev=>
+      slot.addEventListener(ev, e=>{ e.preventDefault(); slot.classList.remove("drag"); }));
+    slot.addEventListener("drop", e=>{
+      e.preventDefault(); slot.classList.remove("drag");
+      const f = e.dataTransfer.files && e.dataTransfer.files[0];
+      setImage(i, f);
     });
   });
 
