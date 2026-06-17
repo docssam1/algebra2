@@ -49,6 +49,27 @@ function toImg(item, defaultMime) {
   };
 }
 
+// 응답 구조가 모델/버전마다 달라, response 전체를 재귀 탐색해 영상을 찾는다.
+function extractVideo(root) {
+  let base64 = null, uri = null, mime = null;
+  const seen = new Set();
+  (function walk(o) {
+    if (!o || typeof o !== "object" || seen.has(o)) return;
+    seen.add(o);
+    if (Array.isArray(o)) { o.forEach(walk); return; }
+    for (const [k, v] of Object.entries(o)) {
+      if (typeof v === "string") {
+        if (!base64 && /bytesBase64Encoded|encodedVideo|videoBytes/i.test(k) && v.length > 100) base64 = v;
+        else if (!uri && /(gcsUri|uri|videoUri)/i.test(k) && (/^gs:\/\//i.test(v) || /\.mp4/i.test(v))) uri = v;
+        else if (!mime && /mimeType/i.test(k) && /video/i.test(v)) mime = v;
+      } else {
+        walk(v);
+      }
+    }
+  })(root);
+  return { base64, uri, mime };
+}
+
 export const veoRouter = express.Router();
 
 veoRouter.post("/api/video", async (req, res) => {
@@ -114,16 +135,29 @@ veoRouter.post("/api/video/status", async (req, res) => {
     if (!data.done) return res.json({ done: false });
     if (data.error) return res.status(500).json({ done: true, error: data.error });
 
-    const sample =
-      data.response?.videos?.[0] ||
-      data.response?.generatedSamples?.[0]?.video ||
-      {};
+    const resp = data.response || {};
+    const found = extractVideo(resp);
+
+    // 안전필터로 걸러졌는지 표시(있으면)
+    const filtered = resp.raiMediaFilteredCount || resp.raiMediaFilteredReasons;
+
+    if (!found.base64 && !found.uri) {
+      // 영상을 못 찾은 경우: 진단용으로 response 구조 키를 함께 반환
+      return res.json({
+        done: true,
+        mimeType: found.mime || "video/mp4",
+        gcsUri: null,
+        videoBase64: null,
+        filtered: filtered || null,
+        debugKeys: Object.keys(resp)
+      });
+    }
 
     return res.json({
       done: true,
-      mimeType: sample.mimeType || "video/mp4",
-      gcsUri: sample.gcsUri || null,
-      videoBase64: sample.bytesBase64Encoded || null
+      mimeType: found.mime || "video/mp4",
+      gcsUri: found.uri || null,
+      videoBase64: found.base64 || null
     });
   } catch (e) {
     return res.status(500).json({ error: String(e?.message || e) });
