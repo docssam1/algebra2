@@ -3,7 +3,7 @@ import express from "express";
 
 const VEO_PROJECT  = process.env.GOOGLE_CLOUD_PROJECT || "";
 const VEO_LOCATION = process.env.VEO_LOCATION || "us-central1";
-const VEO_MODEL    = process.env.VEO_MODEL || "veo-3.1-fast-generate-001";
+const VEO_MODEL    = process.env.VEO_MODEL || "veo-3.1-generate-lite-001";
 
 const BASE =
   `https://${VEO_LOCATION}-aiplatform.googleapis.com/v1` +
