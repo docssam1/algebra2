@@ -4,22 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Algebra 2 Placement Test Diagnostic & Curriculum Dashboard</title>
-    <!-- Tailwind CSS & Font & ChartJS & MathJax 설정 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght=300;400;500;700&family=Lora:ital,wght@0,400;0,700;1,400&display=swap');
-
-        body {
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: #fafaf9;
-            color: #292524;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #fafaf9; color: #292524; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
         .math-font { font-family: 'Lora', serif; }
         .chart-container { position: relative; width: 100%; height: 380px; }
         .tab-active { border-bottom: 4px solid #4f46e5; color: #4f46e5; font-weight: 700; }
@@ -30,12 +19,10 @@
         .q-inactive:hover { background-color: #f5f5f4; border-color: #a8a29e; }
         .omr-btn-selected-correct { background-color: #10b981 !important; color: white !important; border-color: #059669 !important; }
         .omr-btn-selected-incorrect { background-color: #f43f5e !important; color: white !important; border-color: #e11d48 !important; }
-
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f5f5f4; }
         ::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #a8a29e; }
-
         @media print {
             body { background-color: #ffffff !important; color: #000000 !important; font-size: 12pt; padding: 0; margin: 0; -webkit-user-select: auto; user-select: auto; }
             .no-print { display: none !important; }
@@ -244,12 +231,12 @@
                     <div>
                         <h4 class="font-bold text-stone-800 text-xs uppercase tracking-wider mb-3 border-b border-stone-100 pb-2">🎖️ Placement Cut-off Guide</h4>
                         <div class="space-y-3 text-xs leading-relaxed">
-                            <div class="p-2.5 rounded-lg border-l-4 border-emerald-500 bg-emerald-50/50"><strong class="text-emerald-900 block font-bold mb-0.5">Honors Pre-Calc 월반선 (35점 이상)</strong>미국 TOP 25 보딩 및 주요 국제학교 통과 안정 등급. 대수 연산 속도 및 실전 변별력이 최상위에 포진해 있습니다.</div>
-                            <div class="p-2.5 rounded-lg border-l-4 border-amber-500 bg-amber-50/50"><strong class="text-amber-900 block font-bold mb-0.5">Standard Pre-Calc 패스선 (28~34점)</strong>평균 이상의 수리 능력을 증명했으나, 정교한 고차 로그방정식이나 삼각함수 단원의 미세 연산 오류가 존재합니다.</div>
-                            <div class="p-2.5 rounded-lg border-l-4 border-rose-500 bg-rose-50/50"><strong class="text-rose-900 block font-bold mb-0.5">보강 필요 위험 구간 (27점 이하)</strong>고차 다항식 및 기하학 단원 개념 누수가 심각하며, Pre-Calculus 진학 전 철저한 복습이 권장됩니다.</div>
+                            <div class="p-2.5 rounded-lg border-l-4 border-emerald-500 bg-emerald-50/50"><strong class="text-emerald-900 block font-bold mb-0.5">Honors Pre-Calc 월반선 (35점 이상)</strong>미국 TOP 25 보딩 및 주요 국제학교 통과 안정 등급.</div>
+                            <div class="p-2.5 rounded-lg border-l-4 border-amber-500 bg-amber-50/50"><strong class="text-amber-900 block font-bold mb-0.5">Standard Pre-Calc 패스선 (28~34점)</strong>평균 이상의 수리 능력을 증명했으나 미세 연산 오류가 존재합니다.</div>
+                            <div class="p-2.5 rounded-lg border-l-4 border-rose-500 bg-rose-50/50"><strong class="text-rose-900 block font-bold mb-0.5">보강 필요 위험 구간 (27점 이하)</strong>Pre-Calculus 진학 전 철저한 복습이 권장됩니다.</div>
                         </div>
                     </div>
-                    <div class="bg-stone-50 rounded-xl p-3 border border-stone-100 text-[11px] text-stone-500 leading-normal mt-4">💡 그래프상의 <b>빨간 점선(Honors Pass - 35점 대등선)</b> 및 <b>노란 점선(Regular Pass - 28점 대등선)</b> 대비 우리 학생의 막대 높이를 정밀 조율해 분석에 반영합니다.</div>
+                    <div class="bg-stone-50 rounded-xl p-3 border border-stone-100 text-[11px] text-stone-500 leading-normal mt-4">💡 <b>빨간 점선(Honors Pass)</b> 및 <b>노란 점선(Regular Pass)</b> 대비 학생의 막대 높이를 분석합니다.</div>
                 </div>
             </div>
             <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm mb-8" id="diagnosis-text-report-board"></div>
@@ -276,12 +263,48 @@
                 <h3 class="font-bold text-indigo-950 text-sm mb-2">✨ AI 실시간 오답 노출 단원 튜닝 기기</h3>
                 <p class="text-indigo-900/80 text-xs mb-4">현재 마킹 결과를 분석해 특별 보강이 시급한 단원을 자동으로 체크했습니다. 원하시는 단원을 직접 추가/제외하여 [AI 커스텀 로드맵 빌드하기] 버튼을 누르면 AI 교육 컨설턴트 템플릿으로 재생성됩니다.</p>
                 <div class="flex flex-wrap gap-2 mb-3" id="curriculum-domain-selectors"></div>
+
+                <!-- 커리큘럼 기본 설정 -->
                 <div class="flex flex-wrap items-center gap-2 mb-4">
                     <label for="curriculum-session-count" class="text-[11px] font-bold text-indigo-900">회차 수</label>
                     <input id="curriculum-session-count" type="number" min="4" max="30" value="10" class="w-20 border border-indigo-200 rounded-lg px-2 py-1 text-xs bg-white">
                     <label for="curriculum-session-minutes" class="text-[11px] font-bold text-indigo-900">회당 시간(분)</label>
                     <input id="curriculum-session-minutes" type="number" min="30" max="240" value="120" class="w-24 border border-indigo-200 rounded-lg px-2 py-1 text-xs bg-white">
                 </div>
+
+                <!-- 워크북 설정 -->
+                <div class="bg-sky-50 border border-sky-100 rounded-xl p-4 mb-4">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-sm">📘</span>
+                        <h4 class="text-[11px] font-black text-sky-900 uppercase tracking-wider">워크북 문항 설정 (회차별 과제용)</h4>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="flex items-center gap-1.5">
+                            <label for="workbook-item-count" class="text-[11px] font-bold text-sky-900">단원당 문항 수</label>
+                            <input id="workbook-item-count" type="number" min="20" max="50" value="30" class="w-20 border border-sky-200 rounded-lg px-2 py-1 text-xs bg-white" oninput="app.validateWorkbookRatio()">
+                            <span class="text-[10px] text-sky-700 font-semibold">(20~50)</span>
+                        </div>
+                        <div class="h-4 w-px bg-sky-200"></div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded">B</span>
+                            <input id="workbook-ratio-b" type="number" min="0" max="100" value="30" class="w-14 border border-emerald-200 rounded-lg px-2 py-1 text-xs bg-white text-center" oninput="app.validateWorkbookRatio()">
+                            <span class="text-[10px] text-stone-500">%</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] font-black text-amber-700 bg-amber-50 border border-amber-100 px-1.5 py-0.5 rounded">C</span>
+                            <input id="workbook-ratio-c" type="number" min="0" max="100" value="50" class="w-14 border border-amber-200 rounded-lg px-2 py-1 text-xs bg-white text-center" oninput="app.validateWorkbookRatio()">
+                            <span class="text-[10px] text-stone-500">%</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] font-black text-rose-700 bg-rose-50 border border-rose-100 px-1.5 py-0.5 rounded">A</span>
+                            <input id="workbook-ratio-a" type="number" min="0" max="100" value="20" class="w-14 border border-rose-200 rounded-lg px-2 py-1 text-xs bg-white text-center" oninput="app.validateWorkbookRatio()">
+                            <span class="text-[10px] text-stone-500">%</span>
+                        </div>
+                        <div id="workbook-ratio-status" class="text-[10px] font-bold text-emerald-700">✅ 합계 100%</div>
+                    </div>
+                    <p class="text-[10px] text-sky-700 mt-2">개념북(수업 90분, 고정) + 워크북(과제, 위 설정 적용) · 답안지 포함 출력</p>
+                </div>
+
                 <div class="flex items-center gap-3">
                     <button onclick="app.buildCustomCurriculum()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-colors shadow-sm flex items-center gap-1.5"><span>✨ AI 커스텀 로드맵 빌드하기</span></button>
                     <button onclick="app.resetToStandardCurriculum()" class="text-indigo-800 hover:text-indigo-950 font-bold text-xs">기본 구조로 재설정</button>
@@ -298,7 +321,7 @@
                         <h3 class="font-bold text-stone-800 text-sm">💾 나만의 오답 변형 노트 (클립보드)</h3>
                         <span class="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-md" id="saved-variants-count">0개 저장됨</span>
                     </div>
-                    <p class="text-[11px] text-stone-500 leading-normal mb-3">문제 풀이 뷰어에서 AI 수학 튜터에게 <b>'쌍둥이 변형 문제 출제'</b>를 요청해 생성된 문항을 학생의 취약 극복 오답 보관함에 담을 수 있습니다. 인쇄 시 리포트 뒤에 자동 바인딩됩니다.</p>
+                    <p class="text-[11px] text-stone-500 leading-normal mb-3">문제 풀이 뷰어에서 AI 수학 튜터에게 <b>'쌍둥이 변형 문제 출제'</b>를 요청해 생성된 문항을 학생의 취약 극복 오답 보관함에 담을 수 있습니다.</p>
                     <div class="space-y-3 max-h-[400px] overflow-y-auto pr-1" id="saved-variants-container">
                         <div class="text-center py-8 text-xs text-stone-400">저장된 유사 문항이 없습니다. 튜터와의 대화 중 문항을 담아 보세요!</div>
                     </div>
@@ -315,7 +338,7 @@
                 <h3 class="font-bold text-stone-800 text-base flex items-center gap-1.5"><span>🖨️</span> PDF 성적 진단서 & 시험지 고화질 인쇄 포털</h3>
                 <button onclick="app.closePrintModal()" class="text-stone-400 hover:text-stone-600 font-bold">✕</button>
             </div>
-            <p class="text-xs text-stone-500 leading-relaxed mb-4">브라우저 프린터 폰트 매칭 및 레이아웃 깨짐을 완전히 예방한 고화질 학부모 브리핑용 성적표와 오프라인 배포용 문제지 인쇄 포털입니다.</p>
+            <p class="text-xs text-stone-500 leading-relaxed mb-4">고화질 학부모 브리핑용 성적표와 오프라인 배포용 문제지 인쇄 포털입니다.</p>
             <div class="space-y-3">
                 <button onclick="app.runPrintProcess('report')" class="w-full flex items-center justify-between p-3.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-950 font-semibold rounded-2xl transition-all border border-indigo-100 group">
                     <div class="flex items-center gap-3"><span class="text-xl">📊</span><div class="text-left"><span class="block text-xs font-bold">프리미엄 한/영 성적 종합 분석 진단서 발행</span><span class="text-[10px] text-indigo-700 font-medium">상위 25% 가이드라인 차트 + 선수 학습 결손 역추적 소견서</span></div></div>
@@ -456,6 +479,33 @@
                 });
             },
 
+            validateWorkbookRatio() {
+                const b = Number(document.getElementById('workbook-ratio-b')?.value || 30);
+                const c = Number(document.getElementById('workbook-ratio-c')?.value || 50);
+                const a = Number(document.getElementById('workbook-ratio-a')?.value || 20);
+                const total = b + c + a;
+                const status = document.getElementById('workbook-ratio-status');
+                if (!status) return;
+                if (total === 100) {
+                    status.textContent = '✅ 합계 100%';
+                    status.className = 'text-[10px] font-bold text-emerald-700';
+                } else {
+                    status.textContent = `⚠️ 합계 ${total}% (100% 맞춰주세요)`;
+                    status.className = 'text-[10px] font-bold text-rose-600';
+                }
+            },
+
+            getWorkbookSettings() {
+                const count = Math.max(20, Math.min(50, Number(document.getElementById('workbook-item-count')?.value || 30)));
+                const b = Number(document.getElementById('workbook-ratio-b')?.value || 30);
+                const c = Number(document.getElementById('workbook-ratio-c')?.value || 50);
+                const a = Number(document.getElementById('workbook-ratio-a')?.value || 20);
+                const total = b + c + a;
+                const ratio = total > 0 ? { b: Math.round(count * b / total), c: Math.round(count * c / total), a: 0 } : { b: 9, c: 15, a: 6 };
+                ratio.a = count - ratio.b - ratio.c;
+                return { count, ratio };
+            },
+
             buildQuestionGrids() {
                 const g1 = document.getElementById('part1-grid');
                 const g2 = document.getElementById('part2-grid');
@@ -486,7 +536,6 @@
                 document.getElementById('solution-box').classList.add('hidden');
                 document.getElementById('q-answer').innerHTML = `정답: ${q.a}`;
                 document.getElementById('q-steps').innerHTML = q.s;
-                // 영상 패널 닫기
                 const vp = document.getElementById('mario-video-panel');
                 if (vp) vp.remove();
                 this.typesetMathJaxElements([document.getElementById('q-body'), document.getElementById('q-answer'), document.getElementById('q-steps')]);
@@ -529,7 +578,8 @@
             appendCurriculumCard(container, id, title, desc, meta = null) {
                 const card = document.createElement('div');
                 card.className = "bg-white border border-stone-200 p-4 rounded-xl flex gap-3 items-start shadow-sm";
-                const metaHtml = meta ? `<div class="mt-2 grid grid-cols-2 md:grid-cols-4 gap-2 text-[10px]"><div class="bg-stone-50 border border-stone-200 rounded-lg px-2 py-1"><b>시간</b><br>${meta.minutes}분</div><div class="bg-stone-50 border border-stone-200 rounded-lg px-2 py-1"><b>문항수</b><br>${meta.itemCount}문항</div><div class="bg-stone-50 border border-stone-200 rounded-lg px-2 py-1"><b>난이도</b><br>B ${meta.mix.basic} / C ${meta.mix.core} / A ${meta.mix.advanced}</div><div class="bg-stone-50 border border-stone-200 rounded-lg px-2 py-1"><b>포커스</b><br>${meta.focus}</div></div><div class="mt-2 text-[10px] text-stone-600">학원수업: 개념 ${meta.lessonPlan.concept}분 · 유도 ${meta.lessonPlan.guided}분 · 실전 ${meta.lessonPlan.independent}분 · 피드백 ${meta.lessonPlan.exit}분<br>가정학습: 쉬움 ${meta.homework.easy} / 보통 ${meta.homework.medium} / 어려움 ${meta.homework.hard}</div>` : "";
+                const wb = this.getWorkbookSettings();
+                const metaHtml = meta ? `<div class="mt-2 grid grid-cols-2 md:grid-cols-4 gap-2 text-[10px]"><div class="bg-stone-50 border border-stone-200 rounded-lg px-2 py-1"><b>시간</b><br>${meta.minutes}분</div><div class="bg-stone-50 border border-stone-200 rounded-lg px-2 py-1"><b>수업문항</b><br>${meta.itemCount}문항</div><div class="bg-stone-50 border border-stone-200 rounded-lg px-2 py-1"><b>난이도</b><br>B ${meta.mix.basic} / C ${meta.mix.core} / A ${meta.mix.advanced}</div><div class="bg-stone-50 border border-stone-200 rounded-lg px-2 py-1"><b>포커스</b><br>${meta.focus}</div></div><div class="mt-2 text-[10px] text-stone-600">학원수업: 개념 ${meta.lessonPlan.concept}분 · 유도 ${meta.lessonPlan.guided}분 · 실전 ${meta.lessonPlan.independent}분 · 피드백 ${meta.lessonPlan.exit}분</div><div class="mt-1.5 bg-sky-50 border border-sky-100 rounded-lg px-2 py-1 text-[10px] text-sky-800"><b>📘 워크북 과제:</b> 총 ${wb.count}문항 (B:${wb.ratio.b} / C:${wb.ratio.c} / A:${wb.ratio.a}) + 답안지</div>` : "";
                 card.innerHTML = `<div class="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 font-extrabold text-xs flex items-center justify-center mt-0.5">${id}</div><div><h4 class="font-bold text-stone-800 text-sm">${title}</h4><p class="text-xs text-stone-500 mt-1 leading-relaxed">${desc}</p>${metaHtml}</div>`;
                 container.appendChild(card);
             },
@@ -799,68 +849,22 @@
             closeAiTutor() { document.getElementById('ai-tutor-panel').classList.add('hidden'); },
             sendPresetQuestion(text) { this.queueTutorQuestion(text); },
 
-            // ✅ Mario's Math Tutoring YouTube 영상 ID 매핑 (Q1~Q40)
             getMarioVideoId(question) {
                 const qId=Number(question?.id||0);
-                const map={
-                    1:"YpLSZdhOhtU",  // Multi-Step Linear Equations
-                    2:"IsvdlrVpQAo",  // Absolute Value Equations & Inequalities
-                    3:"Mpou_ly0bvw",  // Equation of Perpendicular Line
-                    4:"u8YBdN23rK4",  // Parallel Lines / Linear Systems
-                    5:"XFkmEW6myeU",  // Exponents / Slope Intercept Form
-                    6:"puWdJ-s9y_Y",  // Complex Numbers / Solving Quadratics
-                    7:"puWdJ-s9y_Y",  // Complex Fractions
-                    8:"sthnDdr6klY",  // Factoring Quadratics / Quadratic Formula
-                    9:"sthnDdr6klY",  // Quadratic Formula (complex roots)
-                    10:"sthnDdr6klY", // Vertex Form / Completing the Square
-                    11:"0MKafhRHolM", // Polynomial Multiplication
-                    12:"puWdJ-s9y_Y", // Difference of Cubes
-                    13:"puWdJ-s9y_Y", // Synthetic Division
-                    14:"puWdJ-s9y_Y", // Simplifying Rational Expressions
-                    15:"puWdJ-s9y_Y", // Solving Rational Equations
-                    16:"XFkmEW6myeU", // Rational Exponents & Radicals
-                    17:"puWdJ-s9y_Y", // Radical Equations
-                    18:"_e0EdFGpcvc", // Function Composition & Notation
-                    19:"_e0EdFGpcvc", // Inverse Functions
-                    20:"puWdJ-s9y_Y", // Log Properties (expand/condense)
-                    21:"puWdJ-s9y_Y", // 3-Variable Systems
-                    22:"DUH6wsdwYqc", // Word Problem Systems (coins)
-                    23:"puWdJ-s9y_Y", // Linear Programming
-                    24:"sthnDdr6klY", // Quadratic Word Problems (rocket)
-                    25:"WDx-54rdOl8", // Continuous Compound Interest
-                    26:"puWdJ-s9y_Y", // Solving Exponential Equations
-                    27:"puWdJ-s9y_Y", // Solving Logarithmic Equations
-                    28:"DUH6wsdwYqc", // Work Rate Problems
-                    29:"L3qlwDmoJN8", // Direct & Inverse Variation
-                    30:"KbLA-0h1EGk", // Graphing Absolute Value / Transformations
-                    31:"puWdJ-s9y_Y", // Circle Equations
-                    32:"puWdJ-s9y_Y", // Arithmetic Sequences
-                    33:"puWdJ-s9y_Y", // Infinite Geometric Series
-                    34:"puWdJ-s9y_Y", // Binomial Theorem
-                    35:"puWdJ-s9y_Y", // Right Triangle Trig (SOH-CAH-TOA)
-                    36:"puWdJ-s9y_Y", // Unit Circle Special Angles
-                    37:"puWdJ-s9y_Y", // Sine Graph Transformations
-                    38:"puWdJ-s9y_Y", // Normal Distribution / Empirical Rule
-                    39:"puWdJ-s9y_Y", // Probability Without Replacement
-                    40:"puWdJ-s9y_Y", // Matrix Operations
-                };
+                const map={1:"YpLSZdhOhtU",2:"IsvdlrVpQAo",3:"Mpou_ly0bvw",4:"u8YBdN23rK4",5:"XFkmEW6myeU",6:"puWdJ-s9y_Y",7:"puWdJ-s9y_Y",8:"sthnDdr6klY",9:"sthnDdr6klY",10:"sthnDdr6klY",11:"0MKafhRHolM",12:"puWdJ-s9y_Y",13:"puWdJ-s9y_Y",14:"puWdJ-s9y_Y",15:"puWdJ-s9y_Y",16:"XFkmEW6myeU",17:"puWdJ-s9y_Y",18:"_e0EdFGpcvc",19:"_e0EdFGpcvc",20:"puWdJ-s9y_Y",21:"puWdJ-s9y_Y",22:"DUH6wsdwYqc",23:"puWdJ-s9y_Y",24:"sthnDdr6klY",25:"WDx-54rdOl8",26:"puWdJ-s9y_Y",27:"puWdJ-s9y_Y",28:"DUH6wsdwYqc",29:"L3qlwDmoJN8",30:"KbLA-0h1EGk",31:"puWdJ-s9y_Y",32:"puWdJ-s9y_Y",33:"puWdJ-s9y_Y",34:"puWdJ-s9y_Y",35:"puWdJ-s9y_Y",36:"puWdJ-s9y_Y",37:"puWdJ-s9y_Y",38:"puWdJ-s9y_Y",39:"puWdJ-s9y_Y",40:"puWdJ-s9y_Y"};
                 return map[qId]||"puWdJ-s9y_Y";
             },
 
             openConceptVideo() {
                 const q=appData.questions.find(x=>x.id===this.currentQuestion);
                 const videoId=this.getMarioVideoId(q);
-                // 기존 영상 패널 제거
                 const existing=document.getElementById('mario-video-panel');
                 if(existing)existing.remove();
-                // 튜터 패널 열기
                 document.getElementById('ai-tutor-panel').classList.remove('hidden');
-                // 영상 패널 생성
                 const panel=document.createElement('div');
                 panel.id='mario-video-panel';
                 panel.className='mt-3 rounded-xl overflow-hidden border border-emerald-200';
                 panel.innerHTML=`<div class="flex items-center justify-between bg-emerald-50 px-3 py-2 border-b border-emerald-200"><span class="text-[11px] font-bold text-emerald-800">🎬 Mario's Math Tutoring — Q${q.id} [${q.domain}]</span><button onclick="document.getElementById('mario-video-panel').remove()" class="text-stone-400 hover:text-rose-500 text-xs font-bold">✕ 닫기</button></div><div class="relative w-full bg-black" style="padding-bottom:56.25%;"><iframe src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&cc_load_policy=1" title="Mario's Math Tutoring Q${q.id}" frameborder="0" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen class="absolute inset-0 w-full h-full"></iframe></div>`;
-                // 채팅 로그 다음에 삽입
                 const chatLogs=document.getElementById('chat-logs');
                 chatLogs.parentNode.insertBefore(panel,chatLogs.nextSibling);
                 panel.scrollIntoView({behavior:'smooth',block:'nearest'});
@@ -884,8 +888,10 @@
             setTutorControlsDisabled(d) {
                 const panel=document.getElementById('ai-tutor-panel');
                 if(!panel)return;
-                const vp=document.getElementById('mario-video-panel');if(vp)vp.querySelectorAll('button').forEach(el=>el.removeAttribute('disabled'));
+                const vp=document.getElementById('mario-video-panel');
+                if(vp)vp.querySelectorAll('button').forEach(el=>el.removeAttribute('disabled'));
                 panel.querySelectorAll('button,input').forEach(el=>{if(d)el.setAttribute('disabled','disabled');else el.removeAttribute('disabled');});
+                if(vp)vp.querySelectorAll('button').forEach(el=>el.removeAttribute('disabled'));
             },
 
             async processTutorPipeline(query) {
@@ -947,6 +953,10 @@
             async buildCustomCurriculum() {
                 if(!this.activeStudent){alert("학생을 먼저 등록해 주세요.");return;}
                 if(!this.omrMarks.filter(x=>x!==null).length){alert("OMR 마킹이 1개 이상 있어야 합니다.");return;}
+                const b=Number(document.getElementById('workbook-ratio-b')?.value||30);
+                const c=Number(document.getElementById('workbook-ratio-c')?.value||50);
+                const a=Number(document.getElementById('workbook-ratio-a')?.value||20);
+                if(b+c+a!==100){alert("워크북 난이도 비율 합계가 100%여야 합니다.");return;}
                 let domains=Array.from(document.querySelectorAll('.domain-checkbox:checked')).map(x=>x.value);
                 const sess=Math.max(4,Math.min(30,Number(document.getElementById('curriculum-session-count')?.value||10)));
                 const mins=Math.max(30,Math.min(240,Number(document.getElementById('curriculum-session-minutes')?.value||120)));
@@ -983,12 +993,13 @@
             downloadMaterialPack(type='workbook') {
                 const sess=Math.max(4,Math.min(30,Number(document.getElementById('curriculum-session-count')?.value||10)));
                 const mins=Math.max(30,Math.min(240,Number(document.getElementById('curriculum-session-minutes')?.value||120)));
+                const wb=this.getWorkbookSettings();
                 const sessions=this.lastGeneratedCurriculum?.length?this.lastGeneratedCurriculum:this.generateAdaptiveCurriculum(this.getWeakestDomainGroups(3),sess,mins);
                 const name=(this.activeStudent&&this.activeStudent.name)?this.activeStudent.name:"student";
                 const isWb=type==='workbook';
                 const title=isWb?"Algebra 2 맞춤 워크북":"Algebra 2 수업 해설지/교안";
-                const rows=sessions.map(s=>{const m=s.meta||{};return`<tr><td>${s.id}</td><td>${s.title}</td><td>${m.minutes||'-'}분</td><td>${m.itemCount||'-'}문항</td><td>B${m.mix?.basic??'-'}/C${m.mix?.core??'-'}/A${m.mix?.advanced??'-'}</td><td>${isWb?`${m.homework?.easy??'-'}/${m.homework?.medium??'-'}/${m.homework?.hard??'-'}`:`${m.lessonPlan?.concept??'-'}-${m.lessonPlan?.guided??'-'}-${m.lessonPlan?.independent??'-'}-${m.lessonPlan?.exit??'-'}`}</td></tr>`;}).join('');
-                const html=`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>${title}</title><style>body{font-family:Arial,sans-serif;padding:24px}table{border-collapse:collapse;width:100%;font-size:12px}th,td{border:1px solid #d1d5db;padding:8px}th{background:#f5f3ff}</style></head><body><h1>${title}</h1><table><thead><tr><th>회차</th><th>주제</th><th>시간</th><th>문항수</th><th>난이도</th><th>${isWb?'Homework(E/M/H)':'교안시간'}</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
+                const rows=sessions.map(s=>{const m=s.meta||{};return`<tr><td>${s.id}</td><td>${s.title}</td><td>${m.minutes||'-'}분</td><td>${m.itemCount||'-'}문항</td><td>B${m.mix?.basic??'-'}/C${m.mix?.core??'-'}/A${m.mix?.advanced??'-'}</td><td>${isWb?`워크북 ${wb.count}문항 (B:${wb.ratio.b}/C:${wb.ratio.c}/A:${wb.ratio.a})`:`${m.lessonPlan?.concept??'-'}-${m.lessonPlan?.guided??'-'}-${m.lessonPlan?.independent??'-'}-${m.lessonPlan?.exit??'-'}`}</td></tr>`;}).join('');
+                const html=`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>${title}</title><style>body{font-family:Arial,sans-serif;padding:24px}table{border-collapse:collapse;width:100%;font-size:12px}th,td{border:1px solid #d1d5db;padding:8px}th{background:#f5f3ff}</style></head><body><h1>${title}</h1><p style="font-size:12px;color:#6b7280">워크북 설정: 단원당 ${wb.count}문항 / B:${wb.ratio.b}문항 · C:${wb.ratio.c}문항 · A:${wb.ratio.a}문항 · 답안지 포함</p><table><thead><tr><th>회차</th><th>주제</th><th>시간</th><th>수업문항</th><th>난이도</th><th>${isWb?'워크북 과제':'교안시간'}</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
                 const blob=new Blob([html],{type:'text/html;charset=utf-8'});const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=`${name}_${isWb?'workbook':'answer_key'}.html`;document.body.appendChild(link);link.click();document.body.removeChild(link);URL.revokeObjectURL(link.href);
             },
 
