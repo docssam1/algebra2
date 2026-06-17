@@ -14,8 +14,8 @@ const BASE =
   `https://${VEO_LOCATION}-aiplatform.googleapis.com/v1` +
   `/projects/${VEO_PROJECT}/locations/${VEO_LOCATION}/publishers/google/models/${VEO_MODEL}`;
 
-// ★★ 절대 조건 (모든 장면에 항상 적용) ★★
-const STYLE_PREFIX =
+// ★★ 모드별 스타일 프리픽스 ★★
+const STYLE_PREFIX_YUJUN =
   "일본 애니메이션 화풍(셀 애니, 선명한 윤곽선, 부드러운 채색). " +
   "등장인물은 한국어로 말한다. " +
   '주인공 "유준": 20세 성인 남성. ' +
@@ -24,6 +24,26 @@ const STYLE_PREFIX =
   "레퍼런스 이미지와 100% 동일하게 유지하며, 남자 캐릭터를 절대 바꾸지 않는다. " +
   '나머지 등장 캐릭터는 "이탈리안 브레인롯(Italian Brainrot)" 밈 스타일의 의인화 캐릭터로 그린다. ' +
   "모든 캐릭터 디자인은 회차 내내 일관되게 유지. ";
+
+const STYLE_PREFIX_MATH =
+  "일본 애니메이션 화풍(셀 애니, 선명한 윤곽선, 부드러운 채색). " +
+  "등장인물은 한국어로 말하며 수학 개념을 쉽고 재미있게 설명한다. " +
+  "칠판, 수식, 도형 등 수학 요소가 화면에 자연스럽게 등장한다. " +
+  "캐릭터는 귀엽고 친근한 선생님 또는 학생 스타일. " +
+  "밝고 교육적인 분위기. 모든 텍스트와 수식은 명확하게 표시. ";
+
+const STYLE_PREFIX_SCIENCE =
+  "일본 애니메이션 화풍(셀 애니, 선명한 윤곽선, 부드러운 채색). " +
+  "등장인물은 한국어로 말하며 과학 개념이나 실험을 쉽고 재미있게 설명한다. " +
+  "실험 도구, 원소 기호, 자연 현상 등 과학 요소가 화면에 자연스럽게 등장한다. " +
+  "캐릭터는 귀엽고 호기심 많은 과학자 또는 학생 스타일. " +
+  "밝고 탐구적인 분위기. ";
+
+function getStylePrefix(mode) {
+  if (mode === "math") return STYLE_PREFIX_MATH;
+  if (mode === "science") return STYLE_PREFIX_SCIENCE;
+  return STYLE_PREFIX_YUJUN;
+}
 
 const NEGATIVE_PROMPT =
   "실사, 사진, 3D 렌더, 저화질, 흐릿함, 깨진 손, 글자/자막 왜곡, 워터마크, 영어 텍스트";
@@ -83,10 +103,11 @@ veoRouter.post("/api/video", async (req, res) => {
       imageBase64,
       mimeType = "image/png",
       aspectRatio = "16:9",
-      durationSeconds = 8
+      durationSeconds = 8,
+      mode = "yujun"
     } = req.body || {};
 
-    const instance = { prompt: STYLE_PREFIX + prompt };
+    const instance = { prompt: getStylePrefix(mode) + prompt };
 
     if (Array.isArray(images) && images.length > 0) {
       instance.referenceImages = images.slice(0, 3).map((it) => ({
@@ -101,7 +122,7 @@ veoRouter.post("/api/video", async (req, res) => {
 
     const body = {
       instances: [instance],
-      parameters: { ...FIXED_PARAMS, aspectRatio, durationSeconds, negativePrompt: NEGATIVE_PROMPT }
+      parameters: { ...FIXED_PARAMS, aspectRatio, durationSeconds, negativePrompt: NEGATIVE_PROMPT, personGeneration: "allow_adult" }
     };
 
     const token = await getToken();

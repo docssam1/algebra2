@@ -28,10 +28,23 @@
   .stat{ font-size:.88rem; color:#555; margin-top:10px; white-space:pre-wrap; }
   video{ width:100%; margin-top:14px; border-radius:10px; display:none; }
   a.dl{ display:none; margin-top:10px; font-size:1rem; }
+  .mode-tabs{ display:flex; gap:8px; margin:12px 0 4px; flex-wrap:wrap; }
+  .mode-btn{ padding:8px 18px; border:2px solid #e3e3e3; border-radius:20px;
+             background:#fff; font-size:.92rem; cursor:pointer; color:#555; margin-top:0; }
+  .mode-btn.active{ border-color:#2563eb; background:#2563eb; color:#fff; font-weight:700; }
+  .mode-desc{ font-size:.85rem; color:#666; margin:0 0 8px; }
 </style>
 </head>
 <body>
   <h1>만화 → 애니 영상 만들기</h1>
+
+  <div class="mode-tabs">
+    <button class="mode-btn active" data-mode="yujun">🧒 유준 스토리</button>
+    <button class="mode-btn" data-mode="math">📐 수학 만화</button>
+    <button class="mode-btn" data-mode="science">🔬 과학 만화</button>
+  </div>
+  <p class="mode-desc" id="modeDesc">유준이 주인공인 일본 애니풍 스토리 영상을 만들어요.</p>
+
   <p class="opt">사진(재료)을 최대 3장 올리고 대본을 쓴 뒤 <b>영상 만들기</b>를 누르면,
      일본 애니풍 8초 영상이 만들어집니다. 다 되면 다운로드하세요.</p>
 
@@ -44,7 +57,7 @@
     </div>
 
     <label>② 대본 / 설명</label>
-    <textarea id="prompt" placeholder="예) 유준이 네스프레소 머신으로 커피를 내리며 향을 맡고 한국어로 '와~ 커피 냄새 진짜 좋다!' 라고 말한다. 따뜻한 아침 주방, 일본 애니 화풍."></textarea>
+    <textarea id="prompt" placeholder="예) 유준이 네스프레소 머신으로 커피를 내리며 향을 맡고 한국어로 '와~ 커피 냄새 진짜 좋다!' 라고 말한다."></textarea>
 
     <button id="make">영상 만들기</button>
     <div class="stat" id="stat"></div>
@@ -59,6 +72,22 @@
   const API_BASE = "https://algebra2-gemini-proxy-v2-243382036810.asia-northeast3.run.app";
   const $ = (id)=>document.getElementById(id);
   const ing = [null,null,null];
+  let currentMode = "yujun";
+
+  const modeDescs = {
+    yujun: "유준이 주인공인 일본 애니풍 스토리 영상을 만들어요.",
+    math: "수학 개념/문제를 캐릭터가 설명하는 애니 영상을 만들어요.",
+    science: "과학 개념/실험을 캐릭터가 설명하는 애니 영상을 만들어요."
+  };
+
+  document.querySelectorAll(".mode-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll(".mode-btn").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      currentMode = btn.dataset.mode;
+      $("modeDesc").textContent = modeDescs[currentMode];
+    });
+  });
 
   function setImage(i, file){
     if(!file || !file.type.startsWith("image/")){ return; }
@@ -87,7 +116,6 @@
     });
   });
 
-  // 붙여넣기(Ctrl+V): 클립보드 이미지를 빈 칸에 자동 추가
   window.addEventListener("paste", (e)=>{
     const items = e.clipboardData && e.clipboardData.items;
     if(!items) return;
@@ -112,7 +140,7 @@
     setStat("영상 생성 요청 중…");
     try{
       const start = await postJSON(`${API_BASE}/api/video`, {
-        prompt: $("prompt").value, images, aspectRatio:"16:9", durationSeconds:8
+        prompt: $("prompt").value, images, aspectRatio:"16:9", durationSeconds:8, mode: currentMode
       });
       const op = start.operationName;
       setStat("영상 생성 중… (수십 초~수 분 걸려요)");
