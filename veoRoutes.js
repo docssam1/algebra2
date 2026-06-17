@@ -18,9 +18,9 @@ const BASE =
 const STYLE_PREFIX =
   "일본 애니메이션 화풍(셀 애니, 선명한 윤곽선, 부드러운 채색). " +
   "등장인물은 한국어로 말한다. " +
-  '주인공 "유준": 20세 성인 남성(동안이라 어려 보임). ' +
-  "키 130cm, 몸무게 40kg, 조금 통통한 귀여운 체형. 커피를 즐겨 마신다. " +
-  "검은색 짧은 스파이키 헤어, 굵은 눈썹, 큰 눈, 발그레한 볼, 밝고 활기찬 미소, 주황색 별무늬 셔츠. " +
+  '주인공 "유준": 20세 성인 남성. ' +
+  "키 130cm, 몸무게 40kg, 조금 통통한 체형. 커피를 즐겨 마신다. " +
+  "검은색 짧은 스파이키 헤어, 굵은 눈썹, 밝고 활기찬 미소, 주황색 별무늬 셔츠. " +
   "레퍼런스 이미지와 100% 동일하게 유지하며, 남자 캐릭터를 절대 바꾸지 않는다. " +
   '나머지 등장 캐릭터는 "이탈리안 브레인롯(Italian Brainrot)" 밈 스타일의 의인화 캐릭터로 그린다. ' +
   "모든 캐릭터 디자인은 회차 내내 일관되게 유지. ";
@@ -137,18 +137,16 @@ veoRouter.post("/api/video/status", async (req, res) => {
 
     const resp = data.response || {};
     const found = extractVideo(resp);
-
-    // 안전필터로 걸러졌는지 표시(있으면)
     const filtered = resp.raiMediaFilteredCount || resp.raiMediaFilteredReasons;
 
     if (!found.base64 && !found.uri) {
-      // 영상을 못 찾은 경우: 진단용으로 response 구조 키를 함께 반환
       return res.json({
         done: true,
         mimeType: found.mime || "video/mp4",
         gcsUri: null,
         videoBase64: null,
         filtered: filtered || null,
+        filterReasons: resp.raiMediaFilteredReasons || null,
         debugKeys: Object.keys(resp)
       });
     }
