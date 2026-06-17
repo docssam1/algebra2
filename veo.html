@@ -5,34 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>만화 → 애니 영상 만들기 (Veo 3.1)</title>
 <style>
-  body{ font-family:-apple-system,"Noto Sans KR",sans-serif; max-width:720px;
-        margin:28px auto; padding:0 16px; color:#1a1a1a; }
+  body{ font-family:-apple-system,"Noto Sans KR",sans-serif; max-width:720px; margin:28px auto; padding:0 16px; color:#1a1a1a; }
   h1{ font-size:1.3rem; } h2{ font-size:1.02rem; margin:0 0 8px; }
   .box{ border:1px solid #e3e3e3; border-radius:12px; padding:18px; margin-top:16px; }
   .ings{ display:flex; gap:12px; flex-wrap:wrap; }
   .ing{ width:150px; }
-  .drop{ position:relative; width:150px; height:110px; border:2px dashed #bbb;
-         border-radius:8px; background:#fafafa; cursor:pointer; overflow:hidden;
-         display:flex; align-items:center; justify-content:center; }
+  .drop{ position:relative; width:150px; height:110px; border:2px dashed #bbb; border-radius:8px; background:#fafafa; cursor:pointer; overflow:hidden; display:flex; align-items:center; justify-content:center; }
   .drop.drag{ border-color:#2563eb; background:#eef3ff; }
   .drop img{ width:100%; height:100%; object-fit:cover; display:none; }
   .drop .hint{ font-size:.78rem; color:#888; text-align:center; padding:4px; }
   .ing input[type=file]{ display:none; }
-  textarea{ width:100%; box-sizing:border-box; min-height:96px; margin-top:10px;
-            padding:11px; border:1px solid #ccc; border-radius:8px; font-size:.96rem; line-height:1.5; }
+  textarea{ width:100%; box-sizing:border-box; min-height:96px; margin-top:10px; padding:11px; border:1px solid #ccc; border-radius:8px; font-size:.96rem; line-height:1.5; }
   label{ font-weight:600; display:block; margin-top:6px; }
   .opt{ font-size:.85rem; color:#666; }
-  button{ margin-top:14px; padding:12px 22px; border:0; border-radius:8px;
-          background:#2563eb; color:#fff; font-size:1rem; cursor:pointer; }
+  button{ margin-top:14px; padding:12px 22px; border:0; border-radius:8px; background:#2563eb; color:#fff; font-size:1rem; cursor:pointer; }
   button:disabled{ background:#9ca3af; cursor:not-allowed; }
   .stat{ font-size:.88rem; color:#555; margin-top:10px; white-space:pre-wrap; }
   video{ width:100%; margin-top:14px; border-radius:10px; display:none; }
   a.dl{ display:none; margin-top:10px; font-size:1rem; }
   .mode-tabs{ display:flex; gap:8px; margin:12px 0 4px; flex-wrap:wrap; }
-  .mode-btn{ padding:8px 18px; border:2px solid #e3e3e3; border-radius:20px;
-             background:#fff; font-size:.92rem; cursor:pointer; color:#555; margin-top:0; }
+  .mode-btn{ padding:8px 18px; border:2px solid #e3e3e3; border-radius:20px; background:#fff; font-size:.92rem; cursor:pointer; color:#555; margin-top:0; }
   .mode-btn.active{ border-color:#2563eb; background:#2563eb; color:#fff; font-weight:700; }
   .mode-desc{ font-size:.85rem; color:#666; margin:0 0 8px; }
+  .title-card-box{ background:#f8f9fa; }
+  .title-row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .title-row input{ flex:1; min-width:160px; padding:10px; border:1px solid #ccc; border-radius:8px; font-size:.96rem; }
+  .title-row select{ padding:10px; border:1px solid #ccc; border-radius:8px; font-size:.9rem; }
+  #titlePreview{ width:100%; margin-top:12px; border-radius:8px; display:none; }
+  .btn-green{ background:#16a34a; }
 </style>
 </head>
 <body>
@@ -45,39 +45,54 @@
   </div>
   <p class="mode-desc" id="modeDesc">유준이 주인공인 일본 애니풍 스토리 영상을 만들어요.</p>
 
-  <p class="opt">사진(재료)을 최대 3장 올리고 대본을 쓴 뒤 <b>영상 만들기</b>를 누르면,
-     일본 애니풍 8초 영상이 만들어집니다. 다 되면 다운로드하세요.</p>
+  <p class="opt">사진(재료)을 최대 3장 올리고 대본을 쓴 뒤 <b>영상 만들기</b>를 누르면, 일본 애니풍 8초 영상이 만들어집니다.</p>
 
+  <!-- 제목 카드 생성기 -->
+  <div class="box title-card-box">
+    <h2>🎬 제목 카드 만들기</h2>
+    <div class="title-row">
+      <input id="titleText" type="text" placeholder="예) 1화: 커피를 좋아하는 유준" />
+      <select id="titleTheme">
+        <option value="blue">🔵 블루</option>
+        <option value="dark">⚫ 다크</option>
+        <option value="math">📐 수학 (초록)</option>
+        <option value="science">🔬 과학 (보라)</option>
+      </select>
+    </div>
+    <button id="makeTitle">제목 카드 생성</button>
+    <canvas id="titleCanvas" style="display:none"></canvas>
+    <img id="titlePreview" alt="제목 카드 미리보기" />
+    <a id="titleDownload" class="dl btn-green" download="제목카드.png">⬇ 제목 카드 다운로드</a>
+  </div>
+
+  <!-- 영상 만들기 -->
   <div class="box">
-    <h2>① 사진 (최대 3장 — 끌어다 놓기 · 클릭 · 붙여넣기 Ctrl+V)</h2>
+    <h2>① 사진 (최대 3장 — 끌어다 놓기 · 클릭 · Ctrl+V)</h2>
     <div class="ings">
       <div class="ing"><div class="drop" id="d0"><span class="hint">끌어다 놓기<br>클릭 · Ctrl+V</span><img id="t0"></div><input type="file" id="f0" accept="image/png,image/jpeg"></div>
       <div class="ing"><div class="drop" id="d1"><span class="hint">끌어다 놓기<br>클릭 · Ctrl+V</span><img id="t1"></div><input type="file" id="f1" accept="image/png,image/jpeg"></div>
       <div class="ing"><div class="drop" id="d2"><span class="hint">끌어다 놓기<br>클릭 · Ctrl+V</span><img id="t2"></div><input type="file" id="f2" accept="image/png,image/jpeg"></div>
     </div>
-
     <label>② 대본 / 설명</label>
-    <textarea id="prompt" placeholder="예) 유준이 네스프레소 머신으로 커피를 내리며 향을 맡고 한국어로 '와~ 커피 냄새 진짜 좋다!' 라고 말한다."></textarea>
-
+    <textarea id="prompt" placeholder="예) 독쌤이 칠판 앞에서 이차방정식을 설명하며 '근의 공식만 외우면 끝!' 이라고 말한다."></textarea>
     <button id="make">영상 만들기</button>
     <div class="stat" id="stat"></div>
     <video id="result" controls></video>
     <a id="download" class="dl" download="영상.mp4">⬇ 영상 다운로드</a>
   </div>
 
-  <p class="opt">여러 개(8초)를 한 편으로 이어붙이고 싶으면, 만든 영상들을 다운로드해서
-     코워크(Claude)에 올리면 타이틀 카드까지 붙여 한 편으로 합쳐드립니다.</p>
+  <p class="opt">여러 개(8초)를 한 편으로 이어붙이고 싶으면, 만든 영상들을 다운로드해서 코워크(Claude)에 올리면 제목 카드까지 붙여 한 편으로 합쳐드립니다.</p>
 
 <script>
   const API_BASE = "https://algebra2-gemini-proxy-v2-243382036810.asia-northeast3.run.app";
-  const $ = (id)=>document.getElementById(id);
+  const $ = id => document.getElementById(id);
   const ing = [null,null,null];
   let currentMode = "yujun";
 
   const modeDescs = {
     yujun: "유준이 주인공인 일본 애니풍 스토리 영상을 만들어요.",
-    math: "수학 개념/문제를 캐릭터가 설명하는 애니 영상을 만들어요.",
-    science: "과학 개념/실험을 캐릭터가 설명하는 애니 영상을 만들어요."
+    math: "독쌤이 수학 개념을 설명하는 애니 영상을 만들어요.",
+    science: "독쌤이 과학 개념/실험을 설명하는 애니 영상을 만들어요."
   };
 
   document.querySelectorAll(".mode-btn").forEach(btn=>{
@@ -89,8 +104,71 @@
     });
   });
 
+  // ── 제목 카드 생성기 ──
+  const themes = {
+    blue:    { bg:"#1e3a8a", accent:"#60a5fa", text:"#ffffff" },
+    dark:    { bg:"#0f172a", accent:"#f59e0b", text:"#ffffff" },
+    math:    { bg:"#14532d", accent:"#86efac", text:"#ffffff" },
+    science: { bg:"#3b0764", accent:"#c4b5fd", text:"#ffffff" }
+  };
+
+  $("makeTitle").addEventListener("click", ()=>{
+    const title = $("titleText").value.trim();
+    if(!title){ alert("제목을 입력하세요."); return; }
+    const theme = themes[$("titleTheme").value] || themes.blue;
+    const W=1280, H=720;
+    const canvas=$("titleCanvas");
+    canvas.width=W; canvas.height=H;
+    const ctx=canvas.getContext("2d");
+
+    // 배경
+    ctx.fillStyle=theme.bg;
+    ctx.fillRect(0,0,W,H);
+
+    // 상단 액센트 바
+    ctx.fillStyle=theme.accent;
+    ctx.fillRect(0,0,W,8);
+    ctx.fillRect(0,H-8,W,8);
+
+    // 좌측 세로선
+    ctx.fillStyle=theme.accent;
+    ctx.fillRect(80,80,6,H-160);
+
+    // 제목 텍스트
+    ctx.fillStyle=theme.text;
+    ctx.font="bold 72px 'Noto Sans KR', sans-serif";
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    // 긴 텍스트 줄바꿈
+    const maxW=W-200;
+    const words=title.split("");
+    let line="", lines=[];
+    for(const ch of words){
+      const test=line+ch;
+      if(ctx.measureText(test).width>maxW && line){ lines.push(line); line=ch; }
+      else line=test;
+    }
+    if(line) lines.push(line);
+    const lineH=90;
+    const startY=H/2-(lines.length-1)*lineH/2;
+    lines.forEach((l,i)=>ctx.fillText(l, W/2, startY+i*lineH));
+
+    // 하단 브랜드
+    ctx.fillStyle=theme.accent;
+    ctx.font="28px 'Noto Sans KR', sans-serif";
+    ctx.textAlign="right";
+    ctx.fillText("GFIELD 프리미어", W-80, H-50);
+
+    const dataUrl=canvas.toDataURL("image/png");
+    $("titlePreview").src=dataUrl;
+    $("titlePreview").style.display="block";
+    $("titleDownload").href=dataUrl;
+    $("titleDownload").style.display="inline-block";
+  });
+
+  // ── 이미지 업로드 ──
   function setImage(i, file){
-    if(!file || !file.type.startsWith("image/")){ return; }
+    if(!file||!file.type.startsWith("image/")) return;
     const r=new FileReader();
     r.onload=()=>{
       ing[i]={base64:r.result, mimeType:file.type};
@@ -103,55 +181,45 @@
 
   [0,1,2].forEach(i=>{
     const slot=$(`d${i}`), input=$(`f${i}`);
-    slot.addEventListener("click", ()=> input.click());
-    input.addEventListener("change", e=> setImage(i, e.target.files[0]));
-    ["dragenter","dragover"].forEach(ev=>
-      slot.addEventListener(ev, e=>{ e.preventDefault(); slot.classList.add("drag"); }));
-    ["dragleave","dragend"].forEach(ev=>
-      slot.addEventListener(ev, e=>{ e.preventDefault(); slot.classList.remove("drag"); }));
-    slot.addEventListener("drop", e=>{
-      e.preventDefault(); slot.classList.remove("drag");
-      const f = e.dataTransfer.files && e.dataTransfer.files[0];
-      setImage(i, f);
-    });
+    slot.addEventListener("click", ()=>input.click());
+    input.addEventListener("change", e=>setImage(i,e.target.files[0]));
+    ["dragenter","dragover"].forEach(ev=>slot.addEventListener(ev,e=>{ e.preventDefault(); slot.classList.add("drag"); }));
+    ["dragleave","dragend"].forEach(ev=>slot.addEventListener(ev,e=>{ e.preventDefault(); slot.classList.remove("drag"); }));
+    slot.addEventListener("drop",e=>{ e.preventDefault(); slot.classList.remove("drag"); setImage(i,e.dataTransfer.files[0]); });
   });
 
-  window.addEventListener("paste", (e)=>{
-    const items = e.clipboardData && e.clipboardData.items;
+  window.addEventListener("paste",e=>{
+    const items=e.clipboardData&&e.clipboardData.items;
     if(!items) return;
     for(const it of items){
-      if(it.type && it.type.startsWith("image/")){
-        const f = it.getAsFile();
-        const idx = firstEmpty();
+      if(it.type&&it.type.startsWith("image/")){
+        const idx=firstEmpty();
         if(idx===-1){ alert("사진 칸 3개가 모두 찼어요."); return; }
-        setImage(idx, f);
-        e.preventDefault();
-        break;
+        setImage(idx,it.getAsFile()); e.preventDefault(); break;
       }
     }
   });
 
+  // ── 영상 생성 ──
   $("make").addEventListener("click", async ()=>{
-    const images = ing.filter(Boolean);
-    if(images.length===0){ alert("재료 사진을 최소 1장 올려주세요."); return; }
+    const images=ing.filter(Boolean);
+    if(!images.length){ alert("재료 사진을 최소 1장 올려주세요."); return; }
     if(!$("prompt").value.trim()){ alert("대본/설명을 입력하세요."); return; }
     $("make").disabled=true;
     $("result").style.display="none"; $("download").style.display="none";
     setStat("영상 생성 요청 중…");
     try{
-      const start = await postJSON(`${API_BASE}/api/video`, {
-        prompt: $("prompt").value, images, aspectRatio:"16:9", durationSeconds:8, mode: currentMode
-      });
-      const op = start.operationName;
+      const start=await postJSON(`${API_BASE}/api/video`,{ prompt:$("prompt").value, images, aspectRatio:"16:9", durationSeconds:8, mode:currentMode });
+      const op=start.operationName;
       setStat("영상 생성 중… (수십 초~수 분 걸려요)");
       let result=null;
       for(let k=0;k<50;k++){
         await sleep(12000);
-        const s = await postJSON(`${API_BASE}/api/video/status`, { operationName: op });
+        const s=await postJSON(`${API_BASE}/api/video/status`,{operationName:op});
         if(s.done){ if(s.error) throw new Error(JSON.stringify(s.error)); result=s; break; }
         setStat(`영상 생성 중… (${(k+1)*12}초 경과)`);
       }
-      if(!result || !result.videoBase64) throw new Error("영상 수신 실패 (시간 초과일 수 있어요)");
+      if(!result||!result.videoBase64) throw new Error("영상 수신 실패 (시간 초과일 수 있어요)");
       const src=`data:${result.mimeType};base64,${result.videoBase64}`;
       $("result").src=src; $("result").style.display="block";
       $("download").href=src; $("download").style.display="inline-block";
@@ -160,7 +228,7 @@
     finally{ $("make").disabled=false; }
   });
 
-  async function postJSON(url, body){
+  async function postJSON(url,body){
     const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
     const data=await r.json();
     if(!r.ok) throw new Error(JSON.stringify(data));

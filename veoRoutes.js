@@ -1,20 +1,14 @@
 // veoRoutes.js  (ESM — 이 프로젝트는 package.json 에 "type":"module" 이라 import 문법 사용)
-// Veo 3.1 영상 생성 라우트. 기존 server.js 스타일/인증 방식과 충돌 없도록 작성.
-//
-// 인증: Cloud Run/GCE 메타데이터 서버에서 액세스 토큰을 받아 사용 → 새 npm 패키지 불필요.
-// Veo 리전: us-central1 (서버 기본 리전 asia-northeast3 와 별개로 둠 — Veo 지원 리전)
-
 import express from "express";
 
 const VEO_PROJECT  = process.env.GOOGLE_CLOUD_PROJECT || "";
 const VEO_LOCATION = process.env.VEO_LOCATION || "us-central1";
-const VEO_MODEL    = process.env.VEO_MODEL || "veo-3.1-fast-generate-001"; // 정식: veo-3.1-generate-001
+const VEO_MODEL    = process.env.VEO_MODEL || "veo-3.1-fast-generate-001";
 
 const BASE =
   `https://${VEO_LOCATION}-aiplatform.googleapis.com/v1` +
   `/projects/${VEO_PROJECT}/locations/${VEO_LOCATION}/publishers/google/models/${VEO_MODEL}`;
 
-// ★★ 모드별 스타일 프리픽스 ★★
 const STYLE_PREFIX_YUJUN =
   "일본 애니메이션 화풍(셀 애니, 선명한 윤곽선, 부드러운 채색). " +
   "등장인물은 한국어로 말한다. " +
@@ -28,15 +22,17 @@ const STYLE_PREFIX_YUJUN =
 const STYLE_PREFIX_MATH =
   "일본 애니메이션 화풍(셀 애니, 선명한 윤곽선, 부드러운 채색). " +
   "등장인물은 한국어로 말하며 수학 개념을 쉽고 재미있게 설명한다. " +
-  "칠판, 수식, 도형 등 수학 요소가 화면에 자연스럽게 등장한다. " +
-  "캐릭터는 귀엽고 친근한 선생님 또는 학생 스타일. " +
-  "밝고 교육적인 분위기. 모든 텍스트와 수식은 명확하게 표시. ";
+  '선생님 캐릭터 "독쌤": 20대 남성, 회색 재킷, 검은 셔츠, 단정한 갈색 중단발 헤어, 친근하고 따뜻한 미소. ' +
+  "레퍼런스 이미지와 100% 동일하게 유지하며, 캐릭터를 절대 바꾸지 않는다. " +
+  "배경은 밝은 교실 또는 칠판이 있는 강의실. 칠판, 수식, 도형 등 수학 요소가 화면에 자연스럽게 등장. " +
+  "밝고 교육적인 분위기. ";
 
 const STYLE_PREFIX_SCIENCE =
   "일본 애니메이션 화풍(셀 애니, 선명한 윤곽선, 부드러운 채색). " +
   "등장인물은 한국어로 말하며 과학 개념이나 실험을 쉽고 재미있게 설명한다. " +
-  "실험 도구, 원소 기호, 자연 현상 등 과학 요소가 화면에 자연스럽게 등장한다. " +
-  "캐릭터는 귀엽고 호기심 많은 과학자 또는 학생 스타일. " +
+  '선생님 캐릭터 "독쌤": 20대 남성, 회색 재킷, 검은 셔츠, 단정한 갈색 중단발 헤어, 친근하고 따뜻한 미소. ' +
+  "레퍼런스 이미지와 100% 동일하게 유지하며, 캐릭터를 절대 바꾸지 않는다. " +
+  "배경은 밝은 실험실 또는 자연 탐구 현장. 실험 도구, 원소 기호, 자연 현상 등 과학 요소가 자연스럽게 등장. " +
   "밝고 탐구적인 분위기. ";
 
 function getStylePrefix(mode) {
@@ -69,7 +65,6 @@ function toImg(item, defaultMime) {
   };
 }
 
-// 응답 구조가 모델/버전마다 달라, response 전체를 재귀 탐색해 영상을 찾는다.
 function extractVideo(root) {
   let base64 = null, uri = null, mime = null;
   const seen = new Set();
@@ -82,9 +77,7 @@ function extractVideo(root) {
         if (!base64 && /bytesBase64Encoded|encodedVideo|videoBytes/i.test(k) && v.length > 100) base64 = v;
         else if (!uri && /(gcsUri|uri|videoUri)/i.test(k) && (/^gs:\/\//i.test(v) || /\.mp4/i.test(v))) uri = v;
         else if (!mime && /mimeType/i.test(k) && /video/i.test(v)) mime = v;
-      } else {
-        walk(v);
-      }
+      } else { walk(v); }
     }
   })(root);
   return { base64, uri, mime };
@@ -94,91 +87,40 @@ export const veoRouter = express.Router();
 
 veoRouter.post("/api/video", async (req, res) => {
   try {
-    if (!VEO_PROJECT) {
-      return res.status(500).json({ error: "GOOGLE_CLOUD_PROJECT 가 설정되어 있지 않습니다." });
-    }
-    const {
-      prompt = "",
-      images,
-      imageBase64,
-      mimeType = "image/png",
-      aspectRatio = "16:9",
-      durationSeconds = 8,
-      mode = "yujun"
-    } = req.body || {};
-
+    if (!VEO_PROJECT) return res.status(500).json({ error: "GOOGLE_CLOUD_PROJECT 가 설정되어 있지 않습니다." });
+    const { prompt="", images, imageBase64, mimeType="image/png", aspectRatio="16:9", durationSeconds=8, mode="yujun" } = req.body || {};
     const instance = { prompt: getStylePrefix(mode) + prompt };
-
     if (Array.isArray(images) && images.length > 0) {
-      instance.referenceImages = images.slice(0, 3).map((it) => ({
-        image: toImg(it, mimeType),
-        referenceType: "asset"
-      }));
+      instance.referenceImages = images.slice(0,3).map(it=>({ image: toImg(it,mimeType), referenceType:"asset" }));
     } else if (imageBase64) {
       instance.image = toImg(imageBase64, mimeType);
     } else {
       return res.status(400).json({ error: "사진(images 또는 imageBase64)이 필요합니다." });
     }
-
-    const body = {
-      instances: [instance],
-      parameters: { ...FIXED_PARAMS, aspectRatio, durationSeconds, negativePrompt: NEGATIVE_PROMPT, personGeneration: "allow_adult" }
-    };
-
+    const body = { instances:[instance], parameters:{...FIXED_PARAMS, aspectRatio, durationSeconds, negativePrompt:NEGATIVE_PROMPT, personGeneration:"allow_adult"} };
     const token = await getToken();
-    const r = await fetch(`${BASE}:predictLongRunning`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      body: JSON.stringify(body)
-    });
+    const r = await fetch(`${BASE}:predictLongRunning`, { method:"POST", headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"}, body:JSON.stringify(body) });
     const data = await r.json();
     if (!r.ok) return res.status(r.status).json(data);
     return res.json({ operationName: data.name });
-  } catch (e) {
-    return res.status(500).json({ error: String(e?.message || e) });
-  }
+  } catch(e) { return res.status(500).json({ error: String(e?.message||e) }); }
 });
 
 veoRouter.post("/api/video/status", async (req, res) => {
   try {
     const { operationName } = req.body || {};
     if (!operationName) return res.status(400).json({ error: "operationName 이 필요합니다." });
-
     const token = await getToken();
-    const r = await fetch(`${BASE}:fetchPredictOperation`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ operationName })
-    });
+    const r = await fetch(`${BASE}:fetchPredictOperation`, { method:"POST", headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"}, body:JSON.stringify({operationName}) });
     const data = await r.json();
     if (!r.ok) return res.status(r.status).json(data);
-
-    if (!data.done) return res.json({ done: false });
-    if (data.error) return res.status(500).json({ done: true, error: data.error });
-
+    if (!data.done) return res.json({ done:false });
+    if (data.error) return res.status(500).json({ done:true, error:data.error });
     const resp = data.response || {};
     const found = extractVideo(resp);
-    const filtered = resp.raiMediaFilteredCount || resp.raiMediaFilteredReasons;
-
     if (!found.base64 && !found.uri) {
-      return res.json({
-        done: true,
-        mimeType: found.mime || "video/mp4",
-        gcsUri: null,
-        videoBase64: null,
-        filtered: filtered || null,
-        filterReasons: resp.raiMediaFilteredReasons || null,
-        debugKeys: Object.keys(resp)
-      });
+      return res.json({ done:true, mimeType:found.mime||"video/mp4", gcsUri:null, videoBase64:null, filtered:resp.raiMediaFilteredCount||null, debugKeys:Object.keys(resp) });
     }
-
-    return res.json({
-      done: true,
-      mimeType: found.mime || "video/mp4",
-      gcsUri: found.uri || null,
-      videoBase64: found.base64 || null
-    });
-  } catch (e) {
-    return res.status(500).json({ error: String(e?.message || e) });
-  }
+    return res.json({ done:true, mimeType:found.mime||"video/mp4", gcsUri:found.uri||null, videoBase64:found.base64||null });
+  } catch(e) { return res.status(500).json({ error: String(e?.message||e) }); }
 });
