@@ -14,6 +14,11 @@ const location = process.env.GOOGLE_CLOUD_LOCATION || "asia-northeast3";
 const model = process.env.GEMINI_MODEL || "gemini-2.0-flash-lite";
 const fallbackModels = ["gemini-2.0-flash", "gemini-1.5-flash"];
 
+// OpenAI 설정
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
+const GPT_MODEL = process.env.GPT_MODEL || "gpt-4o";
+const CODEX_MODEL = process.env.CODEX_MODEL || "o4-mini";
+
 const allowedOrigins = (
   process.env.ALLOWED_ORIGINS ||
   "https://docssam1.github.io,http://localhost:5500,http://127.0.0.1:5500,http://localhost:3000"
@@ -52,11 +57,16 @@ app.get("/api/health", (_req, res) => {
     location,
     model,
     fallbackModels,
+    openai: {
+      available: !!OPENAI_API_KEY,
+      gptModel: GPT_MODEL,
+      codexModel: CODEX_MODEL
+    },
     time: new Date().toISOString()
   });
 });
 
-// HF AI 튜터 엔드포인트
+// HF AI 튜터 엔드포인트 (Gemini)
 app.post("/api/tutor", async (req, res) => {
   const startedAt = Date.now();
   const traceId = crypto.randomUUID();
@@ -79,7 +89,7 @@ app.post("/api/tutor", async (req, res) => {
       model,
       contents: userMessages,
       config: {
-        systemInstruction: system || "당신은 7세 어린이를 위한 수학 튜터입니다.",
+        systemInstruction: system || "You are a precise Algebra 2 math tutor for high school students preparing for US boarding school placement tests.",
         maxOutputTokens: 1024,
         temperature: 0.7
       }
@@ -113,7 +123,7 @@ app.post("/api/tutor", async (req, res) => {
   }
 });
 
-// NOTE: route name is kept as /api/openai for frontend compatibility.
+// Gemini 엔드포인트 (기존 /api/openai 유지 — 프론트 호환)
 app.post("/api/openai", async (req, res) => {
   const startedAt = Date.now();
   const traceId = crypto.randomUUID();
@@ -188,6 +198,202 @@ app.post("/api/openai", async (req, res) => {
       ok: false,
       category,
       message: getKoreanErrorMessage(category),
+      detail: raw.slice(0, 500)
+    });
+  }
+});
+
+// OpenAI GPT-4o 엔드포인트
+app.post("/api/gpt", async (req, res) => {
+  const startedAt = Date.now();
+  const traceId = crypto.randomUUID();
+  try {
+    if (!OPENAI_API_KEY) {
+      return res.status(500).json({
+        ok: false,
+        category: "server",
+        message: "OpenAI API Key가 설정되어 있지 않습니다.",
+        detail: "Missing OPENAI_API_KEY"
+      });
+    }
+
+    const { prompt, instructions, maxOutputTokens } = req.body || {};
+
+    if (!prompt || !String(prompt).trim()) {
+      return res.status(400).json({
+        ok: false,
+        category: "bad_request",
+        message: "prompt가 비어 있습니다."
+      });
+    }
+
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: GPT_MODEL,
+        messages: [
+          {
+            role: "system",
+            content: String(instructions || "You are a precise Algebra 2 tutor. Return clear, reliable answers.")
+          },
+          {
+            role: "user",
+            content: String(prompt)
+          }
+        ],
+        max_tokens: Number(maxOutputTokens || 1200)
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      const raw = String(data?.error?.message || "OpenAI request failed");
+      emitStructuredLog({
+        traceId,
+        endpoint: "/api/gpt",
+        statusCode: response.status,
+        latencyMs: Date.now() - startedAt,
+        modelActive: GPT_MODEL,
+        category: "error",
+        errorMessage: raw
+      });
+      return res.status(response.status).json({
+        ok: false,
+        category: "openai_error",
+        message: "OpenAI 요청 오류입니다.",
+        detail: raw.slice(0, 500)
+      });
+    }
+
+    const text = data?.choices?.[0]?.message?.content?.trim() || "";
+    emitStructuredLog({
+      traceId,
+      endpoint: "/api/gpt",
+      statusCode: 200,
+      latencyMs: Date.now() - startedAt,
+      modelActive: GPT_MODEL,
+      category: "success"
+    });
+
+    return res.json({ ok: true, text, model: GPT_MODEL });
+  } catch (error) {
+    const raw = String(error?.message || "OpenAI GPT request failed");
+    emitStructuredLog({
+      traceId,
+      endpoint: "/api/gpt",
+      statusCode: 500,
+      latencyMs: Date.now() - startedAt,
+      modelActive: GPT_MODEL,
+      category: "error",
+      errorMessage: raw
+    });
+    return res.status(500).json({
+      ok: false,
+      category: "server",
+      message: "GPT 서버 오류입니다.",
+      detail: raw.slice(0, 500)
+    });
+  }
+});
+
+// OpenAI Codex (o4-mini) 엔드포인트
+app.post("/api/codex", async (req, res) => {
+  const startedAt = Date.now();
+  const traceId = crypto.randomUUID();
+  try {
+    if (!OPENAI_API_KEY) {
+      return res.status(500).json({
+        ok: false,
+        category: "server",
+        message: "OpenAI API Key가 설정되어 있지 않습니다.",
+        detail: "Missing OPENAI_API_KEY"
+      });
+    }
+
+    const { prompt, instructions, maxOutputTokens } = req.body || {};
+
+    if (!prompt || !String(prompt).trim()) {
+      return res.status(400).json({
+        ok: false,
+        category: "bad_request",
+        message: "prompt가 비어 있습니다."
+      });
+    }
+
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: CODEX_MODEL,
+        messages: [
+          {
+            role: "system",
+            content: String(instructions || "You are a precise Algebra 2 math reasoning engine. Solve problems step by step with clear logical structure.")
+          },
+          {
+            role: "user",
+            content: String(prompt)
+          }
+        ],
+        max_completion_tokens: Number(maxOutputTokens || 1200)
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      const raw = String(data?.error?.message || "OpenAI Codex request failed");
+      emitStructuredLog({
+        traceId,
+        endpoint: "/api/codex",
+        statusCode: response.status,
+        latencyMs: Date.now() - startedAt,
+        modelActive: CODEX_MODEL,
+        category: "error",
+        errorMessage: raw
+      });
+      return res.status(response.status).json({
+        ok: false,
+        category: "openai_error",
+        message: "Codex 요청 오류입니다.",
+        detail: raw.slice(0, 500)
+      });
+    }
+
+    const text = data?.choices?.[0]?.message?.content?.trim() || "";
+    emitStructuredLog({
+      traceId,
+      endpoint: "/api/codex",
+      statusCode: 200,
+      latencyMs: Date.now() - startedAt,
+      modelActive: CODEX_MODEL,
+      category: "success"
+    });
+
+    return res.json({ ok: true, text, model: CODEX_MODEL });
+  } catch (error) {
+    const raw = String(error?.message || "OpenAI Codex request failed");
+    emitStructuredLog({
+      traceId,
+      endpoint: "/api/codex",
+      statusCode: 500,
+      latencyMs: Date.now() - startedAt,
+      modelActive: CODEX_MODEL,
+      category: "error",
+      errorMessage: raw
+    });
+    return res.status(500).json({
+      ok: false,
+      category: "server",
+      message: "Codex 서버 오류입니다.",
       detail: raw.slice(0, 500)
     });
   }
