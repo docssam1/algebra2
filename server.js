@@ -452,6 +452,28 @@ function getKoreanErrorMessage(category) {
   return map[category] || map.unknown;
 }
 
+
+app.post('/identify-chat', async (req, res) => {
+  try {
+    const { query, systemPrompt } = req.body;
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: query }] }],
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          generationConfig: { maxOutputTokens: 600, temperature: 0.7 }
+        })
+      }
+    );
+    const data = await response.json();
+    res.json(data);
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 app.listen(port, () => {
   console.log(`Vertex AI Gemini proxy server running on port ${port}`);
 });
