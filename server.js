@@ -27,10 +27,20 @@ const allowedOrigins = (
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+const allowedOriginPatterns = [
+  /^https:\/\/[a-z0-9-]+\.github\.io$/i,
+  /^https?:\/\/localhost(?::\d+)?$/i,
+  /^https?:\/\/127\.0\.0\.1(?::\d+)?$/i
+];
+
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        allowedOriginPatterns.some((pattern) => pattern.test(origin))
+      ) {
         callback(null, true);
         return;
       }
@@ -453,25 +463,85 @@ function getKoreanErrorMessage(category) {
 }
 
 
-app.post('/identify-chat', async (req, res) => {
+app.post("/identify-chat", async (req, res) => {
+  const startedAt = Date.now();
+  const traceId = crypto.randomUUID();
   try {
-    const { query, systemPrompt } = req.body;
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: query }] }],
-          systemInstruction: { parts: [{ text: systemPrompt }] },
-          generationConfig: { maxOutputTokens: 600, temperature: 0.7 }
-        })
+    if (!project) {
+      return res.status(500).json({
+        ok: false,
+        error: "서버에 GOOGLE_CLOUD_PROJECT가 설정되어 있지 않습니다."
+      });
+    }
+
+    const { query, systemPrompt, messages } = req.body || {};
+    const prompt =
+      String(query || "").trim() ||
+      (Array.isArray(messages)
+        ? messages.map((message) => message?.content || message?.text || "").join("\n").trim()
+        : "");
+
+    if (!prompt) {
+      return res.status(400).json({
+        ok: false,
+        error: "query 또는 messages가 필요합니다."
+      });
+    }
+
+    const request = {
+      model,
+      contents: prompt,
+      config: {
+        systemInstruction: String(
+          systemPrompt ||
+            "You are a helpful, precise AI tutor. Answer clearly and safely."
+        ),
+        maxOutputTokens: 600,
+        temperature: 0.7
       }
-    );
-    const data = await response.json();
-    res.json(data);
-  } catch(e) {
-    res.status(500).json({ error: e.message });
+    };
+
+    const { text, resolvedModel } = await generateWithFallback(request);
+    emitStructuredLog({
+      traceId,
+      endpoint: "/identify-chat",
+      statusCode: 200,
+      latencyMs: Date.now() - startedAt,
+      modelActive: resolvedModel,
+      category: "success"
+    });
+
+    return res.json({
+      ok: true,
+      text,
+      model: resolvedModel,
+      candidates: [
+        {
+          content: {
+            parts: [{ text }]
+          }
+        }
+      ]
+    });
+  } catch (error) {
+    const status = Number(error?.status || error?.code || 500);
+    const raw = String(error?.message || "Vertex AI Gemini request failed");
+    const category = classifyGeminiError(status, raw);
+    emitStructuredLog({
+      traceId,
+      endpoint: "/identify-chat",
+      statusCode: status >= 400 && status < 600 ? status : 500,
+      latencyMs: Date.now() - startedAt,
+      modelActive: model,
+      category,
+      errorMessage: raw
+    });
+
+    return res.status(500).json({
+      ok: false,
+      error: getKoreanErrorMessage(category),
+      detail: raw.slice(0, 500)
+    });
   }
 });
 app.listen(port, () => {
