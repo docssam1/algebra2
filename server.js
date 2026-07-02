@@ -438,6 +438,50 @@ async function generateWithFallback(baseRequest) {
   throw lastError || new Error("No available Gemini model succeeded.");
 }
 
+async function completeIfLikelyTruncated({ text, prompt, systemInstruction, resolvedModel }) {
+  let combined = String(text || "").trim();
+  const hasKorean = /[가-힣]/.test(combined) || /[가-힣]/.test(String(prompt || ""));
+
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    if (!hasKorean || !isLikelyTruncatedKorean(combined)) {
+      break;
+    }
+
+    const continuationRequest = {
+      model: resolvedModel,
+      contents:
+        "아래 답변이 중간에 끊겼습니다. 이미 쓴 문장은 반복하지 말고, 바로 이어서 남은 내용을 완결하세요.\n\n" +
+        `[원래 질문]\n${prompt}\n\n` +
+        `[현재 답변]\n${combined}\n\n` +
+        "[이어 쓸 내용]",
+      config: {
+        systemInstruction:
+          `${systemInstruction}\n\n` +
+          "반드시 한국어로 답하세요. 답변을 완결된 문장으로 끝내세요. 마지막 문장은 마침표로 끝내세요.",
+        maxOutputTokens: 1000,
+        temperature: 0.45
+      }
+    };
+
+    const response = await client.models.generateContent(continuationRequest);
+    const nextText = (response?.text || "").trim();
+    if (!nextText) {
+      break;
+    }
+    combined = `${combined}\n${nextText}`.trim();
+  }
+
+  return combined;
+}
+
+function isLikelyTruncatedKorean(text) {
+  const value = String(text || "").trim();
+  if (!value) return false;
+  if (/[.?!。！？…]$/.test(value)) return false;
+  if (/(습니다|니다|세요|됩니다|합니다|입니다|좋습니다|있습니다|어요|예요|이에요)$/.test(value)) return false;
+  return /[가-힣A-Za-z0-9)]$/.test(value);
+}
+
 function classifyGeminiError(status, raw) {
   const text = String(raw || "").toLowerCase();
   if (status === 401 || status === 403 || /permission|unauth|denied/.test(text)) return "auth";
@@ -497,12 +541,18 @@ app.post("/identify-chat", async (req, res) => {
           systemPrompt ||
             "You are a helpful, precise AI tutor. Answer clearly and safely."
         ),
-        maxOutputTokens: 600,
-        temperature: 0.7
+        maxOutputTokens: 1400,
+        temperature: 0.55
       }
     };
 
     const { text, resolvedModel } = await generateWithFallback(request);
+    const finalText = await completeIfLikelyTruncated({
+      text,
+      prompt,
+      systemInstruction: request.config.systemInstruction,
+      resolvedModel
+    });
     emitStructuredLog({
       traceId,
       endpoint: "/identify-chat",
@@ -514,12 +564,12 @@ app.post("/identify-chat", async (req, res) => {
 
     return res.json({
       ok: true,
-      text,
+      text: finalText,
       model: resolvedModel,
       candidates: [
         {
           content: {
-            parts: [{ text }]
+            parts: [{ text: finalText }]
           }
         }
       ]
