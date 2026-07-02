@@ -29,6 +29,7 @@ const allowedOrigins = (
 
 const allowedOriginPatterns = [
   /^https:\/\/[a-z0-9-]+\.github\.io$/i,
+  /^https:\/\/([a-z0-9-]+\.)?gfieldacademy\.net$/i,
   /^https?:\/\/localhost(?::\d+)?$/i,
   /^https?:\/\/127\.0\.0\.1(?::\d+)?$/i
 ];
